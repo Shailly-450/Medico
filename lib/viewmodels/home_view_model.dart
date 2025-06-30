@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/viewmodels/base_view_model.dart';
 import '../models/appointment.dart';
 import '../models/doctor.dart';
+import '../models/hospital.dart';
 import '../models/offer_package.dart';
 import '../models/hospital_clinic.dart';
 import 'notification_view_model.dart';
@@ -142,69 +143,74 @@ class HomeViewModel extends BaseViewModel {
     ),
   ];
 
-  // Hospitals & Clinics data
   List<HospitalClinic> hospitals = [
     HospitalClinic(
       id: '1',
       name: 'Mount Sinai Hospital',
-      address: '1 Gustave L. Levy Place, New York, NY 10029',
+      address: '1468 Madison Ave, New York, NY 10029',
       phone: '+1 (212) 241-6500',
       email: 'info@mountsinai.org',
       imageUrl:
-          'https://images.unsplash.com/photo-1516841273335-e39b37888115?auto=format&fit=crop&w=800&q=80',
+          'https://img.freepik.com/free-photo/modern-hospital-building_1417-1205.jpg',
       rating: 4.8,
       reviewCount: 1250,
-      specialties: ['Cardiology', 'Neurology', 'Emergency Care', 'Surgery'],
+      specialties: ['Cardiology', 'Emergency Medicine', 'Surgery', 'Neurology'],
       isOpen: true,
-      workingHours: '24/7',
-      distance: 2.5,
-      facilities: ['ICU', 'Emergency Room', 'Surgery Center', 'Laboratory'],
+      workingHours: '24/7 Emergency Care',
+      distance: 0.8,
+      facilities: [
+        'Emergency Room',
+        'ICU',
+        'Surgery',
+        'Pharmacy',
+        'Laboratory'
+      ],
     ),
     HospitalClinic(
       id: '2',
-      name: 'NYU Langone Medical Center',
-      address: '550 First Avenue, New York, NY 10016',
+      name: 'NYU Langone Health',
+      address: '550 1st Ave, New York, NY 10016',
       phone: '+1 (212) 263-7300',
       email: 'info@nyulangone.org',
       imageUrl:
-          'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80',
+          'https://img.freepik.com/free-photo/hospital-building_1417-1206.jpg',
       rating: 4.7,
       reviewCount: 980,
-      specialties: [
-        'Dental Care',
-        'Orthopedics',
-        'Cancer Treatment',
-        'Pediatrics'
-      ],
+      specialties: ['Orthopedics', 'Dental Care', 'Dermatology', 'Pediatrics'],
       isOpen: true,
-      workingHours: '6:00 AM - 10:00 PM',
-      distance: 3.2,
+      workingHours: 'Mon-Fri: 7AM-9PM, Sat-Sun: 8AM-6PM',
+      distance: 1.2,
       facilities: [
+        'Outpatient Care',
         'Dental Clinic',
-        'Cancer Center',
-        'Pediatric Ward',
-        'Pharmacy'
+        'Radiology',
+        'Physical Therapy'
       ],
     ),
     HospitalClinic(
       id: '3',
-      name: 'Columbia Presbyterian',
-      address: '622 West 168th Street, New York, NY 10032',
+      name: 'Columbia Presbyterian Hospital',
+      address: '622 W 168th St, New York, NY 10032',
       phone: '+1 (212) 305-2500',
-      email: 'info@columbia.org',
+      email: 'info@cuimc.columbia.edu',
       imageUrl:
-          'https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?auto=format&fit=crop&w=800&q=80',
+          'https://img.freepik.com/free-photo/hospital-entrance_1417-1207.jpg',
       rating: 4.9,
       reviewCount: 1450,
-      specialties: ['Eye Care', 'Mental Health', 'Women\'s Health', 'Research'],
-      isOpen: true,
-      workingHours: '7:00 AM - 9:00 PM',
-      distance: 4.1,
-      facilities: [
-        'Eye Clinic',
-        'Mental Health Center',
+      specialties: [
+        'Pediatrics',
+        'Oncology',
         'Women\'s Health',
-        'Research Lab'
+        'Mental Health'
+      ],
+      isOpen: false,
+      workingHours: 'Mon-Sat: 6AM-10PM, Closed Sundays',
+      distance: 2.1,
+      facilities: [
+        'Cancer Center',
+        'Maternity Ward',
+        'Mental Health Clinic',
+        'Rehabilitation'
       ],
     ),
   ];

@@ -156,7 +156,14 @@ class HomeScreen extends StatelessWidget {
                       final isActive =
                           model.selectedCategory == category['name'];
                       return GestureDetector(
-                        onTap: () => model.setCategory(category['name']),
+                        onTap: () {
+                          model.setCategory(category['name']);
+                          Navigator.pushNamed(
+                            context,
+                            '/category',
+                            arguments: category['name'],
+                          );
+                        },
                         child: CategoryCard(
                           icon: category['icon'],
                           title: category['name'],
