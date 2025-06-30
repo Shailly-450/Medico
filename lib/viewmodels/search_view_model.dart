@@ -18,6 +18,7 @@ class SearchViewModel extends BaseViewModel {
   List<String> recentSearches = [];
   SearchFilter selectedFilter = SearchFilter.all;
   bool isSearching = false;
+  bool hasSearchResults = false;
 
   @override
   void init() {
@@ -117,6 +118,28 @@ class SearchViewModel extends BaseViewModel {
         imageUrl:
             'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=800&q=80',
       ),
+      Doctor(
+        name: 'Dr. Jennifer Foster',
+        specialty: 'Family Medicine',
+        hospital: 'Kaiser Permanente',
+        rating: 4.3,
+        reviews: 112,
+        price: 75.0,
+        isOnline: true,
+        imageUrl:
+            'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=800&q=80',
+      ),
+      Doctor(
+        name: 'Dr. Alex Kumar',
+        specialty: 'Endocrinologist',
+        hospital: 'Cedars-Sinai',
+        rating: 4.6,
+        reviews: 89,
+        price: 105.0,
+        isOnline: false,
+        imageUrl:
+            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80',
+      ),
     ];
   }
 
@@ -132,29 +155,48 @@ class SearchViewModel extends BaseViewModel {
   }
 
   void onSearchChanged(String query) {
-    isSearching = query.isNotEmpty;
-    _performSearch(query);
+    isSearching = query.trim().isNotEmpty;
+    _performSearch(query.trim());
     notifyListeners();
   }
 
   void _performSearch(String query) {
     if (query.isEmpty) {
+      // When no search query, show all doctors with current filter
       filteredDoctors = _applyFilter(allDoctors, selectedFilter);
+      hasSearchResults = true;
     } else {
-      final searchResults = allDoctors.where((doctor) {
-        final searchLower = query.toLowerCase();
-        return doctor.name.toLowerCase().contains(searchLower) ||
-            doctor.specialty.toLowerCase().contains(searchLower) ||
-            doctor.hospital.toLowerCase().contains(searchLower);
-      }).toList();
-
+      // Perform intelligent search
+      final searchResults = _searchDoctors(query);
       filteredDoctors = _applyFilter(searchResults, selectedFilter);
+      hasSearchResults = filteredDoctors.isNotEmpty;
     }
+  }
+
+  List<Doctor> _searchDoctors(String query) {
+    final searchLower = query.toLowerCase();
+    final searchTerms =
+        searchLower.split(' ').where((term) => term.isNotEmpty).toList();
+
+    return allDoctors.where((doctor) {
+      // Check if any search term matches any field
+      for (final term in searchTerms) {
+        final matchesName = doctor.name.toLowerCase().contains(term);
+        final matchesSpecialty = doctor.specialty.toLowerCase().contains(term);
+        final matchesHospital = doctor.hospital.toLowerCase().contains(term);
+
+        // If any term matches any field, include this doctor
+        if (matchesName || matchesSpecialty || matchesHospital) {
+          return true;
+        }
+      }
+      return false;
+    }).toList();
   }
 
   void setFilter(SearchFilter filter) {
     selectedFilter = filter;
-    _performSearch(searchController.text);
+    _performSearch(searchController.text.trim());
     notifyListeners();
   }
 
@@ -182,8 +224,9 @@ class SearchViewModel extends BaseViewModel {
   }
 
   void addToRecentSearches(String search) {
-    if (search.isNotEmpty && !recentSearches.contains(search)) {
-      recentSearches.insert(0, search);
+    final trimmedSearch = search.trim();
+    if (trimmedSearch.isNotEmpty && !recentSearches.contains(trimmedSearch)) {
+      recentSearches.insert(0, trimmedSearch);
       if (recentSearches.length > 10) {
         recentSearches.removeLast();
       }
@@ -203,9 +246,12 @@ class SearchViewModel extends BaseViewModel {
   }
 
   void onSearchSubmitted(String query) {
-    addToRecentSearches(query);
-    _performSearch(query);
-    notifyListeners();
+    final trimmedQuery = query.trim();
+    if (trimmedQuery.isNotEmpty) {
+      addToRecentSearches(trimmedQuery);
+      _performSearch(trimmedQuery);
+      notifyListeners();
+    }
   }
 
   String getFilterDisplayName(SearchFilter filter) {
@@ -223,6 +269,37 @@ class SearchViewModel extends BaseViewModel {
       case SearchFilter.online:
         return 'Online';
     }
+  }
+
+  // Get search suggestions based on current input
+  List<String> getSearchSuggestions(String query) {
+    if (query.trim().isEmpty) return [];
+
+    final suggestions = <String>{};
+    final queryLower = query.toLowerCase();
+
+    // Add matching specialties
+    for (final doctor in allDoctors) {
+      if (doctor.specialty.toLowerCase().contains(queryLower)) {
+        suggestions.add(doctor.specialty);
+      }
+    }
+
+    // Add matching hospital names
+    for (final doctor in allDoctors) {
+      if (doctor.hospital.toLowerCase().contains(queryLower)) {
+        suggestions.add(doctor.hospital);
+      }
+    }
+
+    // Add matching doctor names
+    for (final doctor in allDoctors) {
+      if (doctor.name.toLowerCase().contains(queryLower)) {
+        suggestions.add(doctor.name);
+      }
+    }
+
+    return suggestions.take(5).toList();
   }
 
   @override
