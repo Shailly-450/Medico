@@ -45,21 +45,21 @@ class MyApp extends StatelessWidget {
           },
           onGenerateRoute: (settings) {
             print('Navigating to: ${settings.name}');
-            
+
             if (settings.name == '/category') {
               final String? categoryName = settings.arguments as String?;
               return MaterialPageRoute(
                 builder: (context) => CategoryScreen(categoryName: categoryName),
               );
             }
-            
+
             if (settings.name == '/hospital-detail') {
               final hospital = settings.arguments as Hospital;
               return MaterialPageRoute(
                 builder: (context) => HospitalDetailScreen(hospital: hospital),
               );
             }
-            
+
             return null;
           },
         ),
@@ -79,11 +79,11 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
   int _selectedIndex = 0;
   final List<int> _tabHistory = [0];
 
-  final List<Widget> _screens = const [
-    HomeScreen(),
-    DashboardScreen(),
-    ScheduleScreen(),
-    DummyProfileScreen(),
+  final List<Widget> _screens = [
+    const HomeScreen(),
+    const DashboardScreen(),
+    const ScheduleScreen(),
+    const DummyProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -151,4 +151,3 @@ class DummyProfileScreen extends StatelessWidget {
     return const Center(child: Text('Profile Screen (Coming Soon)'));
   }
 }
-

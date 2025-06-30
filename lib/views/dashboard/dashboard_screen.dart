@@ -10,6 +10,7 @@ import 'widgets/notification_card.dart';
 import 'widgets/quick_action_card.dart';
 import '../shared/profile_header.dart';
 import 'notifications_page.dart';
+import '../notifications/notification_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -34,27 +35,27 @@ class DashboardScreen extends StatelessWidget {
                   onNotificationTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => NotificationsPage(model: model),
+                        builder: (context) => const NotificationScreen(),
                       ),
                     );
                   },
                 ),
-                
+
                 // Health Overview Cards
                 _buildHealthOverview(context, model),
-                
+
                 // Recent Medical History
                 _buildRecentHistory(context, model),
-                
+
                 // Active Care Section
                 _buildActiveCare(context, model),
-                
+
                 // Smart Recommendations
                 _buildRecommendations(context, model),
-                
+
                 // Quick Actions
                 _buildQuickActions(context, model),
-                
+
                 const SizedBox(height: 20),
               ],
             ),
@@ -73,9 +74,9 @@ class DashboardScreen extends StatelessWidget {
           Text(
             'Health Overview',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: AppColors.textBlack,
-            ),
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textBlack,
+                ),
           ),
           const SizedBox(height: 12),
           Row(
@@ -142,9 +143,9 @@ class DashboardScreen extends StatelessWidget {
               Text(
                 'Recent Medical History',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textBlack,
-                ),
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textBlack,
+                    ),
               ),
               TextButton(
                 onPressed: () {},
@@ -183,19 +184,19 @@ class DashboardScreen extends StatelessWidget {
           Text(
             'Active Care',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: AppColors.textBlack,
-            ),
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textBlack,
+                ),
           ),
           const SizedBox(height: 12),
-          
+
           // Medications
           if (model.activeMedications.isNotEmpty) ...[
             Text(
               'Current Medications',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const SizedBox(height: 8),
             ListView.builder(
@@ -211,14 +212,14 @@ class DashboardScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
           ],
-          
+
           // Ongoing Treatments
           if (model.ongoingTreatments.isNotEmpty) ...[
             Text(
               'Ongoing Treatments',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const SizedBox(height: 8),
             ListView.builder(
@@ -245,7 +246,8 @@ class DashboardScreen extends StatelessWidget {
                               ),
                             ),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
                                 color: AppColors.primary.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(12),
@@ -264,7 +266,8 @@ class DashboardScreen extends StatelessWidget {
                         LinearProgressIndicator(
                           value: treatment['progress'],
                           backgroundColor: Colors.grey[300],
-                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(AppColors.primary),
                         ),
                         const SizedBox(height: 8),
                         Text(
@@ -295,9 +298,9 @@ class DashboardScreen extends StatelessWidget {
           Text(
             'Smart Recommendations',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: AppColors.textBlack,
-            ),
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textBlack,
+                ),
           ),
           const SizedBox(height: 12),
           ListView.builder(
@@ -324,9 +327,9 @@ class DashboardScreen extends StatelessWidget {
           Text(
             'Quick Actions',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: AppColors.textBlack,
-            ),
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textBlack,
+                ),
           ),
           const SizedBox(height: 12),
           GridView.builder(
@@ -349,4 +352,4 @@ class DashboardScreen extends StatelessWidget {
       ),
     );
   }
-} 
+}

@@ -9,8 +9,12 @@ class BaseViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void init() {
+    // Override this method in subclasses to initialize data
+  }
+
   @override
   void dispose() {
     super.dispose();
   }
-} 
+}
