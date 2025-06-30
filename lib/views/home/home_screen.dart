@@ -6,8 +6,11 @@ import 'widgets/category_card.dart';
 import 'widgets/appointment_card.dart';
 import 'widgets/doctor_card.dart';
 import 'widgets/offer_card.dart';
+import 'widgets/hospital_card.dart';
 import '../shared/profile_header.dart';
 import '../notifications/notification_screen.dart';
+import 'offers_screen.dart';
+import 'hospitals_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -236,7 +239,13 @@ class HomeScreen extends StatelessWidget {
                           minimumSize: const Size(0, 0),
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const OffersScreen(),
+                            ),
+                          );
+                        },
                         child: const Text(
                           'View All',
                           style: TextStyle(
@@ -254,7 +263,7 @@ class HomeScreen extends StatelessWidget {
                   SizedBox(
                     height: 340,
                     child: ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      padding: const EdgeInsets.only(left: 16.0),
                       scrollDirection: Axis.horizontal,
                       itemCount: model.offers.length,
                       itemBuilder: (context, index) {
@@ -365,6 +374,70 @@ class HomeScreen extends StatelessWidget {
                     );
                   },
                 ),
+
+                // Find Hospitals/Clinics Section
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Find Hospitals/Clinics',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textBlack,
+                            ),
+                      ),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                          padding: EdgeInsets.zero,
+                          minimumSize: const Size(0, 0),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const HospitalsScreen(),
+                            ),
+                          );
+                        },
+                        child: const Text(
+                          'View All',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Hospital Cards
+                ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: model.hospitals.length,
+                  itemBuilder: (context, index) {
+                    return HospitalCard(
+                      hospital: model.hospitals[index],
+                      onTap: () {
+                        // Handle hospital card tap - could navigate to hospital details
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                                'Booking appointment at ${model.hospitals[index].name}...'),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+
+                const SizedBox(height: 20),
               ],
             ),
           ),
