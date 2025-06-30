@@ -56,7 +56,7 @@ class HomeViewModel extends BaseViewModel {
       title: 'Eye Care Bundle',
       description: 'Complete eye examination with prescription glasses',
       imageUrl:
-          'https://img.freepik.com/free-photo/eye-care-equipment-optometry_23-2148958270.jpg',
+          'https://img.freepik.com/free-photo/medical-equipment-dentistry_23-2148847898.jpg',
       originalPrice: 199.99,
       discountedPrice: 149.99,
       discountPercentage: 25,
