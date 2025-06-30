@@ -7,7 +7,6 @@ import 'views/onboarding/onboarding_screen.dart';
 import 'views/registration/registration_screen.dart';
 import 'views/schedule/schedule_screen.dart';
 import 'views/search/search_screen.dart';
-import 'views/notifications/notification_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -32,7 +31,6 @@ class MyApp extends StatelessWidget {
           '/registration': (context) => const RegistrationScreen(),
           '/home': (context) => const MainNavigationShell(),
           '/search': (context) => const SearchScreen(),
-          '/notifications': (context) => const NotificationScreen(),
         },
       ),
     );
@@ -51,12 +49,13 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
 
   final List<Widget> _screens = const [
     HomeScreen(),
+    DashboardScreen(),
     ScheduleScreen(),
-    DummyChatScreen(),
     DummyProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
+    print('Bottom nav tapped: $index');
     setState(() {
       _selectedIndex = index;
     });
@@ -78,14 +77,14 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
             label: 'Home',
           ),
           NavigationDestination(
+            icon: Icon(Icons.dashboard_outlined),
+            selectedIcon: Icon(Icons.dashboard),
+            label: 'Dashboard',
+          ),
+          NavigationDestination(
             icon: Icon(Icons.calendar_today_outlined),
             selectedIcon: Icon(Icons.calendar_today),
             label: 'Schedule',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.chat_bubble_outline),
-            selectedIcon: Icon(Icons.chat_bubble),
-            label: 'Chat',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline),
@@ -95,14 +94,6 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
         ],
       ),
     );
-  }
-}
-
-class DummyChatScreen extends StatelessWidget {
-  const DummyChatScreen({Key? key}) : super(key: key);
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: Text('Chat Screen (Coming Soon)'));
   }
 }
 

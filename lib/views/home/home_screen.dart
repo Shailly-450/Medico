@@ -5,6 +5,7 @@ import '../../core/theme/app_colors.dart';
 import 'widgets/category_card.dart';
 import 'widgets/appointment_card.dart';
 import 'widgets/doctor_card.dart';
+import '../shared/profile_header.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -59,39 +60,9 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ),
                       IconButton(
-                        icon: Stack(
-                          children: [
-                            const Icon(Icons.notifications_none,
-                                color: Colors.blueGrey),
-                            if (model.unreadCount > 0)
-                              Positioned(
-                                right: 0,
-                                top: 0,
-                                child: Container(
-                                  padding: const EdgeInsets.all(2),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.accent,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  constraints: const BoxConstraints(
-                                    minWidth: 16,
-                                    minHeight: 16,
-                                  ),
-                                  child: Text(
-                                    '${model.unreadCount}',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                        onPressed: () =>
-                            Navigator.pushNamed(context, '/notifications'),
+                        icon: const Icon(Icons.notifications_none,
+                            color: Colors.blueGrey),
+                        onPressed: () {},
                       ),
                     ],
                   ),

@@ -47,7 +47,7 @@ class DoctorCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: AppColors.secondary.withOpacity(0.1),
+                          color: Colors.green.withOpacity(0.4),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Row(
@@ -56,13 +56,13 @@ class DoctorCard extends StatelessWidget {
                             Icon(
                               Icons.circle,
                               size: 8,
-                              color: AppColors.secondary,
+                              // color: AppColors.secondary,
                             ),
                             const SizedBox(width: 4),
                             Text(
                               'Online',
                               style: TextStyle(
-                                color: AppColors.secondary,
+                                // color: AppColors.secondary,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
                               ),
