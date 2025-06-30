@@ -5,6 +5,7 @@ import '../../core/theme/app_colors.dart';
 import 'widgets/category_card.dart';
 import 'widgets/appointment_card.dart';
 import 'widgets/doctor_card.dart';
+import '../shared/profile_header.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -21,43 +22,16 @@ class HomeScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // User Profile Section
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 24,
-                        backgroundColor: AppColors.secondary,
-                        child: const Icon(Icons.location_on, color: Colors.white),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              model.userName,
-                              style: Theme.of(context).textTheme.titleLarge,
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  model.userLocation,
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                                const Icon(Icons.keyboard_arrow_down, color: AppColors.primary),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.notifications_none, color: Colors.blueGrey),
-                        onPressed: () {},
-                      ),
-                    ],
+                ProfileHeader(
+                  name: model.userName,
+                  location: model.userLocation,
+                  subtitle: '',
+                  notificationCount: 0,
+                  onNotificationTap: () {},
+                  leading: CircleAvatar(
+                    radius: 24,
+                    backgroundColor: AppColors.primary,
+                    child: const Icon(Icons.location_on, color: Colors.white),
                   ),
                 ),
 

@@ -47,7 +47,7 @@ class SearchScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: AppColors.primary),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: TextField(
+        title: const TextField(
           autofocus: true,
           decoration: InputDecoration(
             hintText: 'Search doctors, clinics, services...',
