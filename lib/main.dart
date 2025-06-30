@@ -7,6 +7,7 @@ import 'views/onboarding/onboarding_screen.dart';
 import 'views/registration/registration_screen.dart';
 import 'views/schedule/schedule_screen.dart';
 import 'views/search/search_screen.dart';
+import 'views/dashboard/dashboard_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -49,7 +50,7 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
 
   final List<Widget> _screens = [
     const HomeScreen(),
-    const DummyDashboardScreen(),
+    const DashboardScreen(),
     const ScheduleScreen(),
     const DummyProfileScreen(),
   ];
@@ -94,14 +95,6 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
         ],
       ),
     );
-  }
-}
-
-class DummyDashboardScreen extends StatelessWidget {
-  const DummyDashboardScreen({Key? key}) : super(key: key);
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: Text('Dashboard Screen (Coming Soon)'));
   }
 }
 

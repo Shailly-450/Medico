@@ -6,6 +6,7 @@ import 'widgets/category_card.dart';
 import 'widgets/appointment_card.dart';
 import 'widgets/doctor_card.dart';
 import '../shared/profile_header.dart';
+import '../notifications/notification_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -59,10 +60,46 @@ class HomeScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.notifications_none,
-                            color: Colors.blueGrey),
-                        onPressed: () {},
+                      Stack(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.notifications_none,
+                                color: Colors.blueGrey),
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const NotificationScreen(),
+                                ),
+                              );
+                            },
+                          ),
+                          if (model.unreadCount > 0)
+                            Positioned(
+                              right: 8,
+                              top: 8,
+                              child: Container(
+                                padding: const EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                constraints: const BoxConstraints(
+                                  minWidth: 16,
+                                  minHeight: 16,
+                                ),
+                                child: Text(
+                                  '${model.unreadCount}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ],
                   ),
