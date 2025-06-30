@@ -171,7 +171,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
               width: double.infinity,
               height: 52,
               child: ElevatedButton(
-                onPressed: (_selectedDoctorIndex != null && _selectedDate != null && _selectedTime != null)
+                onPressed: (_selectedDoctorIndex != null && (_selectedDate != null || _selectedTime != null))
                     ? () {
                         final doc = _dummyDoctors[_selectedDoctorIndex!];
                         showDialog(
@@ -179,8 +179,8 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                           builder: (context) => AlertDialog(
                             title: const Text('Appointment Booked'),
                             content: Text('Your appointment with ${doc['name']} is booked for '
-                                '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year} at '
-                                '${_selectedTime!.format(context)}.'),
+                                '${_selectedDate != null ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}' : 'No date selected'} at '
+                                '${_selectedTime != null ? _selectedTime!.format(context) : 'No time selected'}.'),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context),
@@ -193,7 +193,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                     : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
-                  foregroundColor:AppColors.primary,
+                  foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),

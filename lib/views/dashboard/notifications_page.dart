@@ -12,9 +12,7 @@ class NotificationsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Notifications'),
-        // backgroundColor: Colors.white,
-        // foregroundColor: AppColors.textBlack,
-        // elevation: 0.5,
+
         actions: [
           TextButton(
             onPressed: () {

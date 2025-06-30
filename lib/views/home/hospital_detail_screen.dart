@@ -12,18 +12,16 @@ class HospitalDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(hospital.name),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textBlack,
-        elevation: 0.5,
+
       ),
       backgroundColor: Colors.grey[50],
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(8),
               child: Container(
                 height: 180,
                 width: double.infinity,

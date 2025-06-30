@@ -20,18 +20,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
       builder: (context, model, child) => Scaffold(
         backgroundColor: Colors.grey[50],
         appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: AppColors.textBlack),
-            onPressed: () => Navigator.pop(context),
-          ),
-          title: Text(
+           title: Text(
             'Notifications',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textBlack,
-                ),
           ),
           actions: [
             if (model.unreadCount > 0)
