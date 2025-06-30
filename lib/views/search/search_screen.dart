@@ -26,7 +26,7 @@ class SearchScreen extends StatelessWidget {
             ),
             title: SearchBarWidget(
               controller: model.searchController,
-              hintText: 'Search doctors, clinics, services...',
+              hintText: 'Search doctors, specialties, hospitals...',
               autofocus: true,
               onChanged: model.onSearchChanged,
               onSubmitted: model.onSearchSubmitted,
@@ -38,7 +38,14 @@ class SearchScreen extends StatelessWidget {
               : ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
-                    // Recent searches
+                    // Search suggestions when typing
+                    if (model.isSearching &&
+                        model.searchController.text.trim().isNotEmpty) ...[
+                      _buildSearchSuggestions(model),
+                      const SizedBox(height: 16),
+                    ],
+
+                    // Recent searches (only when not searching)
                     if (!model.isSearching &&
                         model.recentSearches.isNotEmpty) ...[
                       Row(
@@ -90,18 +97,16 @@ class SearchScreen extends StatelessWidget {
                       const SizedBox(height: 16),
                     ],
 
-                    // Filters
-                    if (!model.isSearching) ...[
-                      Text(
-                        'Filters',
-                        style: TextStyle(
-                          color: AppColors.textBlack,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
+                    // Filters (always show)
+                    Text(
+                      'Filters',
+                      style: TextStyle(
+                        color: AppColors.textBlack,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
                       ),
-                      const SizedBox(height: 8),
-                    ],
+                    ),
+                    const SizedBox(height: 8),
                     SizedBox(
                       height: 36,
                       child: ListView.builder(
@@ -123,7 +128,7 @@ class SearchScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
 
-                    // Results
+                    // Results section
                     if (model.isSearching ||
                         model.filteredDoctors.isNotEmpty) ...[
                       Row(
@@ -149,9 +154,10 @@ class SearchScreen extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      if (model.filteredDoctors.isEmpty && model.isSearching)
-                        _buildNoResultsWidget()
-                      else
+                      if (model.isSearching && !model.hasSearchResults)
+                        _buildNoResultsWidget(
+                            model.searchController.text.trim())
+                      else if (model.filteredDoctors.isNotEmpty)
                         ...model.filteredDoctors.map((doctor) => Padding(
                               padding: const EdgeInsets.only(bottom: 16),
                               child: DoctorCard(doctor: doctor),
@@ -179,7 +185,43 @@ class SearchScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildNoResultsWidget() {
+  Widget _buildSearchSuggestions(SearchViewModel model) {
+    final suggestions = model.getSearchSuggestions(model.searchController.text);
+
+    if (suggestions.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Suggestions',
+          style: TextStyle(
+            color: AppColors.textBlack,
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+        ),
+        const SizedBox(height: 8),
+        ...suggestions.map((suggestion) => ListTile(
+              dense: true,
+              leading: Icon(Icons.search, color: AppColors.primary, size: 20),
+              title: Text(
+                suggestion,
+                style: TextStyle(
+                  color: AppColors.textBlack,
+                  fontSize: 14,
+                ),
+              ),
+              onTap: () {
+                model.searchController.text = suggestion;
+                model.onSearchSubmitted(suggestion);
+              },
+            )),
+      ],
+    );
+  }
+
+  Widget _buildNoResultsWidget(String searchQuery) {
     return Container(
       padding: const EdgeInsets.all(32),
       child: Column(
@@ -191,16 +233,17 @@ class SearchScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'No results found',
+            'No results found for "$searchQuery"',
             style: TextStyle(
               color: AppColors.textBlack,
               fontWeight: FontWeight.bold,
               fontSize: 18,
             ),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
-            'Try adjusting your search terms or filters',
+            'Try a different search term or browse all doctors',
             style: TextStyle(
               color: AppColors.textSecondary,
               fontSize: 14,
@@ -212,7 +255,7 @@ class SearchScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPopularSearches(SearchViewModel model) {
+  Widget _buildPopularSearches(SearchViewModel? model) {
     final popularSearches = [
       'Cardiologist',
       'Dentist',
@@ -228,8 +271,10 @@ class SearchScreen extends StatelessWidget {
       children: popularSearches
           .map((search) => InkWell(
                 onTap: () {
-                  model.searchController.text = search;
-                  model.onSearchSubmitted(search);
+                  if (model != null) {
+                    model.searchController.text = search;
+                    model.onSearchSubmitted(search);
+                  }
                 },
                 child: Container(
                   padding:
