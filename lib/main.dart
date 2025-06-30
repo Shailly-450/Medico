@@ -7,6 +7,7 @@ import 'views/onboarding/onboarding_screen.dart';
 import 'views/registration/registration_screen.dart';
 import 'views/schedule/schedule_screen.dart';
 import 'views/search/search_screen.dart';
+import 'views/notifications/notification_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -31,6 +32,7 @@ class MyApp extends StatelessWidget {
           '/registration': (context) => const RegistrationScreen(),
           '/home': (context) => const MainNavigationShell(),
           '/search': (context) => const SearchScreen(),
+          '/notifications': (context) => const NotificationScreen(),
         },
       ),
     );
@@ -111,4 +113,3 @@ class DummyProfileScreen extends StatelessWidget {
     return const Center(child: Text('Profile Screen (Coming Soon)'));
   }
 }
-

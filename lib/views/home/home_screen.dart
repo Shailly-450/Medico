@@ -28,7 +28,8 @@ class HomeScreen extends StatelessWidget {
                       CircleAvatar(
                         radius: 24,
                         backgroundColor: AppColors.secondary,
-                        child: const Icon(Icons.location_on, color: Colors.white),
+                        child:
+                            const Icon(Icons.location_on, color: Colors.white),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -43,19 +44,54 @@ class HomeScreen extends StatelessWidget {
                               children: [
                                 Text(
                                   model.userLocation,
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Colors.grey[600],
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: Colors.grey[600],
+                                      ),
                                 ),
-                                const Icon(Icons.keyboard_arrow_down, color: AppColors.primary),
+                                const Icon(Icons.keyboard_arrow_down,
+                                    color: AppColors.primary),
                               ],
                             ),
                           ],
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.notifications_none, color: Colors.blueGrey),
-                        onPressed: () {},
+                        icon: Stack(
+                          children: [
+                            const Icon(Icons.notifications_none,
+                                color: Colors.blueGrey),
+                            if (model.unreadCount > 0)
+                              Positioned(
+                                right: 0,
+                                top: 0,
+                                child: Container(
+                                  padding: const EdgeInsets.all(2),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.accent,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 16,
+                                    minHeight: 16,
+                                  ),
+                                  child: Text(
+                                    '${model.unreadCount}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        onPressed: () =>
+                            Navigator.pushNamed(context, '/notifications'),
                       ),
                     ],
                   ),
@@ -71,8 +107,10 @@ class HomeScreen extends StatelessWidget {
                         readOnly: true,
                         decoration: InputDecoration(
                           hintText: 'Search doctor or symptoms',
-                          prefixIcon: Icon(Icons.search, color: AppColors.primary),
-                          suffixIcon: Icon(Icons.tune, color: AppColors.secondary),
+                          prefixIcon:
+                              Icon(Icons.search, color: AppColors.primary),
+                          suffixIcon:
+                              Icon(Icons.tune, color: AppColors.secondary),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
                             borderSide: BorderSide(color: AppColors.secondary),
@@ -97,12 +135,14 @@ class HomeScreen extends StatelessWidget {
                 SizedBox(
                   height: 100,
                   child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 8.0),
                     scrollDirection: Axis.horizontal,
                     itemCount: model.categories.length,
                     itemBuilder: (context, index) {
                       final category = model.categories[index];
-                      final isActive = model.selectedCategory == category['name'];
+                      final isActive =
+                          model.selectedCategory == category['name'];
                       return GestureDetector(
                         onTap: () => model.setCategory(category['name']),
                         child: CategoryCard(
@@ -124,9 +164,9 @@ class HomeScreen extends StatelessWidget {
                       Text(
                         'Upcoming Appointments (${model.upcomingAppointments.length})',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textBlack,
-                        ),
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textBlack,
+                            ),
                       ),
                       TextButton(
                         style: TextButton.styleFrom(
@@ -176,9 +216,9 @@ class HomeScreen extends StatelessWidget {
                       Text(
                         'Find Your Doctor',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textBlack,
-                        ),
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textBlack,
+                            ),
                       ),
                       TextButton(
                         style: TextButton.styleFrom(
@@ -211,19 +251,24 @@ class HomeScreen extends StatelessWidget {
                       final specialty = model.specialties[index];
                       final isSelected = model.selectedSpecialty == specialty;
                       final isAll = specialty == 'All';
-                      
+
                       return Padding(
                         padding: const EdgeInsets.only(right: 8.0),
                         child: FilterChip(
                           label: Text(
                             specialty,
                             style: TextStyle(
-                              color: isSelected ? Colors.white : AppColors.primary,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                              color:
+                                  isSelected ? Colors.white : AppColors.primary,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.w500,
                             ),
                           ),
                           selected: isSelected,
-                          backgroundColor: isSelected ? AppColors.primary : AppColors.secondary,
+                          backgroundColor: isSelected
+                              ? AppColors.primary
+                              : AppColors.secondary,
                           selectedColor: AppColors.primary,
                           checkmarkColor: Colors.white,
                           side: BorderSide(
@@ -256,9 +301,7 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
         ),
-
-
       ),
     );
   }
-} 
+}

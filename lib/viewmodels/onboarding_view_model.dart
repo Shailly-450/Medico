@@ -9,19 +9,27 @@ class OnboardingViewModel extends BaseViewModel {
   final List<OnboardingItem> items = [
     OnboardingItem(
       title: 'Find Trusted Doctors',
-      description: 'Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature.',
-      image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80',
+      description:
+          'Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature.',
+      image:
+          'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80',
       isNetworkImage: true,
     ),
     OnboardingItem(
       title: 'Choose Best Doctors',
-      description: 'Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature.',
-      image: 'assets/images/onboarding2.png',
+      description:
+          'Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature.',
+      image:
+          'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=800&q=80',
+      isNetworkImage: true,
     ),
     OnboardingItem(
       title: 'Easy Appointments',
-      description: 'Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature.',
-      image: 'assets/images/onboarding3.png',
+      description:
+          'Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature.',
+      image:
+          'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=800&q=80',
+      isNetworkImage: true,
     ),
   ];
 
@@ -44,4 +52,4 @@ class OnboardingViewModel extends BaseViewModel {
     pageController.dispose();
     super.dispose();
   }
-} 
+}
