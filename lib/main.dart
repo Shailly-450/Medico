@@ -47,11 +47,11 @@ class MainNavigationShell extends StatefulWidget {
 class _MainNavigationShellState extends State<MainNavigationShell> {
   int _selectedIndex = 0;
 
-  final List<Widget> _screens = const [
-    HomeScreen(),
-    DashboardScreen(),
-    ScheduleScreen(),
-    DummyProfileScreen(),
+  final List<Widget> _screens = [
+    const HomeScreen(),
+    const DummyDashboardScreen(),
+    const ScheduleScreen(),
+    const DummyProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -94,6 +94,14 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
         ],
       ),
     );
+  }
+}
+
+class DummyDashboardScreen extends StatelessWidget {
+  const DummyDashboardScreen({Key? key}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return const Center(child: Text('Dashboard Screen (Coming Soon)'));
   }
 }
 
