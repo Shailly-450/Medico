@@ -5,6 +5,7 @@ import '../../core/theme/app_colors.dart';
 import 'widgets/category_card.dart';
 import 'widgets/appointment_card.dart';
 import 'widgets/doctor_card.dart';
+import 'widgets/offer_card.dart';
 import '../shared/profile_header.dart';
 import '../notifications/notification_screen.dart';
 
@@ -210,6 +211,65 @@ class HomeScreen extends StatelessWidget {
                           child: AppointmentCard(
                             appointment: model.upcomingAppointments[index],
                           ),
+                        );
+                      },
+                    ),
+                  ),
+
+                // Offers & Packages Section
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Offers & Packages',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textBlack,
+                            ),
+                      ),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                          padding: EdgeInsets.zero,
+                          minimumSize: const Size(0, 0),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        onPressed: () {},
+                        child: const Text(
+                          'View All',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Offer Cards
+                if (model.offers.isNotEmpty)
+                  SizedBox(
+                    height: 340,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      scrollDirection: Axis.horizontal,
+                      itemCount: model.offers.length,
+                      itemBuilder: (context, index) {
+                        return OfferCard(
+                          offer: model.offers[index],
+                          onTap: () {
+                            // Handle offer card tap - could navigate to offer details
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                    'Booking ${model.offers[index].title}...'),
+                                duration: const Duration(seconds: 2),
+                              ),
+                            );
+                          },
                         );
                       },
                     ),

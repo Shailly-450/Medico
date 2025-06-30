@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/viewmodels/base_view_model.dart';
 import '../models/appointment.dart';
 import '../models/doctor.dart';
+import '../models/offer_package.dart';
 import 'notification_view_model.dart';
 
 class HomeViewModel extends BaseViewModel {
@@ -20,6 +21,50 @@ class HomeViewModel extends BaseViewModel {
   ];
 
   String selectedCategory = 'General';
+
+  // Offers & Packages data
+  List<OfferPackage> offers = [
+    OfferPackage(
+      id: '1',
+      title: 'Health Checkup Package',
+      description:
+          'Complete body checkup with blood tests, ECG, and consultation',
+      imageUrl:
+          'https://img.freepik.com/free-photo/medical-stethoscope-laptop-keyboard_23-2147862719.jpg',
+      originalPrice: 299.99,
+      discountedPrice: 199.99,
+      discountPercentage: 33,
+      validUntil: DateTime.now().add(const Duration(days: 15)),
+      includedServices: ['Blood Test', 'ECG', 'Consultation', 'X-Ray'],
+      terms: 'Valid for 15 days. Non-refundable. Prior appointment required.',
+    ),
+    OfferPackage(
+      id: '2',
+      title: 'Dental Care Special',
+      description: 'Complete dental checkup with cleaning and consultation',
+      imageUrl:
+          'https://img.freepik.com/free-photo/medical-equipment-dentistry_23-2148847898.jpg',
+      originalPrice: 149.99,
+      discountedPrice: 99.99,
+      discountPercentage: 33,
+      validUntil: DateTime.now().add(const Duration(days: 10)),
+      includedServices: ['Dental Cleaning', 'Consultation', 'X-Ray'],
+      terms: 'Valid for 10 days. Includes basic cleaning only.',
+    ),
+    OfferPackage(
+      id: '3',
+      title: 'Eye Care Bundle',
+      description: 'Complete eye examination with prescription glasses',
+      imageUrl:
+          'https://img.freepik.com/free-photo/eye-care-equipment-optometry_23-2148958270.jpg',
+      originalPrice: 199.99,
+      discountedPrice: 149.99,
+      discountPercentage: 25,
+      validUntil: DateTime.now().add(const Duration(days: 20)),
+      includedServices: ['Eye Test', 'Consultation', 'Prescription'],
+      terms: 'Valid for 20 days. Frame selection limited to basic models.',
+    ),
+  ];
 
   List<Appointment> upcomingAppointments = [
     Appointment(
