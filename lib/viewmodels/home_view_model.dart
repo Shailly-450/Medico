@@ -4,6 +4,7 @@ import '../models/appointment.dart';
 import '../models/doctor.dart';
 import '../models/hospital.dart';
 import '../models/offer_package.dart';
+import '../models/hospital_clinic.dart';
 import 'notification_view_model.dart';
 
 class HomeViewModel extends BaseViewModel {
@@ -142,54 +143,75 @@ class HomeViewModel extends BaseViewModel {
     ),
   ];
 
-  List<Hospital> hospitals = [
-    Hospital(
+  List<HospitalClinic> hospitals = [
+    HospitalClinic(
       id: '1',
       name: 'Mount Sinai Hospital',
-      type: 'General Hospital',
-      location: 'Manhattan, NY',
+      address: '1468 Madison Ave, New York, NY 10029',
+      phone: '+1 (212) 241-6500',
+      email: 'info@mountsinai.org',
+      imageUrl:
+          'https://img.freepik.com/free-photo/modern-hospital-building_1417-1205.jpg',
       rating: 4.8,
-      distance: 2.3,
-      availableDoctors: 45,
+      reviewCount: 1250,
+      specialties: ['Cardiology', 'Emergency Medicine', 'Surgery', 'Neurology'],
       isOpen: true,
-      imageUrl: 'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?w=400',
-      specialties: ['Cardiology', 'Neurology', 'Orthopedics', 'Emergency Medicine'],
+      workingHours: '24/7 Emergency Care',
+      distance: 0.8,
+      facilities: [
+        'Emergency Room',
+        'ICU',
+        'Surgery',
+        'Pharmacy',
+        'Laboratory'
+      ],
     ),
-    Hospital(
+    HospitalClinic(
       id: '2',
-      name: 'NYU Langone Medical Center',
-      type: 'Academic Medical Center',
-      location: 'Brooklyn, NY',
+      name: 'NYU Langone Health',
+      address: '550 1st Ave, New York, NY 10016',
+      phone: '+1 (212) 263-7300',
+      email: 'info@nyulangone.org',
+      imageUrl:
+          'https://img.freepik.com/free-photo/hospital-building_1417-1206.jpg',
       rating: 4.7,
-      distance: 3.1,
-      availableDoctors: 38,
+      reviewCount: 980,
+      specialties: ['Orthopedics', 'Dental Care', 'Dermatology', 'Pediatrics'],
       isOpen: true,
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=400',
-      specialties: ['Dental', 'Pediatrics', 'Dermatology', 'Internal Medicine'],
+      workingHours: 'Mon-Fri: 7AM-9PM, Sat-Sun: 8AM-6PM',
+      distance: 1.2,
+      facilities: [
+        'Outpatient Care',
+        'Dental Clinic',
+        'Radiology',
+        'Physical Therapy'
+      ],
     ),
-    Hospital(
+    HospitalClinic(
       id: '3',
-      name: 'Columbia Presbyterian',
-      type: 'University Hospital',
-      location: 'Queens, NY',
+      name: 'Columbia Presbyterian Hospital',
+      address: '622 W 168th St, New York, NY 10032',
+      phone: '+1 (212) 305-2500',
+      email: 'info@cuimc.columbia.edu',
+      imageUrl:
+          'https://img.freepik.com/free-photo/hospital-entrance_1417-1207.jpg',
       rating: 4.9,
-      distance: 4.2,
-      availableDoctors: 52,
+      reviewCount: 1450,
+      specialties: [
+        'Pediatrics',
+        'Oncology',
+        'Women\'s Health',
+        'Mental Health'
+      ],
       isOpen: false,
-      imageUrl: 'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?w=400',
-      specialties: ['Pediatrics', 'Cardiology', 'Oncology', 'Surgery'],
-    ),
-    Hospital(
-      id: '4',
-      name: 'Memorial Sloan Kettering',
-      type: 'Specialty Hospital',
-      location: 'Bronx, NY',
-      rating: 4.6,
-      distance: 5.8,
-      availableDoctors: 28,
-      isOpen: true,
-      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=400',
-      specialties: ['Oncology', 'Radiation Therapy', 'Palliative Care'],
+      workingHours: 'Mon-Sat: 6AM-10PM, Closed Sundays',
+      distance: 2.1,
+      facilities: [
+        'Cancer Center',
+        'Maternity Ward',
+        'Mental Health Clinic',
+        'Rehabilitation'
+      ],
     ),
   ];
 

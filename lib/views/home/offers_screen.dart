@@ -1,12 +1,135 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../models/offer_package.dart';
+import '../../core/views/base_view.dart';
+import '../../viewmodels/home_view_model.dart';
+import '../../core/theme/app_colors.dart';
+import '../../models/offer_package.dart';
+import 'widgets/offer_card.dart';
 
-class OfferCard extends StatelessWidget {
+class OffersScreen extends StatelessWidget {
+  const OffersScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return BaseView<HomeViewModel>(
+      viewModelBuilder: () => HomeViewModel(),
+      builder: (context, model, child) => Scaffold(
+        backgroundColor: Colors.grey[50],
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: AppColors.textBlack),
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: Text(
+            'Offers & Packages',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textBlack,
+                ),
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.filter_list, color: AppColors.textBlack),
+              onPressed: () {
+                // Add filter functionality
+              },
+            ),
+          ],
+        ),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header text
+                Text(
+                  'Special medical packages and offers available',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Offers Grid
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 1,
+                    childAspectRatio: 1.0,
+                    crossAxisSpacing: 0,
+                    mainAxisSpacing: 16,
+                  ),
+                  itemCount: model.offers.length,
+                  itemBuilder: (context, index) {
+                    return _FullWidthOfferCard(
+                      offer: model.offers[index],
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content:
+                                Text('Booking ${model.offers[index].title}...'),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+
+                const SizedBox(height: 20),
+
+                // Additional offers section
+                Text(
+                  'More Packages',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textBlack,
+                      ),
+                ),
+                const SizedBox(height: 16),
+
+                // You can add more offers here or duplicate existing ones
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: model.offers.length,
+                  itemBuilder: (context, index) {
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      child: _FullWidthOfferCard(
+                        offer: model.offers[index],
+                        onTap: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  'Booking ${model.offers[index].title}...'),
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Full-width version of OfferCard without fixed width and margin
+class _FullWidthOfferCard extends StatelessWidget {
   final OfferPackage offer;
   final VoidCallback? onTap;
 
-  const OfferCard({
+  const _FullWidthOfferCard({
     Key? key,
     required this.offer,
     this.onTap,
@@ -15,8 +138,7 @@ class OfferCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(right: 12),
-      width: 270,
+      width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -39,7 +161,7 @@ class OfferCard extends StatelessWidget {
             children: [
               // Image section
               Container(
-                height: 100,
+                height: 140,
                 decoration: BoxDecoration(
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(16),
@@ -101,9 +223,10 @@ class OfferCard extends StatelessWidget {
 
               // Content section
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     // Title
                     Text(
@@ -119,14 +242,17 @@ class OfferCard extends StatelessWidget {
                     const SizedBox(height: 4),
 
                     // Description
-                    Text(
-                      offer.description,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textSecondary,
+                    SizedBox(
+                      height: 32, // Fixed height for 2 lines of text
+                      child: Text(
+                        offer.description,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 8),
 
@@ -179,7 +305,7 @@ class OfferCard extends StatelessWidget {
                         );
                       }).toList(),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
 
                     // Book now button
                     SizedBox(
@@ -189,7 +315,7 @@ class OfferCard extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          padding: const EdgeInsets.symmetric(vertical: 6),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -198,8 +324,8 @@ class OfferCard extends StatelessWidget {
                         child: const Text(
                           'Book Now',
                           style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
                           ),
                         ),
                       ),
