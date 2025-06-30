@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/viewmodels/base_view_model.dart';
 import '../models/appointment.dart';
 import '../models/doctor.dart';
+import '../models/hospital.dart';
 
 class HomeViewModel extends BaseViewModel {
   String userName = "John Doe";
@@ -77,6 +78,57 @@ class HomeViewModel extends BaseViewModel {
       reviews: 175,
       price: 110.0,
       isOnline: true,
+    ),
+  ];
+
+  List<Hospital> hospitals = [
+    Hospital(
+      id: '1',
+      name: 'Mount Sinai Hospital',
+      type: 'General Hospital',
+      location: 'Manhattan, NY',
+      rating: 4.8,
+      distance: 2.3,
+      availableDoctors: 45,
+      isOpen: true,
+      imageUrl: 'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?w=400',
+      specialties: ['Cardiology', 'Neurology', 'Orthopedics', 'Emergency Medicine'],
+    ),
+    Hospital(
+      id: '2',
+      name: 'NYU Langone Medical Center',
+      type: 'Academic Medical Center',
+      location: 'Brooklyn, NY',
+      rating: 4.7,
+      distance: 3.1,
+      availableDoctors: 38,
+      isOpen: true,
+      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=400',
+      specialties: ['Dental', 'Pediatrics', 'Dermatology', 'Internal Medicine'],
+    ),
+    Hospital(
+      id: '3',
+      name: 'Columbia Presbyterian',
+      type: 'University Hospital',
+      location: 'Queens, NY',
+      rating: 4.9,
+      distance: 4.2,
+      availableDoctors: 52,
+      isOpen: false,
+      imageUrl: 'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?w=400',
+      specialties: ['Pediatrics', 'Cardiology', 'Oncology', 'Surgery'],
+    ),
+    Hospital(
+      id: '4',
+      name: 'Memorial Sloan Kettering',
+      type: 'Specialty Hospital',
+      location: 'Bronx, NY',
+      rating: 4.6,
+      distance: 5.8,
+      availableDoctors: 28,
+      isOpen: true,
+      imageUrl: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=400',
+      specialties: ['Oncology', 'Radiation Therapy', 'Palliative Care'],
     ),
   ];
 

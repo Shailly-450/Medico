@@ -5,6 +5,7 @@ import '../../core/theme/app_colors.dart';
 import 'widgets/category_card.dart';
 import 'widgets/appointment_card.dart';
 import 'widgets/doctor_card.dart';
+import 'widgets/hospital_card.dart';
 import '../shared/profile_header.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -78,7 +79,14 @@ class HomeScreen extends StatelessWidget {
                       final category = model.categories[index];
                       final isActive = model.selectedCategory == category['name'];
                       return GestureDetector(
-                        onTap: () => model.setCategory(category['name']),
+                        onTap: () {
+                          model.setCategory(category['name']);
+                          Navigator.pushNamed(
+                            context,
+                            '/category',
+                            arguments: category['name'],
+                          );
+                        },
                         child: CategoryCard(
                           icon: category['icon'],
                           title: category['name'],
@@ -223,6 +231,52 @@ class HomeScreen extends StatelessWidget {
                   itemBuilder: (context, index) {
                     return DoctorCard(
                       doctor: model.doctors[index],
+                    );
+                  },
+                ),
+
+                // Find Hospital Section with bold text
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Find Hospital',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textBlack,
+                        ),
+                      ),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                          padding: EdgeInsets.zero,
+                          minimumSize: const Size(0, 0),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        onPressed: () {},
+                        child: const Text(
+                          'See All',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Hospital Cards
+                ListView.builder(
+                  padding: const EdgeInsets.all(16.0),
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: model.hospitals.length,
+                  itemBuilder: (context, index) {
+                    return HospitalCard(
+                      hospital: model.hospitals[index],
                     );
                   },
                 ),

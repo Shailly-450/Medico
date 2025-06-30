@@ -50,7 +50,7 @@ class RecentVisitCard extends StatelessWidget {
                 child: Text(
                   visit['status'],
                   style: TextStyle(
-                    color: Colors.green,
+                    color: AppColors.textBlack,
                     fontWeight: FontWeight.w600,
                     fontSize: 12,
                   ),
@@ -78,7 +78,7 @@ class RecentVisitCard extends StatelessWidget {
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
-                        color: Colors.green,
+                        color: AppColors.accent,
                       ),
                     ),
                   ],
@@ -125,7 +125,7 @@ class RecentVisitCard extends StatelessWidget {
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
-                        color: Colors.green,
+                        color: AppColors.accent,
                       ),
                     ),
                   ],
@@ -153,13 +153,13 @@ class RecentVisitCard extends StatelessWidget {
               Icon(
                 Icons.check_circle,
                 size: 14,
-                color: Colors.green,
+                color: AppColors.accent,
               ),
               const SizedBox(width: 4),
               Text(
                 visit['outcome'],
                 style: TextStyle(
-                  color: Colors.green,
+                  color: AppColors.accent,
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
                 ),
