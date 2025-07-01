@@ -108,6 +108,7 @@ class HomeViewModel extends BaseViewModel {
 
   List<Doctor> doctors = [
     Doctor(
+      id: "1",
       name: "Dr. Sarah Johnson",
       imageUrl:
           "https://img.freepik.com/free-photo/woman-doctor-wearing-lab-coat-with-stethoscope-isolated_1303-29791.jpg",
@@ -116,9 +117,11 @@ class HomeViewModel extends BaseViewModel {
       rating: 4.8,
       reviews: 128,
       price: 100.0,
-      isOnline: true,
+      isAvailable: true,
+      videoCall: true,
     ),
     Doctor(
+      id: "2",
       name: "Dr. Michael Chen",
       imageUrl:
           "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
@@ -127,9 +130,11 @@ class HomeViewModel extends BaseViewModel {
       rating: 4.7,
       reviews: 89,
       price: 90.0,
-      isOnline: false,
+      isAvailable: false,
+      videoCall: false,
     ),
     Doctor(
+      id: "3",
       name: "Dr. Emily Brown",
       imageUrl:
           "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
@@ -138,7 +143,8 @@ class HomeViewModel extends BaseViewModel {
       rating: 4.9,
       reviews: 175,
       price: 110.0,
-      isOnline: true,
+      isAvailable: true,
+      videoCall: true,
     ),
   ];
 

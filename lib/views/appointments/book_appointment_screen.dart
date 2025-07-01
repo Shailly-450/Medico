@@ -111,13 +111,16 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                     ),
                     child: DoctorCard(
                       doctor: Doctor(
+                        id: "temp_${index}",
                         name: doc['name'],
                         specialty: doc['specialty'],
                         imageUrl: doc['imageUrl'],
                         hospital: doc['hospital'],
                         price: doc['price'],
                         rating: doc['rating'],
-                        reviews: doc['reviews'], isOnline: true,
+                        reviews: doc['reviews'],
+                        isAvailable: true,
+                        videoCall: true,
                       ),
                     ),
                   ),

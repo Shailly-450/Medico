@@ -1,49 +1,61 @@
 class Doctor {
+  final String id;
   final String name;
-  final String imageUrl;
   final String specialty;
   final String hospital;
+  final String imageUrl;
   final double rating;
   final int reviews;
+  final bool isAvailable;
   final double price;
-  final bool isOnline;
+  final bool videoCall;
+  final List<String> symptoms;
 
   Doctor({
+    required this.id,
     required this.name,
-    required this.imageUrl,
     required this.specialty,
     required this.hospital,
+    required this.imageUrl,
     required this.rating,
     required this.reviews,
+    required this.isAvailable,
     required this.price,
-    required this.isOnline,
+    required this.videoCall,
+    this.symptoms = const [],
   });
 
   // Factory constructor to create Doctor from JSON
   factory Doctor.fromJson(Map<String, dynamic> json) {
     return Doctor(
-      name: json['name'] as String,
-      imageUrl: json['imageUrl'] as String,
-      specialty: json['specialty'] as String,
-      hospital: json['hospital'] as String,
-      rating: (json['rating'] as num).toDouble(),
-      reviews: json['reviews'] as int,
-      price: (json['price'] as num).toDouble(),
-      isOnline: json['isOnline'] as bool,
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      specialty: json['specialty'] ?? '',
+      hospital: json['hospital'] ?? '',
+      imageUrl: json['imageUrl'] ?? '',
+      rating: (json['rating'] ?? 0.0).toDouble(),
+      reviews: json['reviews'] ?? 0,
+      isAvailable: json['isAvailable'] ?? false,
+      price: (json['price'] ?? 0.0).toDouble(),
+      videoCall: json['videoCall'] ?? false,
+      symptoms: List<String>.from(json['symptoms'] ?? []),
     );
   }
 
   // Convert Doctor to JSON
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'name': name,
-      'imageUrl': imageUrl,
       'specialty': specialty,
       'hospital': hospital,
+      'imageUrl': imageUrl,
       'rating': rating,
       'reviews': reviews,
+      'isAvailable': isAvailable,
       'price': price,
-      'isOnline': isOnline,
+      'videoCall': videoCall,
+      'symptoms': symptoms,
     };
   }
 } 

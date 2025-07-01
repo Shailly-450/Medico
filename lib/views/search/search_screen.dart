@@ -27,7 +27,7 @@ class SearchScreen extends StatelessWidget {
             ),
             title: SearchBarWidget(
               controller: model.searchController,
-              hintText: 'Search doctors, specialties, hospitals...',
+              hintText: 'Search doctors, specialties, hospitals, symptoms...',
               autofocus: true,
               onChanged: model.onSearchChanged,
               onSubmitted: model.onSearchSubmitted,
@@ -99,13 +99,32 @@ class SearchScreen extends StatelessWidget {
                     ],
 
                     // Filters (always show)
-                    Text(
-                      'Filters',
-                      style: TextStyle(
-                        color: AppColors.textBlack,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Filters',
+                          style: TextStyle(
+                            color: AppColors.textBlack,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        // Debug button for testing
+                        if (model.isSearching)
+                          TextButton(
+                            onPressed: () {
+                              model.testSymptomSearch(model.searchController.text);
+                            },
+                            child: Text(
+                              'Debug Search',
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                     const SizedBox(height: 8),
                     SizedBox(
@@ -130,8 +149,7 @@ class SearchScreen extends StatelessWidget {
                     const SizedBox(height: 24),
 
                     // Results section
-                    if (model.isSearching ||
-                        model.filteredDoctors.isNotEmpty) ...[
+                    if (model.isSearching || model.filteredDoctors.isNotEmpty) ...[
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -155,7 +173,7 @@ class SearchScreen extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      if (model.isSearching && !model.hasSearchResults)
+                      if (model.isSearching && model.filteredDoctors.isEmpty)
                         _buildNoResultsWidget(
                             model.searchController.text.trim())
                       else if (model.filteredDoctors.isNotEmpty)
@@ -264,6 +282,10 @@ class SearchScreen extends StatelessWidget {
       'Dermatologist',
       'Neurologist',
       'Psychiatrist',
+      'headache',
+      'chest pain',
+      'rash',
+      'anxiety',
     ];
 
     return Wrap(
