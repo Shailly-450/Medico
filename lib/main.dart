@@ -11,7 +11,7 @@ import 'views/search/search_screen.dart';
 import 'views/dashboard/dashboard_screen.dart';
 import 'views/welcome_screen.dart';
 import 'views/category/category_screen.dart';
-import 'views/home/hospital_detail_screen.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -53,12 +53,12 @@ class MyApp extends StatelessWidget {
               );
             }
 
-            if (settings.name == '/hospital-detail') {
-              final hospital = settings.arguments as Hospital;
-              return MaterialPageRoute(
-                builder: (context) => HospitalDetailScreen(hospital: hospital),
-              );
-            }
+            // if (settings.name == '/hospital-detail') {
+            //   final hospital = settings.arguments as Hospital;
+            //   return MaterialPageRoute(
+            //     builder: (context) => HospitalDetailScreen( name: '', address: '',),
+            //   );
+            // }
 
             return null;
           },

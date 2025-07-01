@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../models/hospital.dart';
 import '../../../core/theme/app_colors.dart';
+import 'package:medico/views/home/hospital_detail_screen.dart';
 
 class HospitalCard extends StatelessWidget {
   final Hospital hospital;
@@ -21,7 +22,14 @@ class HospitalCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
       ),
       child: InkWell(
-        onTap: onTap,
+        onTap: onTap ?? () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HospitalDetailScreen(hospital: hospital),
+            ),
+          );
+        },
         borderRadius: BorderRadius.circular(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
