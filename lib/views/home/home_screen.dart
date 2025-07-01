@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../core/views/base_view.dart';
 import '../../viewmodels/home_view_model.dart';
 import '../../core/theme/app_colors.dart';
-
 import 'widgets/category_card.dart';
 import 'widgets/appointment_card.dart';
 import 'widgets/doctor_card.dart';
@@ -13,6 +12,9 @@ import '../notifications/notification_screen.dart';
 import 'offers_screen.dart';
 import 'hospitals_screen.dart';
 import 'hospital_detail_screen.dart';
+import '../doctors/doctors_screen.dart';
+import '../doctors/doctor_detail_screen.dart';
+import 'package:medico/views/home/hospital_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -313,7 +315,13 @@ class HomeScreen extends StatelessWidget {
                           minimumSize: const Size(0, 0),
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const DoctorsScreen(),
+                            ),
+                          );
+                        },
                         child: const Text(
                           'See All',
                           style: TextStyle(
@@ -378,8 +386,19 @@ class HomeScreen extends StatelessWidget {
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: model.doctors.length,
                   itemBuilder: (context, index) {
-                    return DoctorCard(
-                      doctor: model.doctors[index],
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => DoctorDetailScreen(
+                              doctor: model.doctors[index],
+                            ),
+                          ),
+                        );
+                      },
+                      child: DoctorCard(
+                        doctor: model.doctors[index],
+                      ),
                     );
                   },
                 ),

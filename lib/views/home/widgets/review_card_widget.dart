@@ -268,10 +268,7 @@ class _WriteReviewWidgetState extends State<WriteReviewWidget> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed:
-                    _rating > 0 && _commentController.text.trim().isNotEmpty
-                        ? _submitReview
-                        : null,
+                onPressed: _rating > 0 ? _submitReview : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,

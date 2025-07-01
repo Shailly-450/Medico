@@ -4,6 +4,7 @@ import '../../core/theme/app_colors.dart';
 import '../../viewmodels/search_view_model.dart';
 import '../../models/doctor.dart';
 import '../home/widgets/doctor_card.dart';
+import '../doctors/doctor_detail_screen.dart';
 import 'widgets/search_bar_widget.dart';
 import 'widgets/filter_chip_widget.dart';
 
@@ -114,7 +115,8 @@ class SearchScreen extends StatelessWidget {
                         if (model.isSearching)
                           TextButton(
                             onPressed: () {
-                              model.testSymptomSearch(model.searchController.text);
+                              model.testSymptomSearch(
+                                  model.searchController.text);
                             },
                             child: Text(
                               'Debug Search',
@@ -149,7 +151,8 @@ class SearchScreen extends StatelessWidget {
                     const SizedBox(height: 24),
 
                     // Results section
-                    if (model.isSearching || model.filteredDoctors.isNotEmpty) ...[
+                    if (model.isSearching ||
+                        model.filteredDoctors.isNotEmpty) ...[
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -179,7 +182,18 @@ class SearchScreen extends StatelessWidget {
                       else if (model.filteredDoctors.isNotEmpty)
                         ...model.filteredDoctors.map((doctor) => Padding(
                               padding: const EdgeInsets.only(bottom: 16),
-                              child: DoctorCard(doctor: doctor),
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          DoctorDetailScreen(doctor: doctor),
+                                    ),
+                                  );
+                                },
+                                child: DoctorCard(doctor: doctor),
+                              ),
                             )),
                     ] else ...[
                       // Popular searches when no search is active

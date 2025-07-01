@@ -19,7 +19,7 @@ class WelcomeScreen extends StatelessWidget {
               children: [
                 // App Name
                 Text(
-                  'Medico',
+                  'Medu',
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppColors.primary,

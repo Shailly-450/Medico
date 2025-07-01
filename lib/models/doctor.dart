@@ -8,8 +8,26 @@ class Doctor {
   final int reviews;
   final bool isAvailable;
   final double price;
-  final bool videoCall;
+  final bool isOnline;
+
+  // Additional fields for enhanced doctor functionality
+  final int experience;
+  final String education;
+  final List<String> languages;
+  final List<String> specializations;
+  final String about;
+  final Map<String, String> availability;
+  final List<String> awards;
+  final String consultationFee;
+  final bool acceptsInsurance;
+  final List<String> insuranceProviders;
+  final String location;
+  final double distance;
+  final bool isVerified;
+  final String phoneNumber;
+  final String email;
   final List<String> symptoms;
+  final bool videoCall;
 
   Doctor({
     required this.id,
@@ -21,24 +39,56 @@ class Doctor {
     required this.reviews,
     required this.isAvailable,
     required this.price,
+    required this.isOnline,
+    required this.experience,
+    required this.education,
+    required this.languages,
+    required this.specializations,
+    required this.about,
+    required this.availability,
+    required this.awards,
+    required this.consultationFee,
+    required this.acceptsInsurance,
+    required this.insuranceProviders,
+    required this.location,
+    required this.distance,
+    required this.isVerified,
+    required this.phoneNumber,
+    required this.email,
+    required this.symptoms,
     required this.videoCall,
-    this.symptoms = const [],
   });
 
   // Factory constructor to create Doctor from JSON
   factory Doctor.fromJson(Map<String, dynamic> json) {
     return Doctor(
-      id: json['id'] ?? '',
-      name: json['name'] ?? '',
-      specialty: json['specialty'] ?? '',
-      hospital: json['hospital'] ?? '',
-      imageUrl: json['imageUrl'] ?? '',
-      rating: (json['rating'] ?? 0.0).toDouble(),
-      reviews: json['reviews'] ?? 0,
-      isAvailable: json['isAvailable'] ?? false,
-      price: (json['price'] ?? 0.0).toDouble(),
-      videoCall: json['videoCall'] ?? false,
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      imageUrl: json['imageUrl'] as String? ?? '',
+      specialty: json['specialty'] as String? ?? '',
+      hospital: json['hospital'] as String? ?? '',
+      rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
+      reviews: json['reviews'] as int? ?? 0,
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
+      isOnline: json['isOnline'] as bool? ?? false,
+      isAvailable: json['isAvailable'] as bool? ?? true,
+      experience: json['experience'] as int? ?? 0,
+      education: json['education'] as String? ?? '',
+      languages: List<String>.from(json['languages'] ?? []),
+      specializations: List<String>.from(json['specializations'] ?? []),
+      about: json['about'] as String? ?? '',
+      availability: Map<String, String>.from(json['availability'] ?? {}),
+      awards: List<String>.from(json['awards'] ?? []),
+      consultationFee: json['consultationFee'] as String? ?? '',
+      acceptsInsurance: json['acceptsInsurance'] as bool? ?? false,
+      insuranceProviders: List<String>.from(json['insuranceProviders'] ?? []),
+      location: json['location'] as String? ?? '',
+      distance: (json['distance'] as num?)?.toDouble() ?? 0.0,
+      isVerified: json['isVerified'] as bool? ?? false,
+      phoneNumber: json['phoneNumber'] as String? ?? '',
+      email: json['email'] as String? ?? '',
       symptoms: List<String>.from(json['symptoms'] ?? []),
+      videoCall: json['videoCall'] as bool? ?? false,
     );
   }
 
@@ -54,8 +104,24 @@ class Doctor {
       'reviews': reviews,
       'isAvailable': isAvailable,
       'price': price,
-      'videoCall': videoCall,
+      'isOnline': isOnline,
+      'experience': experience,
+      'education': education,
+      'languages': languages,
+      'specializations': specializations,
+      'about': about,
+      'availability': availability,
+      'awards': awards,
+      'consultationFee': consultationFee,
+      'acceptsInsurance': acceptsInsurance,
+      'insuranceProviders': insuranceProviders,
+      'location': location,
+      'distance': distance,
+      'isVerified': isVerified,
+      'phoneNumber': phoneNumber,
+      'email': email,
       'symptoms': symptoms,
+      'videoCall': videoCall,
     };
   }
-} 
+}
