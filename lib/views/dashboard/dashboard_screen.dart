@@ -11,6 +11,7 @@ import 'widgets/quick_action_card.dart';
 import '../shared/profile_header.dart';
 import 'notifications_page.dart';
 import '../notifications/notification_screen.dart';
+import '../comparison/comparison_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -60,6 +61,20 @@ class DashboardScreen extends StatelessWidget {
               ],
             ),
           ),
+        ),
+        appBar: AppBar(
+          title: Text('Dashboard'),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.compare_arrows),
+              tooltip: 'Compare Services',
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const ComparisonScreen()),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
