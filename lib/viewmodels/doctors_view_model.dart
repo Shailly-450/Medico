@@ -62,6 +62,7 @@ class DoctorsViewModel extends BaseViewModel {
         reviews: 128,
         price: 1200.0,
         isOnline: true,
+        isAvailable: true,
         experience: 15,
         education: 'MBBS, MD - Cardiology, Harvard Medical School',
         languages: ['English', 'Spanish'],
@@ -90,6 +91,8 @@ class DoctorsViewModel extends BaseViewModel {
         isVerified: true,
         phoneNumber: '+91 98765 43210',
         email: 'dr.sarah.johnson@hospital.com',
+        symptoms: ['Chest Pain', 'Heart Palpitations', 'High Blood Pressure'],
+        videoCall: true,
       ),
       Doctor(
         id: '2',
@@ -102,6 +105,7 @@ class DoctorsViewModel extends BaseViewModel {
         reviews: 89,
         price: 800.0,
         isOnline: false,
+        isAvailable: true,
         experience: 12,
         education: 'BDS, MDS - Orthodontics, Delhi University',
         languages: ['English', 'Hindi', 'Mandarin'],
@@ -130,6 +134,8 @@ class DoctorsViewModel extends BaseViewModel {
         isVerified: true,
         phoneNumber: '+91 98765 43211',
         email: 'dr.michael.chen@dental.com',
+        symptoms: ['Tooth Pain', 'Gum Problems', 'Teeth Whitening'],
+        videoCall: false,
       ),
       Doctor(
         id: '3',
@@ -170,6 +176,9 @@ class DoctorsViewModel extends BaseViewModel {
         isVerified: true,
         phoneNumber: '+91 98765 43212',
         email: 'dr.emily.brown@children.com',
+        symptoms: ['Fever', 'Cough', 'Growth Concerns', 'Vaccination'],
+        videoCall: true,
+        isAvailable: true,
       ),
       Doctor(
         id: '4',
@@ -182,6 +191,7 @@ class DoctorsViewModel extends BaseViewModel {
         reviews: 203,
         price: 1500.0,
         isOnline: false,
+        isAvailable: true,
         experience: 20,
         education: 'MBBS, MD - Neurology, JIPMER',
         languages: ['English', 'Hindi', 'Tamil'],
@@ -210,6 +220,8 @@ class DoctorsViewModel extends BaseViewModel {
         isVerified: true,
         phoneNumber: '+91 98765 43213',
         email: 'dr.david.wilson@neuro.com',
+        symptoms: ['Headaches', 'Seizures', 'Memory Problems'],
+        videoCall: false,
       ),
       Doctor(
         id: '5',
@@ -250,6 +262,9 @@ class DoctorsViewModel extends BaseViewModel {
         isVerified: true,
         phoneNumber: '+91 98765 43214',
         email: 'dr.lisa.rodriguez@derma.com',
+        symptoms: ['Acne', 'Skin Rash', 'Moles'],
+        videoCall: true,
+        isAvailable: true,
       ),
     ];
 

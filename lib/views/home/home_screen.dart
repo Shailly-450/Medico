@@ -125,7 +125,7 @@ class HomeScreen extends StatelessWidget {
                           prefixIcon:
                               Icon(Icons.search, color: AppColors.primary),
                           suffixIcon:
-                              Icon(Icons.tune, color: AppColors.secondary),
+                              Icon(Icons.tune, color: AppColors.primary),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
                             borderSide: BorderSide(color: AppColors.secondary),

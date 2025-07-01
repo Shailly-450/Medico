@@ -4,6 +4,7 @@ import '../../core/theme/app_colors.dart';
 import '../../viewmodels/search_view_model.dart';
 import '../../models/doctor.dart';
 import '../home/widgets/doctor_card.dart';
+import '../doctors/doctor_detail_screen.dart';
 import 'widgets/search_bar_widget.dart';
 import 'widgets/filter_chip_widget.dart';
 
@@ -27,7 +28,7 @@ class SearchScreen extends StatelessWidget {
             ),
             title: SearchBarWidget(
               controller: model.searchController,
-              hintText: 'Search doctors, specialties, hospitals...',
+              hintText: 'Search doctors, specialties, hospitals, symptoms...',
               autofocus: true,
               onChanged: model.onSearchChanged,
               onSubmitted: model.onSearchSubmitted,
@@ -99,13 +100,33 @@ class SearchScreen extends StatelessWidget {
                     ],
 
                     // Filters (always show)
-                    Text(
-                      'Filters',
-                      style: TextStyle(
-                        color: AppColors.textBlack,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Filters',
+                          style: TextStyle(
+                            color: AppColors.textBlack,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        // Debug button for testing
+                        if (model.isSearching)
+                          TextButton(
+                            onPressed: () {
+                              model.testSymptomSearch(
+                                  model.searchController.text);
+                            },
+                            child: Text(
+                              'Debug Search',
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                     const SizedBox(height: 8),
                     SizedBox(
@@ -155,13 +176,24 @@ class SearchScreen extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      if (model.isSearching && !model.hasSearchResults)
+                      if (model.isSearching && model.filteredDoctors.isEmpty)
                         _buildNoResultsWidget(
                             model.searchController.text.trim())
                       else if (model.filteredDoctors.isNotEmpty)
                         ...model.filteredDoctors.map((doctor) => Padding(
                               padding: const EdgeInsets.only(bottom: 16),
-                              child: DoctorCard(doctor: doctor),
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          DoctorDetailScreen(doctor: doctor),
+                                    ),
+                                  );
+                                },
+                                child: DoctorCard(doctor: doctor),
+                              ),
                             )),
                     ] else ...[
                       // Popular searches when no search is active
@@ -264,6 +296,10 @@ class SearchScreen extends StatelessWidget {
       'Dermatologist',
       'Neurologist',
       'Psychiatrist',
+      'headache',
+      'chest pain',
+      'rash',
+      'anxiety',
     ];
 
     return Wrap(
