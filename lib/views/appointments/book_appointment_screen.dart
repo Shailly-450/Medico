@@ -81,7 +81,6 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Book Appointment'),
-
         elevation: 0.5,
       ),
       backgroundColor: Colors.grey[50],
@@ -90,7 +89,11 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Select Doctor', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            Text('Select Doctor',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             ListView.separated(
               shrinkWrap: true,
@@ -104,28 +107,60 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                   child: Container(
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: _selectedDoctorIndex == index ? AppColors.primary : Colors.transparent,
+                        color: _selectedDoctorIndex == index
+                            ? AppColors.primary
+                            : Colors.transparent,
                         width: 2,
                       ),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: DoctorCard(
                       doctor: Doctor(
+                        id: 'booking_${index + 1}',
                         name: doc['name'],
                         specialty: doc['specialty'],
                         imageUrl: doc['imageUrl'],
                         hospital: doc['hospital'],
                         price: doc['price'],
                         rating: doc['rating'],
-                        reviews: doc['reviews'], isOnline: true,
+                        reviews: doc['reviews'],
+                        isOnline: true,
+                        experience: 10 + index * 2,
+                        education: 'MBBS, MD - ${doc['specialty']}',
+                        languages: ['English', 'Hindi'],
+                        specializations: [doc['specialty']],
+                        about:
+                            'Experienced ${doc['specialty'].toLowerCase()} with expertise in patient care.',
+                        availability: {
+                          'Monday': '9:00 AM - 5:00 PM',
+                          'Tuesday': '9:00 AM - 5:00 PM',
+                          'Wednesday': '9:00 AM - 5:00 PM',
+                          'Thursday': '9:00 AM - 5:00 PM',
+                          'Friday': '9:00 AM - 5:00 PM',
+                          'Saturday': '9:00 AM - 2:00 PM',
+                          'Sunday': 'Closed',
+                        },
+                        awards: ['Excellence Award'],
+                        consultationFee: '₹${doc['price'].toStringAsFixed(0)}',
+                        acceptsInsurance: true,
+                        insuranceProviders: ['Max Bupa', 'HDFC Health'],
+                        location: 'Mumbai, Maharashtra',
+                        distance: 2.0 + index * 0.5,
+                        isVerified: true,
+                        phoneNumber: '+91 98765 4321${index}',
+                        email:
+                            'dr.${doc['name'].toLowerCase().replaceAll(' ', '.').replaceAll('Dr. ', '')}@hospital.com',
                       ),
                     ),
                   ),
                 );
               },
             ),
-
-            Text('Select Date', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            Text('Select Date',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -139,14 +174,19 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.primary,
                       side: BorderSide(color: AppColors.primary),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 20),
-            Text('Select Time', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            Text('Select Time',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -160,7 +200,8 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.primary,
                       side: BorderSide(color: AppColors.primary),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                   ),
                 ),
@@ -171,14 +212,16 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
               width: double.infinity,
               height: 52,
               child: ElevatedButton(
-                onPressed: (_selectedDoctorIndex != null && (_selectedDate != null || _selectedTime != null))
+                onPressed: (_selectedDoctorIndex != null &&
+                        (_selectedDate != null || _selectedTime != null))
                     ? () {
                         final doc = _dummyDoctors[_selectedDoctorIndex!];
                         showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
                             title: const Text('Appointment Booked'),
-                            content: Text('Your appointment with ${doc['name']} is booked for '
+                            content: Text(
+                                'Your appointment with ${doc['name']} is booked for '
                                 '${_selectedDate != null ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}' : 'No date selected'} at '
                                 '${_selectedTime != null ? _selectedTime!.format(context) : 'No time selected'}.'),
                             actions: [
@@ -197,7 +240,8 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  textStyle: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 18),
                 ),
                 child: const Text('Confirm Appointment'),
               ),
@@ -207,4 +251,4 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
       ),
     );
   }
-} 
+}
