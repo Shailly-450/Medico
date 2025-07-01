@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../../models/hospital_clinic.dart';
+import '../../../models/hospital.dart';
 import '../../../core/theme/app_colors.dart';
 
 class HospitalCard extends StatelessWidget {
-  final HospitalClinic hospital;
+  final Hospital hospital;
   final VoidCallback? onTap;
 
   const HospitalCard({
@@ -32,24 +32,35 @@ class HospitalCard extends StatelessWidget {
                   const BorderRadius.vertical(top: Radius.circular(16)),
               child: Stack(
                 children: [
-                  Image.network(
-                    hospital.imageUrl,
-                    height: 160,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        height: 160,
-                        width: double.infinity,
-                        color: Colors.grey[300],
-                        child: const Icon(
-                          Icons.local_hospital,
-                          size: 50,
-                          color: Colors.grey,
+                  hospital.imageUrl != null && hospital.imageUrl!.isNotEmpty
+                      ? Image.network(
+                          hospital.imageUrl!,
+                          height: 160,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              height: 160,
+                              width: double.infinity,
+                              color: Colors.grey[300],
+                              child: const Icon(
+                                Icons.local_hospital,
+                                size: 50,
+                                color: Colors.grey,
+                              ),
+                            );
+                          },
+                        )
+                      : Container(
+                          height: 160,
+                          width: double.infinity,
+                          color: Colors.grey[300],
+                          child: const Icon(
+                            Icons.local_hospital,
+                            size: 50,
+                            color: Colors.grey,
+                          ),
                         ),
-                      );
-                    },
-                  ),
                   Positioned(
                     top: 12,
                     right: 12,
@@ -110,13 +121,6 @@ class HospitalCard extends StatelessWidget {
                               color: AppColors.textBlack,
                             ),
                           ),
-                          Text(
-                            ' (${hospital.reviewCount})',
-                            style: const TextStyle(
-                              color: AppColors.textSecondary,
-                              fontSize: 12,
-                            ),
-                          ),
                         ],
                       ),
                     ],
@@ -124,7 +128,7 @@ class HospitalCard extends StatelessWidget {
 
                   const SizedBox(height: 8),
 
-                  // Address
+                  // Address/Location
                   Row(
                     children: [
                       const Icon(
@@ -135,7 +139,7 @@ class HospitalCard extends StatelessWidget {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          hospital.address,
+                          hospital.location,
                           style: const TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: 14,
@@ -149,7 +153,7 @@ class HospitalCard extends StatelessWidget {
 
                   const SizedBox(height: 4),
 
-                  // Distance and Working Hours
+                  // Distance and Available Doctors
                   Row(
                     children: [
                       Row(
@@ -170,16 +174,22 @@ class HospitalCard extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(width: 16),
-                      Expanded(
-                        child: Text(
-                          hospital.workingHours,
-                          style: const TextStyle(
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.people,
                             color: AppColors.textSecondary,
-                            fontSize: 12,
+                            size: 16,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${hospital.availableDoctors} doctors',
+                            style: const TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -187,82 +197,29 @@ class HospitalCard extends StatelessWidget {
                   const SizedBox(height: 12),
 
                   // Specialties
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 4,
-                    children: hospital.specialties.take(3).map((specialty) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.secondary,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          specialty,
-                          style: const TextStyle(
-                            color: AppColors.primary,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Bottom section with status and button
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Open status
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: hospital.isOpen
-                              ? Colors.green.withOpacity(0.1)
-                              : Colors.red.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: hospital.isOpen ? Colors.green : Colors.red,
-                            width: 1,
-                          ),
-                        ),
-                        child: Text(
-                          hospital.isOpen ? 'Open Now' : 'Closed',
-                          style: TextStyle(
-                            color: hospital.isOpen ? Colors.green : Colors.red,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-
-                      // Book appointment button
-                      ElevatedButton(
-                        onPressed: onTap,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
+                  if (hospital.specialties.isNotEmpty)
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: hospital.specialties.take(3).map((specialty) {
+                        return Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 8),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.secondary,
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          elevation: 0,
-                        ),
-                        child: const Text(
-                          'Book Appointment',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
+                          child: Text(
+                            specialty,
+                            style: const TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                        ),
-                      ),
-                    ],
-                  ),
+                        );
+                      }).toList(),
+                    ),
                 ],
               ),
             ),

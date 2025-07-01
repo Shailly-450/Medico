@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import '../../core/views/base_view.dart';
 import '../../viewmodels/home_view_model.dart';
 import '../../core/theme/app_colors.dart';
+import '../../models/hospital.dart';
 import 'widgets/hospital_card.dart';
+import 'hospital_detail_screen.dart';
 
 class HospitalsScreen extends StatelessWidget {
   const HospitalsScreen({Key? key}) : super(key: key);
@@ -109,15 +111,14 @@ class HospitalsScreen extends StatelessWidget {
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: model.hospitals.length,
                   itemBuilder: (context, index) {
+                    final hospital = model.hospitals[index];
                     return HospitalCard(
-                      hospital: model.hospitals[index],
+                      hospital: hospital,
                       onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                                'Booking appointment at ${model.hospitals[index].name}...'),
-                            duration: const Duration(seconds: 2),
-                          ),
+                        Navigator.pushNamed(
+                          context,
+                          '/hospital-detail',
+                          arguments: hospital,
                         );
                       },
                     );
@@ -141,15 +142,14 @@ class HospitalsScreen extends StatelessWidget {
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: model.hospitals.length,
                   itemBuilder: (context, index) {
+                    final hospital = model.hospitals[index];
                     return HospitalCard(
-                      hospital: model.hospitals[index],
+                      hospital: hospital,
                       onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                                'Booking appointment at ${model.hospitals[index].name}...'),
-                            duration: const Duration(seconds: 2),
-                          ),
+                        Navigator.pushNamed(
+                          context,
+                          '/hospital-detail',
+                          arguments: hospital,
                         );
                       },
                     );

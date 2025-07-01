@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/views/base_view.dart';
 import '../../viewmodels/home_view_model.dart';
 import '../../core/theme/app_colors.dart';
+import '../shared/hospital_detail_screen.dart';
 import 'widgets/category_card.dart';
 import 'widgets/appointment_card.dart';
 import 'widgets/doctor_card.dart';
@@ -428,16 +429,14 @@ class HomeScreen extends StatelessWidget {
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: model.hospitals.length,
                   itemBuilder: (context, index) {
+                    final hospital = model.hospitals[index];
                     return HospitalCard(
-                      hospital: model.hospitals[index],
+                      hospital: hospital,
                       onTap: () {
-                        // Handle hospital card tap - could navigate to hospital details
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                                'Booking appointment at ${model.hospitals[index].name}...'),
-                            duration: const Duration(seconds: 2),
-                          ),
+                        Navigator.pushNamed(
+                          context,
+                          '/hospital-detail',
+                          arguments: hospital,
                         );
                       },
                     );

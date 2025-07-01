@@ -4,7 +4,6 @@ import '../models/appointment.dart';
 import '../models/doctor.dart';
 import '../models/hospital.dart';
 import '../models/offer_package.dart';
-import '../models/hospital_clinic.dart';
 import 'notification_view_model.dart';
 
 class HomeViewModel extends BaseViewModel {
@@ -143,75 +142,45 @@ class HomeViewModel extends BaseViewModel {
     ),
   ];
 
-  List<HospitalClinic> hospitals = [
-    HospitalClinic(
+  List<Hospital> hospitals = [
+    Hospital(
       id: '1',
       name: 'Mount Sinai Hospital',
-      address: '1468 Madison Ave, New York, NY 10029',
-      phone: '+1 (212) 241-6500',
-      email: 'info@mountsinai.org',
-      imageUrl:
-          'https://img.freepik.com/free-photo/modern-hospital-building_1417-1205.jpg',
+      type: 'General Hospital',
+      location: '1468 Madison Ave, New York, NY 10029',
       rating: 4.8,
-      reviewCount: 1250,
-      specialties: ['Cardiology', 'Emergency Medicine', 'Surgery', 'Neurology'],
-      isOpen: true,
-      workingHours: '24/7 Emergency Care',
       distance: 0.8,
-      facilities: [
-        'Emergency Room',
-        'ICU',
-        'Surgery',
-        'Pharmacy',
-        'Laboratory'
-      ],
+      availableDoctors: 45,
+      isOpen: true,
+      imageUrl: 'https://img.freepik.com/free-photo/modern-hospital-building_1417-1205.jpg',
+      specialties: ['Cardiology', 'Emergency Medicine', 'Surgery', 'Neurology'],
+      description: 'A leading hospital in New York with 24/7 emergency care.',
     ),
-    HospitalClinic(
+    Hospital(
       id: '2',
       name: 'NYU Langone Health',
-      address: '550 1st Ave, New York, NY 10016',
-      phone: '+1 (212) 263-7300',
-      email: 'info@nyulangone.org',
-      imageUrl:
-          'https://img.freepik.com/free-photo/hospital-building_1417-1206.jpg',
+      type: 'Academic Medical Center',
+      location: '550 1st Ave, New York, NY 10016',
       rating: 4.7,
-      reviewCount: 980,
-      specialties: ['Orthopedics', 'Dental Care', 'Dermatology', 'Pediatrics'],
-      isOpen: true,
-      workingHours: 'Mon-Fri: 7AM-9PM, Sat-Sun: 8AM-6PM',
       distance: 1.2,
-      facilities: [
-        'Outpatient Care',
-        'Dental Clinic',
-        'Radiology',
-        'Physical Therapy'
-      ],
+      availableDoctors: 38,
+      isOpen: true,
+      imageUrl: 'https://img.freepik.com/free-photo/hospital-building_1417-1206.jpg',
+      specialties: ['Orthopedics', 'Dental Care', 'Dermatology', 'Pediatrics'],
+      description: 'Comprehensive care and advanced medical research.',
     ),
-    HospitalClinic(
+    Hospital(
       id: '3',
       name: 'Columbia Presbyterian Hospital',
-      address: '622 W 168th St, New York, NY 10032',
-      phone: '+1 (212) 305-2500',
-      email: 'info@cuimc.columbia.edu',
-      imageUrl:
-          'https://img.freepik.com/free-photo/hospital-entrance_1417-1207.jpg',
+      type: 'University Hospital',
+      location: '622 W 168th St, New York, NY 10032',
       rating: 4.9,
-      reviewCount: 1450,
-      specialties: [
-        'Pediatrics',
-        'Oncology',
-        'Women\'s Health',
-        'Mental Health'
-      ],
+      distance: 2.5,
+      availableDoctors: 52,
       isOpen: false,
-      workingHours: 'Mon-Sat: 6AM-10PM, Closed Sundays',
-      distance: 2.1,
-      facilities: [
-        'Cancer Center',
-        'Maternity Ward',
-        'Mental Health Clinic',
-        'Rehabilitation'
-      ],
+      imageUrl: 'https://img.freepik.com/free-photo/hospital-entrance_1417-1207.jpg',
+      specialties: ['Pediatrics', 'Cardiology', 'Oncology', 'Surgery'],
+      description: 'Renowned for pediatric and cardiac care.',
     ),
   ];
 
