@@ -12,6 +12,7 @@ import '../notifications/notification_screen.dart';
 import 'offers_screen.dart';
 import 'hospitals_screen.dart';
 import 'hospital_detail_screen.dart';
+import 'hospital_map_screen.dart';
 import '../doctors/doctors_screen.dart';
 import '../doctors/doctor_detail_screen.dart';
 import 'package:medico/views/home/hospital_detail_screen.dart';
@@ -593,6 +594,17 @@ class HomeScreen extends StatelessWidget {
                           MaterialPageRoute(
                             builder: (context) =>
                                 HospitalDetailScreen(hospital: hospital),
+                          ),
+                        );
+                      },
+                      onMapTap: (selectedHospital) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => HospitalMapScreen(
+                              selectedHospital: selectedHospital,
+                              hospitals: model.filteredHospitals,
+                            ),
                           ),
                         );
                       },

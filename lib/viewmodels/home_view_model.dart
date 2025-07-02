@@ -113,7 +113,9 @@ class HomeViewModel extends BaseViewModel {
     'Academic Medical Center',
     'University Hospital',
     'Specialty Clinic',
-    'Emergency Center'
+    'Emergency Center',
+    'Government Hospital',
+    'Multi-Specialty Hospital'
   ];
   String selectedHospitalType = 'All';
 
@@ -413,6 +415,151 @@ class HomeViewModel extends BaseViewModel {
       consultationFee: 160.0,
       emergencyFee: 550.0,
       costCategory: 'High',
+    ),
+    // Indian Hospitals
+    Hospital(
+      id: '7',
+      name: 'Apollo Hospitals',
+      type: 'General Hospital',
+      location: 'Greams Road, Chennai, Tamil Nadu 600006',
+      rating: 4.9,
+      distance: 3.2,
+      availableDoctors: 65,
+      isOpen: true,
+      imageUrl:
+          'https://img.freepik.com/free-photo/modern-hospital-building_1417-1205.jpg',
+      specialties: [
+        'Cardiology',
+        'Oncology',
+        'Neurology',
+        'Transplant Surgery'
+      ],
+      description:
+          'One of India\'s leading healthcare institutions with world-class facilities.',
+      latitude: 13.0827,
+      longitude: 80.2707,
+      consultationFee: 1200.0,
+      emergencyFee: 8000.0,
+      costCategory: 'Premium',
+    ),
+    Hospital(
+      id: '8',
+      name: 'Fortis Hospital',
+      type: 'Multi-Specialty Hospital',
+      location: 'Bannerghatta Road, Bangalore, Karnataka 560076',
+      rating: 4.7,
+      distance: 2.8,
+      availableDoctors: 48,
+      isOpen: true,
+      imageUrl:
+          'https://img.freepik.com/free-photo/hospital-building_1417-1206.jpg',
+      specialties: [
+        'Cardiology',
+        'Orthopedics',
+        'Neurology',
+        'Emergency Medicine'
+      ],
+      description:
+          'Advanced multi-specialty hospital with cutting-edge medical technology.',
+      latitude: 12.9716,
+      longitude: 77.5946,
+      consultationFee: 1000.0,
+      emergencyFee: 6000.0,
+      costCategory: 'High',
+    ),
+    Hospital(
+      id: '9',
+      name: 'AIIMS Delhi',
+      type: 'Government Hospital',
+      location: 'Sri Aurobindo Marg, New Delhi, Delhi 110029',
+      rating: 4.8,
+      distance: 1.5,
+      availableDoctors: 85,
+      isOpen: true,
+      imageUrl:
+          'https://img.freepik.com/free-photo/hospital-entrance_1417-1207.jpg',
+      specialties: [
+        'All Specialties',
+        'Research',
+        'Medical Education',
+        'Public Health'
+      ],
+      description:
+          'Premier medical institute and government hospital with comprehensive care.',
+      latitude: 28.5671,
+      longitude: 77.2090,
+      consultationFee: 50.0,
+      emergencyFee: 500.0,
+      costCategory: 'Low',
+    ),
+    Hospital(
+      id: '10',
+      name: 'Kokilaben Dhirubhai Ambani Hospital',
+      type: 'Multi-Specialty Hospital',
+      location: 'Four Bungalows, Andheri West, Mumbai, Maharashtra 400053',
+      rating: 4.6,
+      distance: 4.1,
+      availableDoctors: 52,
+      isOpen: true,
+      imageUrl:
+          'https://img.freepik.com/free-photo/modern-medical-clinic_23-2148864987.jpg',
+      specialties: [
+        'Cardiology',
+        'Cancer Care',
+        'Neurology',
+        'Robotic Surgery'
+      ],
+      description:
+          'State-of-the-art hospital with advanced robotic surgery facilities.',
+      latitude: 19.0760,
+      longitude: 72.8777,
+      consultationFee: 1500.0,
+      emergencyFee: 10000.0,
+      costCategory: 'Premium',
+    ),
+    Hospital(
+      id: '11',
+      name: 'Manipal Hospital',
+      type: 'Academic Medical Center',
+      location: 'Old Airport Road, Bangalore, Karnataka 560017',
+      rating: 4.5,
+      distance: 3.7,
+      availableDoctors: 38,
+      isOpen: true,
+      imageUrl:
+          'https://img.freepik.com/free-photo/emergency-room-hospital_23-2148864988.jpg',
+      specialties: ['Cardiology', 'Neurology', 'Orthopedics', 'Pediatrics'],
+      description: 'Academic medical center with research and education focus.',
+      latitude: 12.9716,
+      longitude: 77.5946,
+      consultationFee: 800.0,
+      emergencyFee: 4000.0,
+      costCategory: 'Medium',
+    ),
+    Hospital(
+      id: '12',
+      name: 'Sankara Eye Hospital',
+      type: 'Specialty Clinic',
+      location: 'Whitefield, Bangalore, Karnataka 560066',
+      rating: 4.4,
+      distance: 5.2,
+      availableDoctors: 15,
+      isOpen: true,
+      imageUrl:
+          'https://img.freepik.com/free-photo/modern-hospital-building_1417-1205.jpg',
+      specialties: [
+        'Ophthalmology',
+        'Eye Surgery',
+        'Retina Care',
+        'Cornea Transplant'
+      ],
+      description:
+          'Specialized eye care hospital with advanced ophthalmic treatments.',
+      latitude: 12.9716,
+      longitude: 77.5946,
+      consultationFee: 600.0,
+      emergencyFee: 3000.0,
+      costCategory: 'Medium',
     ),
   ];
 

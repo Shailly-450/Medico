@@ -8,13 +8,13 @@ import '../../../core/theme/app_colors.dart';
 import '../../../models/hospital.dart';
 
 /// A widget that displays a hospital location on an interactive map using OpenStreetMap.
-/// 
+///
 /// Features:
 /// - Interactive map with OpenStreetMap tiles
 /// - Custom hospital marker with hospital name
 /// - Location info overlay
 /// - "Get Directions" button that opens directions in external browser
-/// 
+///
 /// Usage:
 /// ```dart
 /// HospitalMapWidget(
@@ -38,7 +38,7 @@ class HospitalMapWidget extends StatelessWidget {
     // Default coordinates for New York if hospital coordinates are not available
     final lat = hospital.latitude ?? 40.7128;
     final lng = hospital.longitude ?? -74.0060;
-    
+
     return Container(
       height: height,
       decoration: BoxDecoration(
@@ -104,7 +104,8 @@ class HospitalMapWidget extends StatelessWidget {
                           ),
                           Container(
                             margin: const EdgeInsets.only(top: 2),
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(8),
@@ -154,15 +155,6 @@ class HospitalMapWidget extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  // Debug button for testing URL launching
-                  if (kDebugMode)
-                    FloatingActionButton.small(
-                      onPressed: () => _testUrlLaunching(context),
-                      backgroundColor: Colors.orange,
-                      foregroundColor: Colors.white,
-                      child: const Icon(Icons.bug_report),
-                    ),
                 ],
               ),
             ),
@@ -233,13 +225,13 @@ class HospitalMapWidget extends StatelessWidget {
   void _openDirections(BuildContext context) async {
     final lat = hospital.latitude ?? 40.7128;
     final lng = hospital.longitude ?? -74.0060;
-    
+
     print('Attempting to open directions for: ${hospital.name} at $lat, $lng');
     print('Platform: ${Platform.operatingSystem}');
-    
+
     // Platform-specific URL attempts
     List<Map<String, dynamic>> urlAttempts = [];
-    
+
     if (Platform.isAndroid) {
       // Android-specific URLs (try native apps first)
       urlAttempts = [
@@ -285,28 +277,28 @@ class HospitalMapWidget extends StatelessWidget {
         },
       ];
     }
-    
+
     bool launched = false;
     String lastError = '';
-    
+
     for (Map<String, dynamic> attempt in urlAttempts) {
       try {
         final uri = Uri.parse(attempt['url']);
         print('Trying: ${attempt['description']} - ${attempt['url']}');
-        
+
         // Check if URL can be launched
         final canLaunch = await canLaunchUrl(uri);
         print('Can launch ${attempt['description']}: $canLaunch');
-        
+
         if (canLaunch) {
           // Try different launch modes for Android
-          LaunchMode mode = Platform.isAndroid 
-              ? LaunchMode.externalApplication 
+          LaunchMode mode = Platform.isAndroid
+              ? LaunchMode.externalApplication
               : LaunchMode.externalApplication;
-          
+
           final result = await launchUrl(uri, mode: mode);
           print('Launch result for ${attempt['description']}: $result');
-          
+
           if (result) {
             launched = true;
             print('Successfully launched: ${attempt['description']}');
@@ -323,7 +315,7 @@ class HospitalMapWidget extends StatelessWidget {
         continue;
       }
     }
-    
+
     if (!launched && context.mounted) {
       print('All URL attempts failed. Last error: $lastError');
       _showErrorSnackBar(context);
@@ -383,8 +375,9 @@ class HospitalMapWidget extends StatelessWidget {
 
   void _tryWebSearch(BuildContext context) async {
     final searchQuery = '${hospital.name} ${hospital.location}';
-    final searchUrl = 'https://www.google.com/search?q=${Uri.encodeComponent(searchQuery)}';
-    
+    final searchUrl =
+        'https://www.google.com/search?q=${Uri.encodeComponent(searchQuery)}';
+
     try {
       final uri = Uri.parse(searchUrl);
       if (await canLaunchUrl(uri)) {
@@ -395,7 +388,8 @@ class HospitalMapWidget extends StatelessWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Unable to open any external app. Please search manually.'),
+            content: Text(
+                'Unable to open any external app. Please search manually.'),
             backgroundColor: Colors.orange,
           ),
         );
@@ -406,7 +400,7 @@ class HospitalMapWidget extends StatelessWidget {
   void _testUrlLaunching(BuildContext context) async {
     print('=== URL Launching Debug Test ===');
     print('Platform: ${Platform.operatingSystem}');
-    
+
     // Test simple URLs
     final testUrls = [
       'https://www.google.com',
@@ -414,22 +408,23 @@ class HospitalMapWidget extends StatelessWidget {
       'tel:+1234567890',
       'mailto:test@example.com',
     ];
-    
+
     for (String url in testUrls) {
       try {
         final uri = Uri.parse(url);
         final canLaunch = await canLaunchUrl(uri);
         print('Can launch $url: $canLaunch');
-        
+
         if (canLaunch) {
-          final result = await launchUrl(uri, mode: LaunchMode.externalApplication);
+          final result =
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
           print('Launch result for $url: $result');
         }
       } catch (e) {
         print('Error testing $url: $e');
       }
     }
-    
+
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -439,4 +434,4 @@ class HospitalMapWidget extends StatelessWidget {
       );
     }
   }
-} 
+}

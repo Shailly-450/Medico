@@ -580,7 +580,7 @@ class _HospitalDetailScreenState extends State<HospitalDetailScreen>
             ],
           ),
           const SizedBox(height: 16),
-          
+
           // Map
           HospitalMapWidget(
             hospital: widget.hospital,

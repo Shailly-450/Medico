@@ -2,15 +2,18 @@ import 'package:flutter/material.dart';
 import '../../../models/hospital.dart';
 import '../../../core/theme/app_colors.dart';
 import 'package:medico/views/home/hospital_detail_screen.dart';
+import 'package:medico/views/home/hospital_map_screen.dart';
 
 class HospitalCard extends StatelessWidget {
   final Hospital hospital;
   final VoidCallback? onTap;
+  final Function(Hospital)? onMapTap;
 
   const HospitalCard({
     Key? key,
     required this.hospital,
     this.onTap,
+    this.onMapTap,
   }) : super(key: key);
 
   Color _getCostCategoryColor(String category) {
@@ -25,6 +28,23 @@ class HospitalCard extends StatelessWidget {
         return Colors.purple;
       default:
         return Colors.grey;
+    }
+  }
+
+  void _openMap(BuildContext context) {
+    if (onMapTap != null) {
+      onMapTap!(hospital);
+    } else {
+      // Fallback to direct navigation if no callback provided
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HospitalMapScreen(
+            selectedHospital: hospital,
+            hospitals: [hospital],
+          ),
+        ),
+      );
     }
   }
 
@@ -334,15 +354,7 @@ class HospitalCard extends StatelessWidget {
                       const SizedBox(width: 8),
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    HospitalDetailScreen(hospital: hospital),
-                              ),
-                            );
-                          },
+                          onPressed: () => _openMap(context),
                           icon: const Icon(Icons.map_outlined, size: 16),
                           label: const Text('Map'),
                           style: OutlinedButton.styleFrom(
