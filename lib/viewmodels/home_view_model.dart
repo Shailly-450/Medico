@@ -117,14 +117,60 @@ class HomeViewModel extends BaseViewModel {
   ];
   String selectedHospitalType = 'All';
 
-  // Get filtered hospitals based on selected type
+  // Cost filtering
+  List<String> costCategories = ['All', 'Low', 'Medium', 'High', 'Premium'];
+  String selectedCostCategory = 'All';
+
+  // Hospital specialties for filtering
+  List<String> hospitalSpecialties = [
+    'All',
+    'Cardiology',
+    'Emergency Medicine',
+    'Surgery',
+    'Neurology',
+    'Orthopedics',
+    'Dental Care',
+    'Dermatology',
+    'Pediatrics',
+    'Oncology',
+    'Ophthalmology',
+    'Otolaryngology',
+    'Plastic Surgery',
+    'Internal Medicine',
+    'Radiology',
+    'Pathology',
+    'Trauma Care',
+    'Critical Care'
+  ];
+  String selectedHospitalSpecialty = 'All';
+
+  // Get filtered hospitals based on selected filters
   List<Hospital> get filteredHospitals {
-    if (selectedHospitalType == 'All') {
-      return hospitals;
+    List<Hospital> filtered = hospitals;
+
+    // Filter by hospital type
+    if (selectedHospitalType != 'All') {
+      filtered = filtered
+          .where((hospital) => hospital.type == selectedHospitalType)
+          .toList();
     }
-    return hospitals
-        .where((hospital) => hospital.type == selectedHospitalType)
-        .toList();
+
+    // Filter by cost category
+    if (selectedCostCategory != 'All') {
+      filtered = filtered
+          .where((hospital) => hospital.costCategory == selectedCostCategory)
+          .toList();
+    }
+
+    // Filter by specialty
+    if (selectedHospitalSpecialty != 'All') {
+      filtered = filtered
+          .where((hospital) =>
+              hospital.specialties.contains(selectedHospitalSpecialty))
+          .toList();
+    }
+
+    return filtered;
   }
 
   List<Doctor> doctors = [
@@ -275,6 +321,9 @@ class HomeViewModel extends BaseViewModel {
       description: 'A leading hospital in New York with 24/7 emergency care.',
       latitude: 40.7909,
       longitude: -73.9497,
+      consultationFee: 150.0,
+      emergencyFee: 500.0,
+      costCategory: 'High',
     ),
     Hospital(
       id: '2',
@@ -291,6 +340,9 @@ class HomeViewModel extends BaseViewModel {
       description: 'Comprehensive care and advanced medical research.',
       latitude: 40.7411,
       longitude: -73.9747,
+      consultationFee: 180.0,
+      emergencyFee: 600.0,
+      costCategory: 'Premium',
     ),
     Hospital(
       id: '3',
@@ -307,6 +359,9 @@ class HomeViewModel extends BaseViewModel {
       description: 'Renowned for pediatric and cardiac care.',
       latitude: 40.8419,
       longitude: -73.9397,
+      consultationFee: 120.0,
+      emergencyFee: 450.0,
+      costCategory: 'Medium',
     ),
     Hospital(
       id: '4',
@@ -321,6 +376,9 @@ class HomeViewModel extends BaseViewModel {
           'https://img.freepik.com/free-photo/modern-medical-clinic_23-2148864987.jpg',
       specialties: ['Ophthalmology', 'Otolaryngology', 'Plastic Surgery'],
       description: 'Specialized care for eye and ear conditions.',
+      consultationFee: 200.0,
+      emergencyFee: 800.0,
+      costCategory: 'Premium',
     ),
     Hospital(
       id: '5',
@@ -335,6 +393,9 @@ class HomeViewModel extends BaseViewModel {
           'https://img.freepik.com/free-photo/emergency-room-hospital_23-2148864988.jpg',
       specialties: ['Emergency Medicine', 'Trauma Care', 'Critical Care'],
       description: '24/7 emergency medical services and trauma care.',
+      consultationFee: 80.0,
+      emergencyFee: 300.0,
+      costCategory: 'Low',
     ),
     Hospital(
       id: '6',
@@ -349,6 +410,9 @@ class HomeViewModel extends BaseViewModel {
           'https://img.freepik.com/free-photo/modern-hospital-building_1417-1205.jpg',
       specialties: ['Internal Medicine', 'Surgery', 'Radiology', 'Pathology'],
       description: 'Academic medical center with cutting-edge research.',
+      consultationFee: 160.0,
+      emergencyFee: 550.0,
+      costCategory: 'High',
     ),
   ];
 
@@ -364,6 +428,16 @@ class HomeViewModel extends BaseViewModel {
 
   void setHospitalType(String hospitalType) {
     selectedHospitalType = hospitalType;
+    notifyListeners();
+  }
+
+  void setCostCategory(String costCategory) {
+    selectedCostCategory = costCategory;
+    notifyListeners();
+  }
+
+  void setHospitalSpecialty(String specialty) {
+    selectedHospitalSpecialty = specialty;
     notifyListeners();
   }
 }

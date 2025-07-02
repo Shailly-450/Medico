@@ -13,6 +13,9 @@ class Hospital {
   final Map<String, dynamic>? contactInfo;
   final double? latitude;
   final double? longitude;
+  final double? consultationFee;
+  final double? emergencyFee;
+  final String? costCategory; // Low, Medium, High, Premium
 
   Hospital({
     required this.id,
@@ -29,6 +32,9 @@ class Hospital {
     this.contactInfo,
     this.latitude,
     this.longitude,
+    this.consultationFee,
+    this.emergencyFee,
+    this.costCategory,
   });
 
   factory Hospital.fromJson(Map<String, dynamic> json) {
@@ -47,6 +53,9 @@ class Hospital {
       contactInfo: json['contactInfo'],
       latitude: json['latitude']?.toDouble(),
       longitude: json['longitude']?.toDouble(),
+      consultationFee: json['consultationFee']?.toDouble(),
+      emergencyFee: json['emergencyFee']?.toDouble(),
+      costCategory: json['costCategory'],
     );
   }
 
@@ -66,6 +75,9 @@ class Hospital {
       'contactInfo': contactInfo,
       'latitude': latitude,
       'longitude': longitude,
+      'consultationFee': consultationFee,
+      'emergencyFee': emergencyFee,
+      'costCategory': costCategory,
     };
   }
-} 
+}
