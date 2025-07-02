@@ -15,22 +15,18 @@ class OffersScreen extends StatelessWidget {
       builder: (context, model, child) => Scaffold(
         backgroundColor: Colors.grey[50],
         appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
+
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: AppColors.textBlack),
+            icon: const Icon(Icons.arrow_back, ),
             onPressed: () => Navigator.pop(context),
           ),
           title: Text(
             'Offers & Packages',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textBlack,
-                ),
+
           ),
           actions: [
             IconButton(
-              icon: const Icon(Icons.filter_list, color: AppColors.textBlack),
+              icon: const Icon(Icons.filter_list, ),
               onPressed: () {
                 // Add filter functionality
               },

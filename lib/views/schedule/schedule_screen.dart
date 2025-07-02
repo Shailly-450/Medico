@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/views/base_view.dart';
 import '../../viewmodels/schedule_view_model.dart';
 import '../../core/theme/app_colors.dart';
+import '../shared/profile_header.dart';
 
 class ScheduleScreen extends StatelessWidget {
   const ScheduleScreen({Key? key}) : super(key: key);
@@ -13,45 +14,93 @@ class ScheduleScreen extends StatelessWidget {
       onModelReady: (model) => model.loadAppointments(),
       builder: (context, model, child) => Scaffold(
         backgroundColor: Colors.grey[50],
+        appBar: AppBar(
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          title: const Text('Schedule', style: TextStyle(fontWeight: FontWeight.bold)),
+          centerTitle: true,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.calendar_today),
+              onPressed: () async {
+                final DateTime? picked = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime.now().add(const Duration(days: 365)),
+                );
+                if (picked != null) {
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Schedule Appointment'),
+                      content: Text('Do you want to schedule an appointment on\n'
+                          '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: const Text('Cancel'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => Navigator.of(context).pop(true),
+                          child: const Text('Call to Schedule'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirm == true) {
+                    // For demo, use 10:00 AM as the time
+                    final scheduledDate = DateTime(
+                      picked.year, picked.month, picked.day, 10, 0,
+                    );
+                    await model.scheduleAppointment(scheduledDate);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Appointment scheduled!')),
+                    );
+                  }
+                }
+              },
+            ),
+          ],
+        ),
         body: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header Section
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Appointments',
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        Text(
-                          'you have ${model.appointments.length} appointments',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
+                    CircleAvatar(
+                      radius: 26,
+                      backgroundColor: AppColors.primary,
+                      child: const Icon(Icons.calendar_today, color: Colors.white),
                     ),
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.calendar_today, color: AppColors.primary),
-                          onPressed: () {},
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.more_vert, color: AppColors.primary),
-                          onPressed: () {},
-                        ),
-                      ],
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${model.appointments.length}',
+                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textBlack,
+                                ),
+                          ),
+                          Text(
+                            'Appointments',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: Colors.grey[600],
+                                ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),

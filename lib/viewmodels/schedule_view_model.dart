@@ -62,4 +62,20 @@ class ScheduleViewModel extends BaseViewModel {
     // Dummy implementation
     setBusy(false);
   }
+
+  Future<void> scheduleAppointment(DateTime dateTime) async {
+    setBusy(true);
+    // Dummy appointment data for scheduling
+    final newAppointment = Appointment(
+      doctorName: 'Dr. New Appointment',
+      doctorImage: 'https://randomuser.me/api/portraits/men/14.jpg',
+      specialty: 'General',
+      isVideoCall: false,
+      date: '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}',
+      time: '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}',
+    );
+    _appointments.add(newAppointment);
+    notifyListeners();
+    setBusy(false);
+  }
 } 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../models/hospital.dart';
 import '../../../core/theme/app_colors.dart';
+import 'package:medico/views/home/hospital_detail_screen.dart';
 
 class HospitalCard extends StatelessWidget {
   final Hospital hospital;
@@ -21,7 +22,14 @@ class HospitalCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
       ),
       child: InkWell(
-        onTap: onTap,
+        onTap: onTap ?? () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HospitalDetailScreen(hospital: hospital),
+            ),
+          );
+        },
         borderRadius: BorderRadius.circular(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -220,6 +228,59 @@ class HospitalCard extends StatelessWidget {
                         );
                       }).toList(),
                     ),
+
+                  const SizedBox(height: 12),
+
+                  // Action Buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => HospitalDetailScreen(hospital: hospital),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.info_outline, size: 16),
+                          label: const Text('Details'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.primary,
+                            side: BorderSide(color: AppColors.primary),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => HospitalDetailScreen(hospital: hospital),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.map_outlined, size: 16),
+                          label: const Text('Map'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.primary,
+                            side: BorderSide(color: AppColors.primary),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),

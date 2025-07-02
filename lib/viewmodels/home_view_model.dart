@@ -273,6 +273,8 @@ class HomeViewModel extends BaseViewModel {
           'https://img.freepik.com/free-photo/modern-hospital-building_1417-1205.jpg',
       specialties: ['Cardiology', 'Emergency Medicine', 'Surgery', 'Neurology'],
       description: 'A leading hospital in New York with 24/7 emergency care.',
+      latitude: 40.7909,
+      longitude: -73.9497,
     ),
     Hospital(
       id: '2',
@@ -287,6 +289,8 @@ class HomeViewModel extends BaseViewModel {
           'https://img.freepik.com/free-photo/hospital-building_1417-1206.jpg',
       specialties: ['Orthopedics', 'Dental Care', 'Dermatology', 'Pediatrics'],
       description: 'Comprehensive care and advanced medical research.',
+      latitude: 40.7411,
+      longitude: -73.9747,
     ),
     Hospital(
       id: '3',
@@ -301,6 +305,8 @@ class HomeViewModel extends BaseViewModel {
           'https://img.freepik.com/free-photo/hospital-entrance_1417-1207.jpg',
       specialties: ['Pediatrics', 'Cardiology', 'Oncology', 'Surgery'],
       description: 'Renowned for pediatric and cardiac care.',
+      latitude: 40.8419,
+      longitude: -73.9397,
     ),
     Hospital(
       id: '4',
