@@ -233,100 +233,35 @@ class HospitalMapWidget extends StatelessWidget {
   void _openDirections(BuildContext context) async {
     final lat = hospital.latitude ?? 40.7128;
     final lng = hospital.longitude ?? -74.0060;
-    
-    print('Attempting to open directions for: ${hospital.name} at $lat, $lng');
-    print('Platform: ${Platform.operatingSystem}');
-    
-    // Platform-specific URL attempts
-    List<Map<String, dynamic>> urlAttempts = [];
-    
-    if (Platform.isAndroid) {
-      // Android-specific URLs (try native apps first)
-      urlAttempts = [
-        {
-          'url': 'geo:$lat,$lng?q=${Uri.encodeComponent(hospital.name)}',
-          'description': 'Android Native Maps',
-        },
-        {
-          'url': 'google.navigation:q=$lat,$lng',
-          'description': 'Google Maps Navigation',
-        },
-        {
-          'url': 'https://maps.google.com/maps?q=$lat,$lng',
-          'description': 'Google Maps Web',
-        },
-        {
-          'url': 'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
-          'description': 'Google Maps Search',
-        },
-        {
-          'url': 'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng',
-          'description': 'Google Maps Directions',
-        },
-      ];
-    } else {
-      // iOS and other platforms
-      urlAttempts = [
-        {
-          'url': 'https://maps.apple.com/?q=$lat,$lng',
-          'description': 'Apple Maps',
-        },
-        {
-          'url': 'https://maps.google.com/maps?q=$lat,$lng',
-          'description': 'Google Maps Web',
-        },
-        {
-          'url': 'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
-          'description': 'Google Maps Search',
-        },
-        {
-          'url': 'https://www.openstreetmap.org/directions?from=&to=$lat,$lng',
-          'description': 'OpenStreetMap',
-        },
-      ];
-    }
-    
-    bool launched = false;
-    String lastError = '';
-    
-    for (Map<String, dynamic> attempt in urlAttempts) {
-      try {
-        final uri = Uri.parse(attempt['url']);
-        print('Trying: ${attempt['description']} - ${attempt['url']}');
-        
-        // Check if URL can be launched
-        final canLaunch = await canLaunchUrl(uri);
-        print('Can launch ${attempt['description']}: $canLaunch');
-        
-        if (canLaunch) {
-          // Try different launch modes for Android
-          LaunchMode mode = Platform.isAndroid 
-              ? LaunchMode.externalApplication 
-              : LaunchMode.externalApplication;
-          
-          final result = await launchUrl(uri, mode: mode);
-          print('Launch result for ${attempt['description']}: $result');
-          
-          if (result) {
-            launched = true;
-            print('Successfully launched: ${attempt['description']}');
-            break;
-          } else {
-            lastError = 'Failed to launch ${attempt['description']}';
-          }
-        } else {
-          lastError = 'Cannot launch ${attempt['description']}';
-        }
-      } catch (e) {
-        lastError = 'Error with ${attempt['description']}: $e';
-        print('URL Launch Error: $lastError');
-        continue;
+
+    final googleMapsAppUrl = Uri.parse('google.navigation:q=$lat,$lng');
+    final googleMapsWebUrl = Uri.parse('https://www.google.com/maps/dir/?api=1&destination=$lat,$lng');
+    final osmUrl = Uri.parse('https://www.openstreetmap.org/directions?from=&to=$lat,$lng');
+
+    try {
+      // Try to launch Google Maps app (Android only)
+      if (Platform.isAndroid && await canLaunchUrl(googleMapsAppUrl)) {
+        await launchUrl(googleMapsAppUrl, mode: LaunchMode.externalApplication);
+        return;
       }
-    }
-    
-    if (!launched && context.mounted) {
-      print('All URL attempts failed. Last error: $lastError');
-      _showErrorSnackBar(context);
+      // Fallback to Google Maps web directions
+      if (await canLaunchUrl(googleMapsWebUrl)) {
+        await launchUrl(googleMapsWebUrl, mode: LaunchMode.externalApplication);
+        return;
+      }
+      // Fallback to OpenStreetMap
+      if (await canLaunchUrl(osmUrl)) {
+        await launchUrl(osmUrl, mode: LaunchMode.externalApplication);
+        return;
+      }
+      // Show error if none work
+      if (context.mounted) {
+        _showErrorSnackBar(context);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        _showErrorSnackBar(context);
+      }
     }
   }
 
