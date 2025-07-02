@@ -17,6 +17,7 @@ import '../doctors/doctors_screen.dart';
 import '../doctors/doctor_detail_screen.dart';
 import 'package:medico/views/home/hospital_detail_screen.dart';
 import 'find_hospitals_screen.dart';
+import 'package:medico/views/schedule/schedule_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -149,6 +150,33 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
 
+                // After the search bar Padding, insert:
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const FindHospitalsScreen()),
+                        );
+                      },
+                      icon: const Icon(Icons.map_outlined),
+                      label: const Text('Find Hospitals on Map'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ),
+
                 // Categories
                 SizedBox(
                   height: 100,
@@ -200,7 +228,14 @@ class HomeScreen extends StatelessWidget {
                           minimumSize: const Size(0, 0),
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (context) => ScheduleScreen()
+                            ),
+                          );
+
+                        },
                         child: const Text(
                           'See All',
                           style: TextStyle(
@@ -611,31 +646,6 @@ class HomeScreen extends StatelessWidget {
                       },
                     );
                   },
-                ),
-
-                const SizedBox(height: 20),
-
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const FindHospitalsScreen()),
-                      );
-                    },
-                    icon: const Icon(Icons.map_outlined),
-                    label: const Text('Find Hospitals on Map'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-                      textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                  ),
                 ),
               ],
             ),

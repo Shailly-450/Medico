@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../models/appointment.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../appointments/appointment_detail_screen.dart';
+import '../../schedule/schedule_screen.dart';
 
 class AppointmentCard extends StatelessWidget {
   final Appointment appointment;
@@ -182,7 +183,14 @@ class AppointmentCard extends StatelessWidget {
                         const SizedBox(width: 12),
                         Expanded(
                           child: ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => ScheduleScreen()
+                                ),
+                              );
+
+                            },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.accent,
                               foregroundColor: AppColors.primary,
