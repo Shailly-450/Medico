@@ -243,7 +243,7 @@ class HomeScreen extends StatelessWidget {
                             decoration: TextDecoration.underline,
                           ),
                         ),
-                      ),
+                      )
                     ],
                   ),
                 ),
@@ -646,6 +646,34 @@ class HomeScreen extends StatelessWidget {
                       },
                     );
                   },
+                ),
+
+                const SizedBox(height: 20),
+
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const FindHospitalsScreen()),
+                      );
+                    },
+                    icon: const Icon(Icons.map_outlined),
+                    label: const Text('Find Hospitals on Map'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 14, horizontal: 20),
+                      textStyle: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 ),
               ],
             ),

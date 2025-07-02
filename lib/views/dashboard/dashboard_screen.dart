@@ -12,7 +12,8 @@ import '../shared/profile_header.dart';
 import 'notifications_page.dart';
 import '../notifications/notification_screen.dart';
 import '../comparison/comparison_screen.dart';
-import 'recent_history_screen.dart';
+import '../appointments/appointment_calendar_screen.dart';
+import '../health_records/health_records_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -55,6 +56,9 @@ class DashboardScreen extends StatelessWidget {
                 // Smart Recommendations
                 _buildRecommendations(context, model),
 
+                // Quick Actions
+                _buildQuickActions(context, model),
+
                 const SizedBox(height: 20),
               ],
             ),
@@ -63,6 +67,15 @@ class DashboardScreen extends StatelessWidget {
         appBar: AppBar(
           title: Text('Dashboard'),
           actions: [
+            IconButton(
+              icon: Icon(Icons.medical_information),
+              tooltip: 'Health Records',
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const HealthRecordsScreen()),
+                );
+              },
+            ),
             IconButton(
               icon: Icon(Icons.compare_arrows),
               tooltip: 'Compare Services',
@@ -161,13 +174,7 @@ class DashboardScreen extends StatelessWidget {
                     ),
               ),
               TextButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => RecentHistoryScreen(recentVisits: model.recentVisits),
-                    ),
-                  );
-                },
+                onPressed: () {},
                 child: Text(
                   'View All',
                   style: TextStyle(
@@ -329,6 +336,41 @@ class DashboardScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               return RecommendationCard(
                 recommendation: model.recommendations[index],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickActions(BuildContext context, DashboardViewModel model) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Quick Actions',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textBlack,
+                ),
+          ),
+          const SizedBox(height: 12),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 1.5,
+            ),
+            itemCount: model.quickActions.length,
+            itemBuilder: (context, index) {
+              return QuickActionCard(
+                action: model.quickActions[index],
               );
             },
           ),

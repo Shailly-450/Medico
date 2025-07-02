@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../shared/app_card.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../appointments/book_appointment_screen.dart';
+import '../../appointments/appointment_calendar_screen.dart';
+import '../../health_records/health_records_screen.dart';
 
 class QuickActionCard extends StatelessWidget {
   final Map<String, dynamic> action;
@@ -14,7 +16,8 @@ class QuickActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppCard(
-      border: Border.all(color: AppColors.secondary.withOpacity(0.8), width: 1.2),
+      border:
+          Border.all(color: AppColors.secondary.withOpacity(0.8), width: 1.2),
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
       margin: const EdgeInsets.only(bottom: 0),
       child: InkWell(
@@ -23,7 +26,20 @@ class QuickActionCard extends StatelessWidget {
           if (action['title'] == 'Book Appointment') {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const BookAppointmentScreen()),
+              MaterialPageRoute(
+                  builder: (context) => const BookAppointmentScreen()),
+            );
+          } else if (action['title'] == 'Calendar View') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const AppointmentCalendarScreen()),
+            );
+          } else if (action['title'] == 'Health Records') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const HealthRecordsScreen()),
             );
           }
         },
@@ -56,4 +72,4 @@ class QuickActionCard extends StatelessWidget {
       ),
     );
   }
-} 
+}

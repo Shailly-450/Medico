@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../health_records/health_record_detail_screen.dart';
+import '../../models/health_record.dart';
 import 'widgets/recent_visit_card.dart';
 
 class RecentHistoryScreen extends StatelessWidget {
@@ -17,8 +19,20 @@ class RecentHistoryScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16.0),
               itemCount: recentVisits.length,
               itemBuilder: (context, index) {
-                return RecentVisitCard(
-                  visit: recentVisits[index],
+                final visit = recentVisits[index];
+                return GestureDetector(
+                  onTap: () {
+                    if (visit is HealthRecord) {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => HealthRecordDetailScreen(record: visit),
+                        ),
+                      );
+                    }
+                  },
+                  child: RecentVisitCard(
+                    visit: visit,
+                  ),
                 );
               },
             ),

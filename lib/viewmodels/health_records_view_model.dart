@@ -1,0 +1,344 @@
+import 'package:flutter/material.dart';
+import '../core/viewmodels/base_view_model.dart';
+import '../models/health_record.dart';
+
+class HealthRecordsViewModel extends BaseViewModel {
+  List<HealthRecord> _allRecords = [];
+  List<HealthRecord> _filteredRecords = [];
+  String _selectedCategory = 'All';
+  String _searchQuery = '';
+  bool _showImportantOnly = false;
+  
+  // Vital signs data
+  List<VitalSigns> _vitalSigns = [];
+  VitalSigns? _latestVitals;
+  
+  // Lab results data
+  List<LabResult> _labResults = [];
+  
+  // Getters
+  List<HealthRecord> get allRecords => _allRecords;
+  List<HealthRecord> get filteredRecords => _filteredRecords;
+  String get selectedCategory => _selectedCategory;
+  String get searchQuery => _searchQuery;
+  bool get showImportantOnly => _showImportantOnly;
+  List<VitalSigns> get vitalSigns => _vitalSigns;
+  VitalSigns? get latestVitals => _latestVitals;
+  List<LabResult> get labResults => _labResults;
+  
+  // Categories for filtering
+  List<String> get categories => [
+    'All',
+    'Vital Signs',
+    'Lab Results',
+    'Medications',
+    'Appointments',
+    'Procedures',
+    'Immunizations',
+    'Allergies',
+    'Conditions',
+  ];
+
+  @override
+  void init() {
+    super.init();
+    _loadMockData();
+    _applyFilters();
+  }
+
+  void _loadMockData() {
+    // Mock health records
+    _allRecords = [
+      HealthRecord(
+        id: '1',
+        title: 'Blood Pressure Check',
+        description: 'Routine blood pressure monitoring',
+        date: DateTime.now().subtract(const Duration(days: 2)),
+        category: 'Vital Signs',
+        provider: 'Dr. Sarah Johnson',
+        providerImage: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150',
+        data: {
+          'systolic': 120,
+          'diastolic': 80,
+          'pulse': 72,
+        },
+        isImportant: true,
+      ),
+      HealthRecord(
+        id: '2',
+        title: 'Complete Blood Count',
+        description: 'Routine blood work',
+        date: DateTime.now().subtract(const Duration(days: 5)),
+        category: 'Lab Results',
+        provider: 'City Medical Lab',
+        providerImage: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=150',
+        data: {
+          'hemoglobin': '14.2 g/dL',
+          'white_blood_cells': '7.5 K/μL',
+          'platelets': '250 K/μL',
+        },
+        attachmentUrl: 'https://example.com/lab-report.pdf',
+      ),
+      HealthRecord(
+        id: '3',
+        title: 'Annual Physical Exam',
+        description: 'Comprehensive health assessment',
+        date: DateTime.now().subtract(const Duration(days: 10)),
+        category: 'Appointments',
+        provider: 'Dr. Michael Chen',
+        providerImage: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=150',
+        data: {
+          'weight': '70 kg',
+          'height': '175 cm',
+          'bmi': '22.9',
+          'temperature': '98.6°F',
+        },
+        isImportant: true,
+      ),
+      HealthRecord(
+        id: '4',
+        title: 'Flu Shot',
+        description: 'Annual influenza vaccination',
+        date: DateTime.now().subtract(const Duration(days: 15)),
+        category: 'Immunizations',
+        provider: 'Community Health Center',
+        providerImage: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=150',
+        data: {
+          'vaccine': 'Influenza',
+          'batch': 'FLU2024-001',
+          'expiry': '2025-06-15',
+        },
+      ),
+      HealthRecord(
+        id: '5',
+        title: 'Dental Cleaning',
+        description: 'Routine dental hygiene',
+        date: DateTime.now().subtract(const Duration(days: 20)),
+        category: 'Procedures',
+        provider: 'Dr. Emily Rodriguez',
+        providerImage: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150',
+        data: {
+          'procedure': 'Dental Cleaning',
+          'duration': '45 minutes',
+          'next_visit': '6 months',
+        },
+      ),
+      HealthRecord(
+        id: '6',
+        title: 'Peanut Allergy',
+        description: 'Food allergy diagnosis',
+        date: DateTime.now().subtract(const Duration(days: 30)),
+        category: 'Allergies',
+        provider: 'Dr. Sarah Johnson',
+        providerImage: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150',
+        data: {
+          'allergen': 'Peanuts',
+          'severity': 'Moderate',
+          'reaction': 'Hives, difficulty breathing',
+        },
+        isImportant: true,
+      ),
+    ];
+
+    // Mock vital signs
+    _vitalSigns = [
+      VitalSigns(
+        bloodPressureSystolic: 120,
+        bloodPressureDiastolic: 80,
+        heartRate: 72,
+        temperature: 98.6,
+        oxygenSaturation: 98,
+        weight: 70.0,
+        height: 175.0,
+        date: DateTime.now().subtract(const Duration(days: 2)),
+      ),
+      VitalSigns(
+        bloodPressureSystolic: 118,
+        bloodPressureDiastolic: 78,
+        heartRate: 70,
+        temperature: 98.4,
+        oxygenSaturation: 99,
+        weight: 69.5,
+        height: 175.0,
+        date: DateTime.now().subtract(const Duration(days: 7)),
+      ),
+    ];
+
+    _latestVitals = _vitalSigns.isNotEmpty ? _vitalSigns.first : null;
+
+    // Mock lab results
+    _labResults = [
+      LabResult(
+        testName: 'Hemoglobin',
+        result: '14.2',
+        unit: 'g/dL',
+        normalRange: '12.0-15.5',
+        status: 'normal',
+        date: DateTime.now().subtract(const Duration(days: 5)),
+        labName: 'City Medical Lab',
+      ),
+      LabResult(
+        testName: 'White Blood Cells',
+        result: '7.5',
+        unit: 'K/μL',
+        normalRange: '4.5-11.0',
+        status: 'normal',
+        date: DateTime.now().subtract(const Duration(days: 5)),
+        labName: 'City Medical Lab',
+      ),
+      LabResult(
+        testName: 'Cholesterol Total',
+        result: '210',
+        unit: 'mg/dL',
+        normalRange: '<200',
+        status: 'high',
+        date: DateTime.now().subtract(const Duration(days: 5)),
+        labName: 'City Medical Lab',
+      ),
+    ];
+  }
+
+  void setCategory(String category) {
+    _selectedCategory = category;
+    _applyFilters();
+    notifyListeners();
+  }
+
+  void setSearchQuery(String query) {
+    _searchQuery = query;
+    _applyFilters();
+    notifyListeners();
+  }
+
+  void toggleImportantOnly() {
+    _showImportantOnly = !_showImportantOnly;
+    _applyFilters();
+    notifyListeners();
+  }
+
+  void _applyFilters() {
+    _filteredRecords = _allRecords.where((record) {
+      // Category filter
+      if (_selectedCategory != 'All' && record.category != _selectedCategory) {
+        return false;
+      }
+      
+      // Search filter
+      if (_searchQuery.isNotEmpty) {
+        final query = _searchQuery.toLowerCase();
+        if (!record.title.toLowerCase().contains(query) &&
+            !record.description.toLowerCase().contains(query) &&
+            !record.provider.toLowerCase().contains(query)) {
+          return false;
+        }
+      }
+      
+      // Important filter
+      if (_showImportantOnly && !record.isImportant) {
+        return false;
+      }
+      
+      return true;
+    }).toList();
+    
+    // Sort by date (newest first)
+    _filteredRecords.sort((a, b) => b.date.compareTo(a.date));
+  }
+
+  void addRecord(HealthRecord record) {
+    _allRecords.add(record);
+    _applyFilters();
+    notifyListeners();
+  }
+
+  void deleteRecord(String id) {
+    _allRecords.removeWhere((record) => record.id == id);
+    _applyFilters();
+    notifyListeners();
+  }
+
+  void markAsImportant(String id) {
+    final index = _allRecords.indexWhere((record) => record.id == id);
+    if (index != -1) {
+      _allRecords[index] = HealthRecord(
+        id: _allRecords[index].id,
+        title: _allRecords[index].title,
+        description: _allRecords[index].description,
+        date: _allRecords[index].date,
+        category: _allRecords[index].category,
+        provider: _allRecords[index].provider,
+        providerImage: _allRecords[index].providerImage,
+        data: _allRecords[index].data,
+        attachmentUrl: _allRecords[index].attachmentUrl,
+        isImportant: !_allRecords[index].isImportant,
+        status: _allRecords[index].status,
+      );
+      _applyFilters();
+      notifyListeners();
+    }
+  }
+
+  List<HealthRecord> getRecordsByCategory(String category) {
+    return _allRecords.where((record) => record.category == category).toList();
+  }
+
+  List<HealthRecord> getRecentRecords(int count) {
+    return _allRecords.take(count).toList();
+  }
+
+  List<HealthRecord> getImportantRecords() {
+    return _allRecords.where((record) => record.isImportant).toList();
+  }
+
+  String formatDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date).inDays;
+    
+    if (difference == 0) {
+      return 'Today';
+    } else if (difference == 1) {
+      return 'Yesterday';
+    } else if (difference < 7) {
+      return '$difference days ago';
+    } else {
+      return '${date.day}/${date.month}/${date.year}';
+    }
+  }
+
+  Color getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'normal':
+        return Colors.green;
+      case 'high':
+      case 'low':
+        return Colors.orange;
+      case 'critical':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  IconData getCategoryIcon(String category) {
+    switch (category) {
+      case 'Vital Signs':
+        return Icons.favorite;
+      case 'Lab Results':
+        return Icons.science;
+      case 'Medications':
+        return Icons.medication;
+      case 'Appointments':
+        return Icons.calendar_today;
+      case 'Procedures':
+        return Icons.medical_services;
+      case 'Immunizations':
+        return Icons.vaccines;
+      case 'Allergies':
+        return Icons.warning;
+      case 'Conditions':
+        return Icons.health_and_safety;
+      default:
+        return Icons.medical_information;
+    }
+  }
+} 
