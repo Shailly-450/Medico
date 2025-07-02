@@ -441,14 +441,59 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
 
+                // Hospital Type Filter
+                SizedBox(
+                  height: 40,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    scrollDirection: Axis.horizontal,
+                    itemCount: model.hospitalTypes.length,
+                    itemBuilder: (context, index) {
+                      final hospitalType = model.hospitalTypes[index];
+                      final isSelected =
+                          model.selectedHospitalType == hospitalType;
+
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: FilterChip(
+                          label: Text(
+                            hospitalType,
+                            style: TextStyle(
+                              color:
+                                  isSelected ? Colors.white : AppColors.primary,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.w500,
+                            ),
+                          ),
+                          selected: isSelected,
+                          backgroundColor: isSelected
+                              ? AppColors.primary
+                              : AppColors.secondary,
+                          selectedColor: AppColors.primary,
+                          checkmarkColor: Colors.white,
+                          side: BorderSide(
+                            color: Colors.transparent,
+                          ),
+                          onSelected: (selected) {
+                            if (selected) {
+                              model.setHospitalType(hospitalType);
+                            }
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
                 // Hospital Cards
                 ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: model.hospitals.length,
+                  itemCount: model.filteredHospitals.length,
                   itemBuilder: (context, index) {
-                    final hospital = model.hospitals[index];
+                    final hospital = model.filteredHospitals[index];
                     return HospitalCard(
                       hospital: hospital,
                       onTap: () {
