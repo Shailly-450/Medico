@@ -11,6 +11,8 @@ class Hospital {
   final String? description;
   final List<String> specialties;
   final Map<String, dynamic>? contactInfo;
+  final double? latitude;
+  final double? longitude;
 
   Hospital({
     required this.id,
@@ -25,6 +27,8 @@ class Hospital {
     this.description,
     this.specialties = const [],
     this.contactInfo,
+    this.latitude,
+    this.longitude,
   });
 
   factory Hospital.fromJson(Map<String, dynamic> json) {
@@ -41,6 +45,8 @@ class Hospital {
       description: json['description'],
       specialties: List<String>.from(json['specialties'] ?? []),
       contactInfo: json['contactInfo'],
+      latitude: json['latitude']?.toDouble(),
+      longitude: json['longitude']?.toDouble(),
     );
   }
 
@@ -58,6 +64,8 @@ class Hospital {
       'description': description,
       'specialties': specialties,
       'contactInfo': contactInfo,
+      'latitude': latitude,
+      'longitude': longitude,
     };
   }
 } 

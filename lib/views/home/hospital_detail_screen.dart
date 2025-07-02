@@ -6,6 +6,7 @@ import '../../models/medical_service.dart';
 import 'widgets/star_rating_widget.dart';
 import 'widgets/hospital_charts_widget.dart';
 import 'widgets/review_card_widget.dart';
+import 'widgets/hospital_map_widget.dart';
 
 class HospitalDetailScreen extends StatefulWidget {
   final Hospital hospital;
@@ -577,6 +578,13 @@ class _HospitalDetailScreenState extends State<HospitalDetailScreen>
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 16),
+          
+          // Map
+          HospitalMapWidget(
+            hospital: widget.hospital,
+            height: 250,
           ),
 
           const SizedBox(height: 20),
