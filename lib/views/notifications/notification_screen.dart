@@ -20,7 +20,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
       builder: (context, model, child) => Scaffold(
         backgroundColor: Colors.grey[50],
         appBar: AppBar(
-           title: Text(
+          title: Text(
             'Notifications',
           ),
           actions: [

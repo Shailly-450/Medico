@@ -106,6 +106,27 @@ class HomeViewModel extends BaseViewModel {
   ];
   String selectedSpecialty = 'All';
 
+  // Hospital filtering
+  List<String> hospitalTypes = [
+    'All',
+    'General Hospital',
+    'Academic Medical Center',
+    'University Hospital',
+    'Specialty Clinic',
+    'Emergency Center'
+  ];
+  String selectedHospitalType = 'All';
+
+  // Get filtered hospitals based on selected type
+  List<Hospital> get filteredHospitals {
+    if (selectedHospitalType == 'All') {
+      return hospitals;
+    }
+    return hospitals
+        .where((hospital) => hospital.type == selectedHospitalType)
+        .toList();
+  }
+
   List<Doctor> doctors = [
     Doctor(
       id: '1',
@@ -287,6 +308,48 @@ class HomeViewModel extends BaseViewModel {
       latitude: 40.8419,
       longitude: -73.9397,
     ),
+    Hospital(
+      id: '4',
+      name: 'Manhattan Eye & Ear Clinic',
+      type: 'Specialty Clinic',
+      location: '210 E 64th St, New York, NY 10065',
+      rating: 4.6,
+      distance: 1.8,
+      availableDoctors: 12,
+      isOpen: true,
+      imageUrl:
+          'https://img.freepik.com/free-photo/modern-medical-clinic_23-2148864987.jpg',
+      specialties: ['Ophthalmology', 'Otolaryngology', 'Plastic Surgery'],
+      description: 'Specialized care for eye and ear conditions.',
+    ),
+    Hospital(
+      id: '5',
+      name: 'NYC Emergency Medical Center',
+      type: 'Emergency Center',
+      location: '462 1st Ave, New York, NY 10016',
+      rating: 4.5,
+      distance: 0.5,
+      availableDoctors: 25,
+      isOpen: true,
+      imageUrl:
+          'https://img.freepik.com/free-photo/emergency-room-hospital_23-2148864988.jpg',
+      specialties: ['Emergency Medicine', 'Trauma Care', 'Critical Care'],
+      description: '24/7 emergency medical services and trauma care.',
+    ),
+    Hospital(
+      id: '6',
+      name: 'Weill Cornell Medical Center',
+      type: 'Academic Medical Center',
+      location: '525 E 68th St, New York, NY 10065',
+      rating: 4.8,
+      distance: 2.1,
+      availableDoctors: 41,
+      isOpen: true,
+      imageUrl:
+          'https://img.freepik.com/free-photo/modern-hospital-building_1417-1205.jpg',
+      specialties: ['Internal Medicine', 'Surgery', 'Radiology', 'Pathology'],
+      description: 'Academic medical center with cutting-edge research.',
+    ),
   ];
 
   void setSpecialty(String specialty) {
@@ -296,6 +359,11 @@ class HomeViewModel extends BaseViewModel {
 
   void setCategory(String category) {
     selectedCategory = category;
+    notifyListeners();
+  }
+
+  void setHospitalType(String hospitalType) {
+    selectedHospitalType = hospitalType;
     notifyListeners();
   }
 }
