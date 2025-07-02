@@ -11,8 +11,8 @@ import 'views/search/search_screen.dart';
 import 'views/dashboard/dashboard_screen.dart';
 import 'views/welcome_screen.dart';
 import 'views/category/category_screen.dart';
+import 'views/appointments/appointment_calendar_screen.dart';
 import 'viewmodels/home_view_model.dart';
-
 
 void main() {
   runApp(const MyApp());
@@ -33,7 +33,8 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           title: 'Medico',
           theme: AppTheme.theme,
-          navigatorKey: Provider.of<NavigationService>(context, listen: false).navigatorKey,
+          navigatorKey: Provider.of<NavigationService>(context, listen: false)
+              .navigatorKey,
           initialRoute: '/welcome',
           routes: {
             '/welcome': (context) => const WelcomeScreen(),
@@ -44,6 +45,8 @@ class MyApp extends StatelessWidget {
             '/schedule': (context) => const ScheduleScreen(),
             '/search': (context) => const SearchScreen(),
             '/category': (context) => const CategoryScreen(),
+            '/appointment-calendar': (context) =>
+                const AppointmentCalendarScreen(),
           },
           onGenerateRoute: (settings) {
             print('Navigating to: ${settings.name}');
@@ -51,7 +54,8 @@ class MyApp extends StatelessWidget {
             if (settings.name == '/category') {
               final String? categoryName = settings.arguments as String?;
               return MaterialPageRoute(
-                builder: (context) => CategoryScreen(categoryName: categoryName),
+                builder: (context) =>
+                    CategoryScreen(categoryName: categoryName),
               );
             }
 

@@ -6,14 +6,14 @@ import '../models/doctor.dart';
 class DashboardViewModel extends BaseViewModel {
   String userName = 'John Doe';
   String userLocation = 'New York, NY';
-  
+
   // Health Overview Data
   double totalSavings = 2450.00;
   int visitsThisMonth = 3;
   int visitsThisYear = 12;
   double healthScore = 85.0;
   bool hasInsurance = true;
-  
+
   // Recent Medical History
   List<Map<String, dynamic>> recentVisits = [
     {
@@ -47,7 +47,7 @@ class DashboardViewModel extends BaseViewModel {
       'outcome': 'Normal results',
     },
   ];
-  
+
   // Active Care Items
   List<Map<String, dynamic>> activeMedications = [
     {
@@ -67,7 +67,7 @@ class DashboardViewModel extends BaseViewModel {
       'refillNeeded': true,
     },
   ];
-  
+
   List<Map<String, dynamic>> ongoingTreatments = [
     {
       'type': 'Physiotherapy',
@@ -77,7 +77,7 @@ class DashboardViewModel extends BaseViewModel {
       'provider': 'Dr. Sarah Johnson',
     },
   ];
-  
+
   // Recommendations
   List<Map<String, dynamic>> recommendations = [
     {
@@ -105,7 +105,7 @@ class DashboardViewModel extends BaseViewModel {
       'priority': 'low',
     },
   ];
-  
+
   // Notifications
   List<Map<String, dynamic>> notifications = [
     {
@@ -130,13 +130,18 @@ class DashboardViewModel extends BaseViewModel {
       'isRead': true,
     },
   ];
-  
+
   // Quick Actions
   List<Map<String, dynamic>> quickActions = [
     {
       'title': 'Book Appointment',
       'icon': Icons.calendar_today,
       'color': Colors.blue,
+    },
+    {
+      'title': 'Calendar View',
+      'icon': Icons.calendar_month,
+      'color': Colors.indigo,
     },
     {
       'title': 'Refill Medicine',
@@ -148,40 +153,37 @@ class DashboardViewModel extends BaseViewModel {
       'icon': Icons.folder,
       'color': Colors.orange,
     },
-    {
-      'title': 'Cost Analysis',
-      'icon': Icons.analytics,
-      'color': Colors.purple,
-    },
   ];
-  
+
   // Methods
   void markNotificationAsRead(int index) {
     notifications[index]['isRead'] = true;
     notifyListeners();
   }
-  
+
   void refillMedication(int index) {
     activeMedications[index]['remaining'] += 30;
     activeMedications[index]['refillNeeded'] = false;
     notifyListeners();
   }
-  
+
   void updateHealthScore(double newScore) {
     healthScore = newScore;
     notifyListeners();
   }
-  
+
   double getTotalSavings() {
     return recentVisits.fold(0.0, (sum, visit) => sum + visit['savings']);
   }
-  
+
   int getUnreadNotificationsCount() {
-    return notifications.where((notification) => !notification['isRead']).length;
+    return notifications
+        .where((notification) => !notification['isRead'])
+        .length;
   }
-  
+
   // Currency formatting helper
   String formatCurrency(double amount) {
     return 'Rs. ${amount.toStringAsFixed(0)}';
   }
-} 
+}

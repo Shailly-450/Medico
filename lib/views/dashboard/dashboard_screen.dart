@@ -12,6 +12,7 @@ import '../shared/profile_header.dart';
 import 'notifications_page.dart';
 import '../notifications/notification_screen.dart';
 import '../comparison/comparison_screen.dart';
+import '../appointments/appointment_calendar_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({Key? key}) : super(key: key);
