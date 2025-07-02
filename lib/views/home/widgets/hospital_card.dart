@@ -2,16 +2,51 @@ import 'package:flutter/material.dart';
 import '../../../models/hospital.dart';
 import '../../../core/theme/app_colors.dart';
 import 'package:medico/views/home/hospital_detail_screen.dart';
+import 'package:medico/views/home/hospital_map_screen.dart';
 
 class HospitalCard extends StatelessWidget {
   final Hospital hospital;
   final VoidCallback? onTap;
+  final Function(Hospital)? onMapTap;
 
   const HospitalCard({
     Key? key,
     required this.hospital,
     this.onTap,
+    this.onMapTap,
   }) : super(key: key);
+
+  Color _getCostCategoryColor(String category) {
+    switch (category.toLowerCase()) {
+      case 'low':
+        return Colors.green;
+      case 'medium':
+        return Colors.orange;
+      case 'high':
+        return Colors.red;
+      case 'premium':
+        return Colors.purple;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  void _openMap(BuildContext context) {
+    if (onMapTap != null) {
+      onMapTap!(hospital);
+    } else {
+      // Fallback to direct navigation if no callback provided
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HospitalMapScreen(
+            selectedHospital: hospital,
+            hospitals: [hospital],
+          ),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,14 +57,16 @@ class HospitalCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
       ),
       child: InkWell(
-        onTap: onTap ?? () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => HospitalDetailScreen(hospital: hospital),
-            ),
-          );
-        },
+        onTap: onTap ??
+            () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      HospitalDetailScreen(hospital: hospital),
+                ),
+              );
+            },
         borderRadius: BorderRadius.circular(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,6 +268,63 @@ class HospitalCard extends StatelessWidget {
 
                   const SizedBox(height: 12),
 
+                  // Cost Information
+                  if (hospital.consultationFee != null ||
+                      hospital.costCategory != null)
+                    Row(
+                      children: [
+                        if (hospital.consultationFee != null)
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.attach_money,
+                                color: AppColors.textSecondary,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '₹${hospital.consultationFee!.toStringAsFixed(0)}',
+                                style: const TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const Text(
+                                ' consultation',
+                                style: TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        if (hospital.consultationFee != null &&
+                            hospital.costCategory != null)
+                          const SizedBox(width: 16),
+                        if (hospital.costCategory != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color:
+                                  _getCostCategoryColor(hospital.costCategory!),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              hospital.costCategory!,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+
+                  const SizedBox(height: 12),
+
                   // Action Buttons
                   Row(
                     children: [
@@ -240,7 +334,8 @@ class HospitalCard extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => HospitalDetailScreen(hospital: hospital),
+                                builder: (context) =>
+                                    HospitalDetailScreen(hospital: hospital),
                               ),
                             );
                           },
@@ -259,14 +354,7 @@ class HospitalCard extends StatelessWidget {
                       const SizedBox(width: 8),
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => HospitalDetailScreen(hospital: hospital),
-                              ),
-                            );
-                          },
+                          onPressed: () => _openMap(context),
                           icon: const Icon(Icons.map_outlined, size: 16),
                           label: const Text('Map'),
                           style: OutlinedButton.styleFrom(

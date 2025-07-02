@@ -12,6 +12,7 @@ import '../notifications/notification_screen.dart';
 import 'offers_screen.dart';
 import 'hospitals_screen.dart';
 import 'hospital_detail_screen.dart';
+import 'hospital_map_screen.dart';
 import '../doctors/doctors_screen.dart';
 import '../doctors/doctor_detail_screen.dart';
 import 'package:medico/views/home/hospital_detail_screen.dart';
@@ -488,6 +489,96 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
 
+                // Cost Category Filter
+                SizedBox(
+                  height: 40,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    scrollDirection: Axis.horizontal,
+                    itemCount: model.costCategories.length,
+                    itemBuilder: (context, index) {
+                      final costCategory = model.costCategories[index];
+                      final isSelected =
+                          model.selectedCostCategory == costCategory;
+
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: FilterChip(
+                          label: Text(
+                            costCategory,
+                            style: TextStyle(
+                              color:
+                                  isSelected ? Colors.white : AppColors.primary,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.w500,
+                            ),
+                          ),
+                          selected: isSelected,
+                          backgroundColor: isSelected
+                              ? AppColors.primary
+                              : AppColors.secondary,
+                          selectedColor: AppColors.primary,
+                          checkmarkColor: Colors.white,
+                          side: BorderSide(
+                            color: Colors.transparent,
+                          ),
+                          onSelected: (selected) {
+                            if (selected) {
+                              model.setCostCategory(costCategory);
+                            }
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
+                // Hospital Specialties Filter
+                SizedBox(
+                  height: 40,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    scrollDirection: Axis.horizontal,
+                    itemCount: model.hospitalSpecialties.length,
+                    itemBuilder: (context, index) {
+                      final specialty = model.hospitalSpecialties[index];
+                      final isSelected =
+                          model.selectedHospitalSpecialty == specialty;
+
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: FilterChip(
+                          label: Text(
+                            specialty,
+                            style: TextStyle(
+                              color:
+                                  isSelected ? Colors.white : AppColors.primary,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.w500,
+                            ),
+                          ),
+                          selected: isSelected,
+                          backgroundColor: isSelected
+                              ? AppColors.primary
+                              : AppColors.secondary,
+                          selectedColor: AppColors.primary,
+                          checkmarkColor: Colors.white,
+                          side: BorderSide(
+                            color: Colors.transparent,
+                          ),
+                          onSelected: (selected) {
+                            if (selected) {
+                              model.setHospitalSpecialty(specialty);
+                            }
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
                 // Hospital Cards
                 ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -502,7 +593,19 @@ class HomeScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => HospitalDetailScreen(hospital: hospital),
+                            builder: (context) =>
+                                HospitalDetailScreen(hospital: hospital),
+                          ),
+                        );
+                      },
+                      onMapTap: (selectedHospital) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => HospitalMapScreen(
+                              selectedHospital: selectedHospital,
+                              hospitals: model.filteredHospitals,
+                            ),
                           ),
                         );
                       },

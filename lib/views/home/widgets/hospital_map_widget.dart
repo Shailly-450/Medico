@@ -8,13 +8,13 @@ import '../../../core/theme/app_colors.dart';
 import '../../../models/hospital.dart';
 
 /// A widget that displays a hospital location on an interactive map using OpenStreetMap.
-/// 
+///
 /// Features:
 /// - Interactive map with OpenStreetMap tiles
 /// - Custom hospital marker with hospital name
 /// - Location info overlay
 /// - "Get Directions" button that opens directions in external browser
-/// 
+///
 /// Usage:
 /// ```dart
 /// HospitalMapWidget(
@@ -38,7 +38,7 @@ class HospitalMapWidget extends StatelessWidget {
     // Default coordinates for New York if hospital coordinates are not available
     final lat = hospital.latitude ?? 40.7128;
     final lng = hospital.longitude ?? -74.0060;
-    
+
     return Container(
       height: height,
       decoration: BoxDecoration(
@@ -104,7 +104,8 @@ class HospitalMapWidget extends StatelessWidget {
                           ),
                           Container(
                             margin: const EdgeInsets.only(top: 2),
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(8),
@@ -154,15 +155,6 @@ class HospitalMapWidget extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  // Debug button for testing URL launching
-                  if (kDebugMode)
-                    FloatingActionButton.small(
-                      onPressed: () => _testUrlLaunching(context),
-                      backgroundColor: Colors.orange,
-                      foregroundColor: Colors.white,
-                      child: const Icon(Icons.bug_report),
-                    ),
                 ],
               ),
             ),
@@ -234,34 +226,99 @@ class HospitalMapWidget extends StatelessWidget {
     final lat = hospital.latitude ?? 40.7128;
     final lng = hospital.longitude ?? -74.0060;
 
-    final googleMapsAppUrl = Uri.parse('google.navigation:q=$lat,$lng');
-    final googleMapsWebUrl = Uri.parse('https://www.google.com/maps/dir/?api=1&destination=$lat,$lng');
-    final osmUrl = Uri.parse('https://www.openstreetmap.org/directions?from=&to=$lat,$lng');
+    print('Attempting to open directions for: ${hospital.name} at $lat, $lng');
+    print('Platform: ${Platform.operatingSystem}');
 
-    try {
-      // Try to launch Google Maps app (Android only)
-      if (Platform.isAndroid && await canLaunchUrl(googleMapsAppUrl)) {
-        await launchUrl(googleMapsAppUrl, mode: LaunchMode.externalApplication);
-        return;
+    // Platform-specific URL attempts
+    List<Map<String, dynamic>> urlAttempts = [];
+
+    if (Platform.isAndroid) {
+      // Android-specific URLs (try native apps first)
+      urlAttempts = [
+        {
+          'url': 'geo:$lat,$lng?q=${Uri.encodeComponent(hospital.name)}',
+          'description': 'Android Native Maps',
+        },
+        {
+          'url': 'google.navigation:q=$lat,$lng',
+          'description': 'Google Maps Navigation',
+        },
+        {
+          'url': 'https://maps.google.com/maps?q=$lat,$lng',
+          'description': 'Google Maps Web',
+        },
+        {
+          'url': 'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
+          'description': 'Google Maps Search',
+        },
+        {
+          'url': 'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng',
+          'description': 'Google Maps Directions',
+        },
+      ];
+    } else {
+      // iOS and other platforms
+      urlAttempts = [
+        {
+          'url': 'https://maps.apple.com/?q=$lat,$lng',
+          'description': 'Apple Maps',
+        },
+        {
+          'url': 'https://maps.google.com/maps?q=$lat,$lng',
+          'description': 'Google Maps Web',
+        },
+        {
+          'url': 'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
+          'description': 'Google Maps Search',
+        },
+        {
+          'url': 'https://www.openstreetmap.org/directions?from=&to=$lat,$lng',
+          'description': 'OpenStreetMap',
+        },
+      ];
+    }
+
+    bool launched = false;
+    String lastError = '';
+
+    for (Map<String, dynamic> attempt in urlAttempts) {
+      try {
+        final uri = Uri.parse(attempt['url']);
+        print('Trying: ${attempt['description']} - ${attempt['url']}');
+
+        // Check if URL can be launched
+        final canLaunch = await canLaunchUrl(uri);
+        print('Can launch ${attempt['description']}: $canLaunch');
+
+        if (canLaunch) {
+          // Try different launch modes for Android
+          LaunchMode mode = Platform.isAndroid
+              ? LaunchMode.externalApplication
+              : LaunchMode.externalApplication;
+
+          final result = await launchUrl(uri, mode: mode);
+          print('Launch result for ${attempt['description']}: $result');
+
+          if (result) {
+            launched = true;
+            print('Successfully launched: ${attempt['description']}');
+            break;
+          } else {
+            lastError = 'Failed to launch ${attempt['description']}';
+          }
+        } else {
+          lastError = 'Cannot launch ${attempt['description']}';
+        }
+      } catch (e) {
+        lastError = 'Error with ${attempt['description']}: $e';
+        print('URL Launch Error: $lastError');
+        continue;
       }
-      // Fallback to Google Maps web directions
-      if (await canLaunchUrl(googleMapsWebUrl)) {
-        await launchUrl(googleMapsWebUrl, mode: LaunchMode.externalApplication);
-        return;
-      }
-      // Fallback to OpenStreetMap
-      if (await canLaunchUrl(osmUrl)) {
-        await launchUrl(osmUrl, mode: LaunchMode.externalApplication);
-        return;
-      }
-      // Show error if none work
-      if (context.mounted) {
-        _showErrorSnackBar(context);
-      }
-    } catch (e) {
-      if (context.mounted) {
-        _showErrorSnackBar(context);
-      }
+    }
+
+    if (!launched && context.mounted) {
+      print('All URL attempts failed. Last error: $lastError');
+      _showErrorSnackBar(context);
     }
   }
 
@@ -318,8 +375,9 @@ class HospitalMapWidget extends StatelessWidget {
 
   void _tryWebSearch(BuildContext context) async {
     final searchQuery = '${hospital.name} ${hospital.location}';
-    final searchUrl = 'https://www.google.com/search?q=${Uri.encodeComponent(searchQuery)}';
-    
+    final searchUrl =
+        'https://www.google.com/search?q=${Uri.encodeComponent(searchQuery)}';
+
     try {
       final uri = Uri.parse(searchUrl);
       if (await canLaunchUrl(uri)) {
@@ -330,7 +388,8 @@ class HospitalMapWidget extends StatelessWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Unable to open any external app. Please search manually.'),
+            content: Text(
+                'Unable to open any external app. Please search manually.'),
             backgroundColor: Colors.orange,
           ),
         );
@@ -341,7 +400,7 @@ class HospitalMapWidget extends StatelessWidget {
   void _testUrlLaunching(BuildContext context) async {
     print('=== URL Launching Debug Test ===');
     print('Platform: ${Platform.operatingSystem}');
-    
+
     // Test simple URLs
     final testUrls = [
       'https://www.google.com',
@@ -349,22 +408,23 @@ class HospitalMapWidget extends StatelessWidget {
       'tel:+1234567890',
       'mailto:test@example.com',
     ];
-    
+
     for (String url in testUrls) {
       try {
         final uri = Uri.parse(url);
         final canLaunch = await canLaunchUrl(uri);
         print('Can launch $url: $canLaunch');
-        
+
         if (canLaunch) {
-          final result = await launchUrl(uri, mode: LaunchMode.externalApplication);
+          final result =
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
           print('Launch result for $url: $result');
         }
       } catch (e) {
         print('Error testing $url: $e');
       }
     }
-    
+
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -374,4 +434,4 @@ class HospitalMapWidget extends StatelessWidget {
       );
     }
   }
-} 
+}
