@@ -12,8 +12,9 @@ import '../shared/profile_header.dart';
 import 'notifications_page.dart';
 import '../notifications/notification_screen.dart';
 import '../comparison/comparison_screen.dart';
-import '../appointments/appointment_calendar_screen.dart';
+import '../schedule/schedule_screen.dart';
 import '../health_records/health_records_screen.dart';
+import '../medicine_reminders/medicine_reminders_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -53,6 +54,9 @@ class DashboardScreen extends StatelessWidget {
                 // Active Care Section
                 _buildActiveCare(context, model),
 
+                // Medicine Reminders Section
+                _buildMedicineReminders(context, model),
+
                 // Smart Recommendations
                 _buildRecommendations(context, model),
 
@@ -72,7 +76,8 @@ class DashboardScreen extends StatelessWidget {
               tooltip: 'Health Records',
               onPressed: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const HealthRecordsScreen()),
+                  MaterialPageRoute(
+                      builder: (_) => const HealthRecordsScreen()),
                 );
               },
             ),
@@ -310,6 +315,105 @@ class DashboardScreen extends StatelessWidget {
               },
             ),
           ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMedicineReminders(
+      BuildContext context, DashboardViewModel model) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Today\'s Medicine Reminders',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textBlack,
+                    ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const MedicineRemindersScreen(),
+                    ),
+                  );
+                },
+                child: Text(
+                  'View All',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.blue.withOpacity(0.2)),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.medication,
+                  color: Colors.blue,
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Medicine Reminder System',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                          color: Colors.blue,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Never miss your medication again! Set up personalized reminders.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.blue.withOpacity(0.8),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const MedicineRemindersScreen(),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('Setup'),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

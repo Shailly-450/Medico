@@ -144,7 +144,7 @@ class DashboardViewModel extends BaseViewModel {
       'color': Colors.indigo,
     },
     {
-      'title': 'Refill Medicine',
+      'title': 'Medicine Reminders',
       'icon': Icons.medication,
       'color': Colors.green,
     },
