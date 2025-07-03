@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:medico/views/home/home_screen.dart';
 import 'package:provider/provider.dart';
 import 'core/services/navigation_service.dart';
+import 'core/services/order_service.dart';
 import 'core/theme/app_theme.dart';
 import 'models/hospital.dart';
 import 'views/auth/login_screen.dart';
@@ -12,9 +13,13 @@ import 'views/dashboard/dashboard_screen.dart';
 import 'views/welcome_screen.dart';
 import 'views/category/category_screen.dart';
 import 'views/appointments/appointment_calendar_screen.dart';
+import 'views/orders/orders_screen.dart';
 import 'viewmodels/home_view_model.dart';
+import 'viewmodels/order_view_model.dart';
 
 void main() {
+  // Initialize mock data for OrderService
+  OrderService.initializeMockData();
   runApp(const MyApp());
 }
 
@@ -27,6 +32,7 @@ class MyApp extends StatelessWidget {
       providers: [
         Provider<NavigationService>(create: (_) => NavigationService()),
         ChangeNotifierProvider<HomeViewModel>(create: (_) => HomeViewModel()),
+        ChangeNotifierProvider<OrderViewModel>(create: (_) => OrderViewModel()),
       ],
       child: Builder(
         builder: (context) => MaterialApp(
@@ -47,6 +53,7 @@ class MyApp extends StatelessWidget {
             '/category': (context) => const CategoryScreen(),
             '/appointment-calendar': (context) =>
                 const AppointmentCalendarScreen(),
+            '/orders': (context) => const OrdersScreen(),
           },
           onGenerateRoute: (settings) {
             print('Navigating to: ${settings.name}');
@@ -89,6 +96,7 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
     const HomeScreen(),
     const DashboardScreen(),
     const ScheduleScreen(),
+    const OrdersScreen(),
     const DummyProfileScreen(),
   ];
 
@@ -137,6 +145,11 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
               icon: Icon(Icons.calendar_today_outlined),
               selectedIcon: Icon(Icons.calendar_today),
               label: 'Schedule',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.shopping_bag_outlined),
+              selectedIcon: Icon(Icons.shopping_bag),
+              label: 'Orders',
             ),
             NavigationDestination(
               icon: Icon(Icons.person_outline),

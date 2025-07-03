@@ -20,10 +20,10 @@ class QuickActionCard extends StatelessWidget {
     return AppCard(
       border:
           Border.all(color: AppColors.secondary.withOpacity(0.8), width: 1.2),
-      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
+      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 6),
       margin: const EdgeInsets.only(bottom: 0),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         onTap: () {
           if (action['title'] == 'Book Appointment') {
             Navigator.push(
@@ -61,7 +61,7 @@ class QuickActionCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: action['color'].withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
