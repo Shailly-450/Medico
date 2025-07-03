@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import '../../shared/app_card.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../appointments/book_appointment_screen.dart';
-import '../../appointments/appointment_calendar_screen.dart';
+import '../../schedule/schedule_screen.dart';
 import '../../health_records/health_records_screen.dart';
+import '../../medicine_reminders/medicine_reminders_screen.dart';
 
 class QuickActionCard extends StatelessWidget {
   final Map<String, dynamic> action;
@@ -32,14 +33,20 @@ class QuickActionCard extends StatelessWidget {
           } else if (action['title'] == 'Calendar View') {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                  builder: (context) => const AppointmentCalendarScreen()),
+              MaterialPageRoute(builder: (context) => const ScheduleScreen()),
             );
           } else if (action['title'] == 'Health Records') {
             Navigator.push(
               context,
               MaterialPageRoute(
                   builder: (context) => const HealthRecordsScreen()),
+            );
+          } else if (action['title'] == 'Medicine Reminders' ||
+              action['title'] == 'Refill Medicine') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const MedicineRemindersScreen()),
             );
           }
         },
