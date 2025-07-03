@@ -5,6 +5,7 @@ import '../../appointments/book_appointment_screen.dart';
 import '../../schedule/schedule_screen.dart';
 import '../../health_records/health_records_screen.dart';
 import '../../medicine_reminders/medicine_reminders_screen.dart';
+import '../../test_checkups/test_checkups_screen.dart';
 
 class QuickActionCard extends StatelessWidget {
   final Map<String, dynamic> action;
@@ -47,6 +48,12 @@ class QuickActionCard extends StatelessWidget {
               context,
               MaterialPageRoute(
                   builder: (context) => const MedicineRemindersScreen()),
+            );
+          } else if (action['title'] == 'Test Checkups') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const TestCheckupsScreen()),
             );
           }
         },

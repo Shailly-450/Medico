@@ -29,7 +29,8 @@ class AppointmentCard extends StatelessWidget {
               patientName: 'Abdullah Alshahrani',
               gender: 'Male',
               age: 28,
-              problem: 'Hey, I have a problem with my stomach and I need to see a doctor.',
+              problem:
+                  'Hey, I have a problem with my stomach and I need to see a doctor.',
             ),
           ),
         );
@@ -76,7 +77,8 @@ class AppointmentCard extends StatelessWidget {
                         Container(
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(color: AppColors.primary, width: 2),
+                            border:
+                                Border.all(color: AppColors.primary, width: 2),
                             boxShadow: [
                               BoxShadow(
                                 color: AppColors.primary.withOpacity(0.08),
@@ -87,7 +89,8 @@ class AppointmentCard extends StatelessWidget {
                           ),
                           child: CircleAvatar(
                             radius: 28,
-                            backgroundImage: NetworkImage(appointment.doctorImage),
+                            backgroundImage:
+                                NetworkImage(appointment.doctorImage),
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -99,15 +102,19 @@ class AppointmentCard extends StatelessWidget {
                                 children: [
                                   Text(
                                     appointment.doctorName,
-                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.textBlack,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.textBlack,
+                                        ),
                                   ),
                                   const SizedBox(width: 8),
                                   // Status tag
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 3),
                                     decoration: BoxDecoration(
                                       color: statusColor.withOpacity(0.18),
                                       borderRadius: BorderRadius.circular(20),
@@ -115,7 +122,9 @@ class AppointmentCard extends StatelessWidget {
                                     child: Row(
                                       children: [
                                         Icon(
-                                          isVideo ? Icons.videocam : Icons.event,
+                                          isVideo
+                                              ? Icons.videocam
+                                              : Icons.event,
                                           size: 14,
                                           color: statusColor,
                                         ),
@@ -135,7 +144,8 @@ class AppointmentCard extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 2),
                                 decoration: BoxDecoration(
                                   color: AppColors.secondary,
                                   borderRadius: BorderRadius.circular(6),
@@ -163,13 +173,14 @@ class AppointmentCard extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
+                    const Divider(
+                        height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
                     const SizedBox(height: 12),
                     Row(
                       children: [
                         Expanded(
                           child: OutlinedButton(
-                            onPressed: () {},
+                            onPressed: () => _cancelAppointment(context),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: AppColors.primary,
                               side: BorderSide(color: AppColors.primary),
@@ -183,14 +194,7 @@ class AppointmentCard extends StatelessWidget {
                         const SizedBox(width: 12),
                         Expanded(
                           child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => ScheduleScreen()
-                                ),
-                              );
-
-                            },
+                            onPressed: () => _rescheduleAppointment(context),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.accent,
                               foregroundColor: AppColors.primary,
@@ -212,4 +216,227 @@ class AppointmentCard extends StatelessWidget {
       ),
     );
   }
-} 
+
+  void _cancelAppointment(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cancel Appointment'),
+        content: Text(
+          'Are you sure you want to cancel your appointment with ${appointment.doctorName}?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('No'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Appointment cancelled successfully'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            },
+            child: const Text('Yes', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _rescheduleAppointment(BuildContext context) async {
+    final result = await _showRescheduleDialog(context);
+    if (result != null) {
+      final newDate = result['date'] as DateTime;
+      final newTime = result['time'] as TimeOfDay;
+
+      // In a real app, this would call the API to reschedule
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Appointment rescheduled successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+  }
+
+  Future<Map<String, dynamic>?> _showRescheduleDialog(
+      BuildContext context) async {
+    DateTime? selectedDate;
+    TimeOfDay? selectedTime;
+
+    return showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Reschedule Appointment'),
+          content: Container(
+            width: double.maxFinite,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Dr. ${appointment.doctorName}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  appointment.specialty,
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Date Selection
+                const Text(
+                  'Select New Date:',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () async {
+                      final DateTime? picked = await showDatePicker(
+                        context: context,
+                        initialDate:
+                            DateTime.now().add(const Duration(days: 1)),
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime.now().add(const Duration(days: 365)),
+                        builder: (context, child) => Theme(
+                          data: Theme.of(context).copyWith(
+                            colorScheme: Theme.of(context).colorScheme.copyWith(
+                                  primary: AppColors.primary,
+                                ),
+                          ),
+                          child: child!,
+                        ),
+                      );
+                      if (picked != null) {
+                        setState(() => selectedDate = picked);
+                      }
+                    },
+                    icon: const Icon(Icons.calendar_today),
+                    label: Text(
+                      selectedDate == null
+                          ? 'Choose Date'
+                          : '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}',
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      side: BorderSide(color: AppColors.primary),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Time Selection
+                const Text(
+                  'Select New Time:',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () async {
+                      final TimeOfDay? picked = await showTimePicker(
+                        context: context,
+                        initialTime: TimeOfDay.now(),
+                        builder: (context, child) => Theme(
+                          data: Theme.of(context).copyWith(
+                            colorScheme: Theme.of(context).colorScheme.copyWith(
+                                  primary: AppColors.primary,
+                                ),
+                          ),
+                          child: child!,
+                        ),
+                      );
+                      if (picked != null) {
+                        setState(() => selectedTime = picked);
+                      }
+                    },
+                    icon: const Icon(Icons.access_time),
+                    label: Text(
+                      selectedTime == null
+                          ? 'Choose Time'
+                          : selectedTime!.format(context),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      side: BorderSide(color: AppColors.primary),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+
+                if (selectedDate != null && selectedTime != null) ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border:
+                          Border.all(color: AppColors.primary.withOpacity(0.3)),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.schedule,
+                            color: AppColors.primary, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'New appointment: ${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year} at ${selectedTime!.format(context)}',
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: selectedDate != null && selectedTime != null
+                  ? () => Navigator.pop(context, {
+                        'date': selectedDate,
+                        'time': selectedTime,
+                      })
+                  : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('Reschedule'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

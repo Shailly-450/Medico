@@ -159,7 +159,8 @@ class HomeScreen extends StatelessWidget {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const FindHospitalsScreen()),
+                          MaterialPageRoute(
+                              builder: (_) => const FindHospitalsScreen()),
                         );
                       },
                       icon: const Icon(Icons.map_outlined),
@@ -171,7 +172,8 @@ class HomeScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        textStyle: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -231,10 +233,8 @@ class HomeScreen extends StatelessWidget {
                         onPressed: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                                builder: (context) => ScheduleScreen()
-                            ),
+                                builder: (context) => ScheduleScreen()),
                           );
-
                         },
                         child: const Text(
                           'See All',
