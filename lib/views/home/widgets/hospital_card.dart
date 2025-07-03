@@ -276,12 +276,7 @@ class HospitalCard extends StatelessWidget {
                         if (hospital.consultationFee != null)
                           Row(
                             children: [
-                              const Icon(
-                                Icons.attach_money,
-                                color: AppColors.textSecondary,
-                                size: 16,
-                              ),
-                              const SizedBox(width: 4),
+
                               Text(
                                 '₹${hospital.consultationFee!.toStringAsFixed(0)}',
                                 style: const TextStyle(
