@@ -8,4 +8,12 @@ class AppColors {
   static const Color paleBackground = Color(0xFFF4F6F9); // Pale Background
   static const Color textBlack = Color(0xFF0B1E27); // Header
   static const Color textSecondary = Color(0xFF5A6A73); // Subtitle/caption
+  
+  // Additional colors for order system
+  static const Color background = Color(0xFFF8F9FA);
+  static const Color textPrimary = Color(0xFF0B1E27);
+  static const Color success = Color(0xFF28A745);
+  static const Color warning = Color(0xFFFFC107);
+  static const Color error = Color(0xFFDC3545);
+  static const Color info = Color(0xFF17A2B8);
 } 
