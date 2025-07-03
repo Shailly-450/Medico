@@ -16,6 +16,8 @@ import 'views/appointments/appointment_calendar_screen.dart';
 import 'views/orders/orders_screen.dart';
 import 'viewmodels/home_view_model.dart';
 import 'viewmodels/order_view_model.dart';
+import 'views/profile/profile_screen.dart';
+import 'viewmodels/family_members_view_model.dart';
 
 void main() {
   // Initialize mock data for OrderService
@@ -33,6 +35,7 @@ class MyApp extends StatelessWidget {
         Provider<NavigationService>(create: (_) => NavigationService()),
         ChangeNotifierProvider<HomeViewModel>(create: (_) => HomeViewModel()),
         ChangeNotifierProvider<OrderViewModel>(create: (_) => OrderViewModel()),
+        ChangeNotifierProvider<FamilyMembersViewModel>(create: (_) => FamilyMembersViewModel()),
       ],
       child: Builder(
         builder: (context) => MaterialApp(
@@ -97,7 +100,7 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
     const DashboardScreen(),
     const ScheduleScreen(),
     const OrdersScreen(),
-    const DummyProfileScreen(),
+    const ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
