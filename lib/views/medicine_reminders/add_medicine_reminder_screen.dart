@@ -65,7 +65,7 @@ class _AddMedicineReminderScreenState extends State<AddMedicineReminderScreen> {
         actions: [
           TextButton(
             onPressed: _saveReminder,
-            child: const Text('Save', style: TextStyle(color: Colors.white)),
+            child: const Text('Save', style: TextStyle(color: Colors.black)),
           ),
         ],
       ),
