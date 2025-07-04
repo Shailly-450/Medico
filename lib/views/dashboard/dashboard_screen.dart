@@ -16,7 +16,9 @@ import '../schedule/schedule_screen.dart';
 import '../health_records/health_records_screen.dart';
 import '../medicine_reminders/medicine_reminders_screen.dart';
 import '../test_checkups/test_checkups_screen.dart';
+import '../policy/policy_documents_screen.dart';
 import 'widgets/pre_approval_summary_card.dart';
+import 'widgets/policy_documents_card.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -53,6 +55,10 @@ class DashboardScreen extends StatelessWidget {
                 // Pre-approval Summary
                 const SizedBox(height: 20),
                 const PreApprovalSummaryCard(),
+
+                // Policy Documents
+                const SizedBox(height: 20),
+                const PolicyDocumentsCard(),
 
                 // Recent Medical History
                 _buildRecentHistory(context, model),
@@ -96,6 +102,16 @@ class DashboardScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const ComparisonScreen()),
+                );
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.upload_file),
+              tooltip: 'Policy Documents',
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                      builder: (_) => const PolicyDocumentsScreen()),
                 );
               },
             ),

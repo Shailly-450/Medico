@@ -49,5 +49,13 @@
 	<string>This app uses location to show your position on the map and provide directions to hospitals.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>This app uses location to show your position on the map and provide directions to hospitals.</string>
+	
+	<!-- Camera and Photo Library permissions for document upload -->
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs camera access to take photos of documents for upload.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs photo library access to select images for document upload.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>This app needs photo library access to save uploaded documents.</string>
 </dict>
 </plist>

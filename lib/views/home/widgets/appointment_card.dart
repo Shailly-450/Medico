@@ -77,25 +77,14 @@ class AppointmentCard extends StatelessWidget {
             Container(
               height: 4,
               decoration: BoxDecoration(
-<<<<<<< HEAD
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.primary,
-                    AppColors.accent,
-                  ],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                ),
-=======
                 color: preApprovalColor,
->>>>>>> a1ca5a940a0bcaa9f6de658287bf3ec13bc08aa8
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(20),
                   topRight: Radius.circular(20),
                 ),
               ),
             ),
-            
+
             // Main content
             Padding(
               padding: const EdgeInsets.all(20.0),
@@ -126,7 +115,8 @@ class AppointmentCard extends StatelessWidget {
                         child: CircleAvatar(
                           radius: 32,
                           backgroundColor: AppColors.secondary.withOpacity(0.1),
-                          backgroundImage: NetworkImage(appointment.doctorImage),
+                          backgroundImage:
+                              NetworkImage(appointment.doctorImage),
                           onBackgroundImageError: (exception, stackTrace) {
                             // Handle image loading error
                           },
@@ -139,9 +129,9 @@ class AppointmentCard extends StatelessWidget {
                               : null,
                         ),
                       ),
-                      
+
                       const SizedBox(width: 16),
-                      
+
                       // Doctor details
                       Expanded(
                         child: Column(
@@ -209,9 +199,9 @@ class AppointmentCard extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            
+
                             const SizedBox(height: 8),
-                            
+
                             // Specialty badge
                             Container(
                               padding: const EdgeInsets.symmetric(
@@ -235,9 +225,9 @@ class AppointmentCard extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            
+
                             const SizedBox(height: 12),
-                            
+
                             // Date and time with enhanced styling
                             Container(
                               padding: const EdgeInsets.symmetric(
@@ -277,9 +267,9 @@ class AppointmentCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 20),
-                  
+
                   // Enhanced divider
                   Container(
                     height: 1,
@@ -293,134 +283,140 @@ class AppointmentCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Action buttons with enhanced styling
-                  Row(
+                  Column(
                     children: [
-                      // Cancel button
-                      Expanded(
-                        child: Container(
-                          height: 48,
+                      Row(
+                        children: [
+                          // Cancel button
+                          Expanded(
+                            child: Container(
+                              height: 48,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Colors.red.withOpacity(0.3),
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(12),
+                                  onTap: () => _cancelAppointment(context),
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.close_rounded,
+                                          size: 18,
+                                          color: Colors.red[600],
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          'Cancel',
+                                          style: TextStyle(
+                                            color: Colors.red[600],
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(width: 12),
+
+                          // Reschedule button
+                          Expanded(
+                            child: Container(
+                              height: 48,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    AppColors.accent,
+                                    AppColors.primary,
+                                  ],
+                                  begin: Alignment.centerLeft,
+                                  end: Alignment.centerRight,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.primary.withOpacity(0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                    spreadRadius: 0,
+                                  ),
+                                ],
+                              ),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(12),
+                                  onTap: () => _rescheduleAppointment(context),
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(
+                                          Icons.schedule_rounded,
+                                          size: 18,
+                                          color: Colors.white,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        const Text(
+                                          'Reschedule',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (appointment.preApprovalStatus !=
+                          PreApprovalStatus.notRequired) ...[
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
+                            color: preApprovalColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(6),
                             border: Border.all(
-                              color: Colors.red.withOpacity(0.3),
-                              width: 1.5,
+                              color: preApprovalColor.withOpacity(0.3),
                             ),
                           ),
-                          child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(12),
-                              onTap: () => _cancelAppointment(context),
-                              child: Container(
-                                alignment: Alignment.center,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.close_rounded,
-                                      size: 18,
-                                      color: Colors.red[600],
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      'Cancel',
-                                      style: TextStyle(
-                                        color: Colors.red[600],
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                          child: Text(
+                            preApprovalText,
+                            style: TextStyle(
+                              color: preApprovalColor,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
-                      ),
-                      
-                      const SizedBox(width: 12),
-                      
-                      // Reschedule button
-                      Expanded(
-                        child: Container(
-                          height: 48,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                AppColors.accent,
-                                AppColors.primary,
-                              ],
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.primary.withOpacity(0.3),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
-                                spreadRadius: 0,
-                              ),
-                              if (appointment.preApprovalStatus !=
-                                  PreApprovalStatus.notRequired) ...[
-                                const SizedBox(height: 4),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: preApprovalColor.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(
-                                      color: preApprovalColor.withOpacity(0.3),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    preApprovalText,
-                                    style: TextStyle(
-                                      color: preApprovalColor,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                          child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(12),
-                              onTap: () => _rescheduleAppointment(context),
-                              child: Container(
-                                alignment: Alignment.center,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(
-                                      Icons.schedule_rounded,
-                                      size: 18,
-                                      color: Colors.white,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    const Text(
-                                      'Reschedule',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
+                      ],
                     ],
                   ),
                 ],
