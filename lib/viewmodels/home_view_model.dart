@@ -4,6 +4,7 @@ import '../models/appointment.dart';
 import '../models/doctor.dart';
 import '../models/hospital.dart';
 import '../models/offer_package.dart';
+import '../core/services/pre_approval_service.dart';
 import 'notification_view_model.dart';
 
 class HomeViewModel extends BaseViewModel {
@@ -69,6 +70,7 @@ class HomeViewModel extends BaseViewModel {
 
   List<Appointment> upcomingAppointments = [
     Appointment(
+      id: '2001',
       doctorName: "Dr. Sarah Johnson",
       doctorImage:
           "https://img.freepik.com/free-photo/woman-doctor-wearing-lab-coat-with-stethoscope-isolated_1303-29791.jpg",
@@ -76,8 +78,10 @@ class HomeViewModel extends BaseViewModel {
       isVideoCall: true,
       date: "Jun 30, 2025",
       time: "10:00 AM",
+      preApprovalStatus: PreApprovalStatus.pending,
     ),
     Appointment(
+      id: '2002',
       doctorName: "Dr. Michael Chen",
       doctorImage:
           "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
@@ -85,8 +89,10 @@ class HomeViewModel extends BaseViewModel {
       isVideoCall: false,
       date: "Jul 01, 2025",
       time: "2:30 PM",
+      preApprovalStatus: PreApprovalStatus.notRequired,
     ),
     Appointment(
+      id: '2003',
       doctorName: "Dr. Emily Brown",
       doctorImage:
           "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
@@ -94,6 +100,7 @@ class HomeViewModel extends BaseViewModel {
       isVideoCall: true,
       date: "Jul 03, 2025",
       time: "4:00 PM",
+      preApprovalStatus: PreApprovalStatus.notRequired,
     ),
   ];
 

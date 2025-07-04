@@ -16,6 +16,7 @@ import '../schedule/schedule_screen.dart';
 import '../health_records/health_records_screen.dart';
 import '../medicine_reminders/medicine_reminders_screen.dart';
 import '../test_checkups/test_checkups_screen.dart';
+import 'widgets/pre_approval_summary_card.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -48,6 +49,10 @@ class DashboardScreen extends StatelessWidget {
 
                 // Health Overview Cards
                 _buildHealthOverview(context, model),
+
+                // Pre-approval Summary
+                const SizedBox(height: 20),
+                const PreApprovalSummaryCard(),
 
                 // Recent Medical History
                 _buildRecentHistory(context, model),

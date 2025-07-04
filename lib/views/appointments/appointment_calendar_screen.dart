@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../models/appointment.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/services/pre_approval_service.dart';
 
 class AppointmentCalendarScreen extends StatefulWidget {
   const AppointmentCalendarScreen({Key? key}) : super(key: key);
@@ -16,6 +17,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   Map<DateTime, List<Appointment>> _events = {};
+  final PreApprovalService _preApprovalService = PreApprovalService();
 
   @override
   void initState() {
@@ -29,6 +31,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
     final appointments = [
       // January 2025 Appointments
       Appointment(
+        id: '4001',
         doctorName: "Dr. Sarah Johnson",
         doctorImage:
             "https://img.freepik.com/free-photo/woman-doctor-wearing-lab-coat-with-stethoscope-isolated_1303-29791.jpg",
@@ -36,8 +39,13 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: true,
         date: "2025-01-15",
         time: "10:00 AM",
+        preApprovalStatus:
+            _preApprovalService.isPreApprovalRequired("Cardiologist")
+                ? PreApprovalStatus.pending
+                : PreApprovalStatus.notRequired,
       ),
       Appointment(
+        id: '4002',
         doctorName: "Dr. Michael Chen",
         doctorImage:
             "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
@@ -45,8 +53,10 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: false,
         date: "2025-01-15",
         time: "2:30 PM",
+        preApprovalStatus: PreApprovalStatus.notRequired,
       ),
       Appointment(
+        id: '4003',
         doctorName: "Dr. Emily Brown",
         doctorImage:
             "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
@@ -54,8 +64,10 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: true,
         date: "2025-01-20",
         time: "4:00 PM",
+        preApprovalStatus: PreApprovalStatus.notRequired,
       ),
       Appointment(
+        id: '4004',
         doctorName: "Dr. Rajesh Kumar",
         doctorImage:
             "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
@@ -63,8 +75,10 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: false,
         date: "2025-01-22",
         time: "11:00 AM",
+        preApprovalStatus: PreApprovalStatus.notRequired,
       ),
       Appointment(
+        id: '4005',
         doctorName: "Dr. Priya Sharma",
         doctorImage:
             "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
@@ -72,10 +86,12 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: true,
         date: "2025-01-25",
         time: "3:00 PM",
+        preApprovalStatus: PreApprovalStatus.notRequired,
       ),
 
       // February 2025 Appointments
       Appointment(
+        id: '4006',
         doctorName: "Dr. David Wilson",
         doctorImage:
             "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
@@ -83,8 +99,13 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: false,
         date: "2025-02-03",
         time: "9:00 AM",
+        preApprovalStatus:
+            _preApprovalService.isPreApprovalRequired("Orthopedic")
+                ? PreApprovalStatus.pending
+                : PreApprovalStatus.notRequired,
       ),
       Appointment(
+        id: '4007',
         doctorName: "Dr. Lisa Anderson",
         doctorImage:
             "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
@@ -92,8 +113,10 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: true,
         date: "2025-02-05",
         time: "1:30 PM",
+        preApprovalStatus: PreApprovalStatus.notRequired,
       ),
       Appointment(
+        id: '4008',
         doctorName: "Dr. James Rodriguez",
         doctorImage:
             "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
@@ -101,8 +124,13 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: false,
         date: "2025-02-08",
         time: "3:45 PM",
+        preApprovalStatus:
+            _preApprovalService.isPreApprovalRequired("Neurologist")
+                ? PreApprovalStatus.approved
+                : PreApprovalStatus.notRequired,
       ),
       Appointment(
+        id: '4009',
         doctorName: "Dr. Maria Garcia",
         doctorImage:
             "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
@@ -110,8 +138,13 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: true,
         date: "2025-02-12",
         time: "11:15 AM",
+        preApprovalStatus:
+            _preApprovalService.isPreApprovalRequired("Psychiatrist")
+                ? PreApprovalStatus.rejected
+                : PreApprovalStatus.notRequired,
       ),
       Appointment(
+        id: '4010',
         doctorName: "Dr. Robert Taylor",
         doctorImage:
             "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
@@ -119,8 +152,10 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: false,
         date: "2025-02-15",
         time: "2:00 PM",
+        preApprovalStatus: PreApprovalStatus.notRequired,
       ),
       Appointment(
+        id: '4011',
         doctorName: "Dr. Jennifer Lee",
         doctorImage:
             "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
@@ -128,8 +163,10 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: true,
         date: "2025-02-18",
         time: "10:30 AM",
+        preApprovalStatus: PreApprovalStatus.notRequired,
       ),
       Appointment(
+        id: '4012',
         doctorName: "Dr. Thomas Martinez",
         doctorImage:
             "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
@@ -137,10 +174,12 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: false,
         date: "2025-02-22",
         time: "4:15 PM",
+        preApprovalStatus: PreApprovalStatus.notRequired,
       ),
 
       // March 2025 Appointments
       Appointment(
+        id: '4013',
         doctorName: "Dr. Amanda White",
         doctorImage:
             "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
@@ -148,8 +187,10 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: true,
         date: "2025-03-01",
         time: "9:30 AM",
+        preApprovalStatus: PreApprovalStatus.notRequired,
       ),
       Appointment(
+        id: '4014',
         doctorName: "Dr. Christopher Davis",
         doctorImage:
             "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
@@ -157,8 +198,10 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: false,
         date: "2025-03-05",
         time: "1:00 PM",
+        preApprovalStatus: PreApprovalStatus.notRequired,
       ),
       Appointment(
+        id: '4015',
         doctorName: "Dr. Nicole Thompson",
         doctorImage:
             "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
@@ -166,8 +209,10 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: true,
         date: "2025-03-08",
         time: "3:30 PM",
+        preApprovalStatus: PreApprovalStatus.notRequired,
       ),
       Appointment(
+        id: '4016',
         doctorName: "Dr. Kevin Johnson",
         doctorImage:
             "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
@@ -175,8 +220,10 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: false,
         date: "2025-03-12",
         time: "11:45 AM",
+        preApprovalStatus: PreApprovalStatus.notRequired,
       ),
       Appointment(
+        id: '4017',
         doctorName: "Dr. Rachel Green",
         doctorImage:
             "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
@@ -184,8 +231,10 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: true,
         date: "2025-03-15",
         time: "2:30 PM",
+        preApprovalStatus: PreApprovalStatus.notRequired,
       ),
       Appointment(
+        id: '4018',
         doctorName: "Dr. Daniel Brown",
         doctorImage:
             "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
@@ -193,55 +242,79 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: false,
         date: "2025-03-18",
         time: "10:15 AM",
+        preApprovalStatus: PreApprovalStatus.notRequired,
       ),
       Appointment(
+        id: '4019',
         doctorName: "Dr. Stephanie Clark",
         doctorImage:
             "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
         specialty: "Dermatologist",
         isVideoCall: true,
         date: "2025-03-20",
-        time: "4:00 PM",
+        time: "4:45 PM",
+        preApprovalStatus: PreApprovalStatus.notRequired,
       ),
       Appointment(
+        id: '4020',
         doctorName: "Dr. Matthew Lewis",
         doctorImage:
             "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
         specialty: "Cardiologist",
         isVideoCall: false,
-        date: "2025-03-25",
-        time: "1:45 PM",
+        date: "2025-03-22",
+        time: "1:15 PM",
+        preApprovalStatus:
+            _preApprovalService.isPreApprovalRequired("Cardiologist")
+                ? PreApprovalStatus.pending
+                : PreApprovalStatus.notRequired,
       ),
       Appointment(
+        id: '4021',
         doctorName: "Dr. Jessica Hall",
         doctorImage:
             "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
-        specialty: "Pediatrician",
+        specialty: "Neurologist",
         isVideoCall: true,
-        date: "2025-03-28",
-        time: "11:00 AM",
+        date: "2025-03-25",
+        time: "3:00 PM",
+        preApprovalStatus:
+            _preApprovalService.isPreApprovalRequired("Neurologist")
+                ? PreApprovalStatus.pending
+                : PreApprovalStatus.notRequired,
       ),
 
       // April 2025 Appointments
       Appointment(
+        id: '4022',
         doctorName: "Dr. Andrew Young",
         doctorImage:
             "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
-        specialty: "General Physician",
+        specialty: "Orthopedic",
         isVideoCall: false,
         date: "2025-04-02",
-        time: "9:00 AM",
+        time: "10:30 AM",
+        preApprovalStatus:
+            _preApprovalService.isPreApprovalRequired("Orthopedic")
+                ? PreApprovalStatus.pending
+                : PreApprovalStatus.notRequired,
       ),
       Appointment(
+        id: '4023',
         doctorName: "Dr. Michelle King",
         doctorImage:
             "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
-        specialty: "Dentist",
+        specialty: "Psychiatrist",
         isVideoCall: true,
         date: "2025-04-05",
-        time: "2:15 PM",
+        time: "2:45 PM",
+        preApprovalStatus:
+            _preApprovalService.isPreApprovalRequired("Psychiatrist")
+                ? PreApprovalStatus.pending
+                : PreApprovalStatus.notRequired,
       ),
       Appointment(
+        id: '4024',
         doctorName: "Dr. Ryan Scott",
         doctorImage:
             "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
@@ -251,6 +324,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         time: "3:30 PM",
       ),
       Appointment(
+        id: '4025',
         doctorName: "Dr. Kimberly Adams",
         doctorImage:
             "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
@@ -260,6 +334,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         time: "10:45 AM",
       ),
       Appointment(
+        id: '4026',
         doctorName: "Dr. Brandon Baker",
         doctorImage:
             "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
@@ -269,6 +344,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         time: "1:20 PM",
       ),
       Appointment(
+        id: '4027',
         doctorName: "Dr. Ashley Nelson",
         doctorImage:
             "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
@@ -278,6 +354,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         time: "4:30 PM",
       ),
       Appointment(
+        id: '4028',
         doctorName: "Dr. Jonathan Carter",
         doctorImage:
             "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
@@ -287,6 +364,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         time: "11:30 AM",
       ),
       Appointment(
+        id: '4029',
         doctorName: "Dr. Samantha Mitchell",
         doctorImage:
             "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
@@ -296,6 +374,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         time: "2:45 PM",
       ),
       Appointment(
+        id: '4030',
         doctorName: "Dr. Tyler Perez",
         doctorImage:
             "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
@@ -307,6 +386,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
 
       // May 2025 Appointments
       Appointment(
+        id: '4031',
         doctorName: "Dr. Lauren Roberts",
         doctorImage:
             "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
@@ -316,6 +396,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         time: "3:00 PM",
       ),
       Appointment(
+        id: '4032',
         doctorName: "Dr. Nathan Turner",
         doctorImage:
             "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
@@ -325,6 +406,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         time: "10:30 AM",
       ),
       Appointment(
+        id: '4033',
         doctorName: "Dr. Victoria Phillips",
         doctorImage:
             "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
@@ -334,6 +416,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         time: "1:45 PM",
       ),
       Appointment(
+        id: '4034',
         doctorName: "Dr. Gregory Campbell",
         doctorImage:
             "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
@@ -343,6 +426,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         time: "4:15 PM",
       ),
       Appointment(
+        id: '4035',
         doctorName: "Dr. Danielle Parker",
         doctorImage:
             "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
@@ -352,6 +436,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         time: "11:00 AM",
       ),
       Appointment(
+        id: '4036',
         doctorName: "Dr. Sean Evans",
         doctorImage:
             "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
@@ -361,6 +446,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         time: "2:30 PM",
       ),
       Appointment(
+        id: '4037',
         doctorName: "Dr. Rebecca Edwards",
         doctorImage:
             "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
@@ -370,6 +456,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         time: "9:45 AM",
       ),
       Appointment(
+        id: '4038',
         doctorName: "Dr. Patrick Collins",
         doctorImage:
             "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
@@ -379,6 +466,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         time: "3:30 PM",
       ),
       Appointment(
+        id: '4039',
         doctorName: "Dr. Hannah Stewart",
         doctorImage:
             "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
@@ -389,11 +477,25 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
       ),
     ];
 
-    // Group appointments by date
-    for (var appointment in appointments) {
-      final date = _parseDate(appointment.date);
-      if (_events[date] == null) _events[date] = [];
-      _events[date]!.add(appointment);
+    // Convert dates to DateTime and organize appointments by date
+    for (final appointment in appointments) {
+      try {
+        final parts = appointment.date.split('-');
+        if (parts.length == 3) {
+          final year = int.parse(parts[0]);
+          final month = int.parse(parts[1]);
+          final day = int.parse(parts[2]);
+          final date = DateTime(year, month, day);
+
+          if (_events[date] != null) {
+            _events[date]!.add(appointment);
+          } else {
+            _events[date] = [appointment];
+          }
+        }
+      } catch (e) {
+        print('Error parsing date ${appointment.date}: $e');
+      }
     }
   }
 
