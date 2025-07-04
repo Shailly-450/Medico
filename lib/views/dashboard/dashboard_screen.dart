@@ -68,6 +68,9 @@ class DashboardScreen extends StatelessWidget {
                 // Health Overview Cards - Most Important Info First
                 _buildHealthOverview(context, model),
 
+                // Health Tracker - Vital Signs and Metrics
+                _buildHealthTracker(context, model),
+
                 // Quick Actions - Easy Access to Common Tasks
                 _buildQuickActions(context, model),
 
@@ -281,6 +284,467 @@ class DashboardScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildHealthTracker(BuildContext context, DashboardViewModel model) {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.health_and_safety,
+                color: AppColors.primary,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Health Tracker',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textBlack,
+                    ),
+              ),
+              const Spacer(),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const HealthRecordsScreen(),
+                    ),
+                  );
+                },
+                child: Text(
+                  'View Details',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Vital Signs Section
+          if (model.latestVitals != null) ...[
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    spreadRadius: 1,
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.favorite,
+                          color: AppColors.primary,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Latest Vital Signs',
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textBlack,
+                              ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          model.formatDate(model.latestVitals!.date),
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildVitalSignCard(
+                                context,
+                                'Blood Pressure',
+                                '${model.latestVitals!.bloodPressureSystolic}/${model.latestVitals!.bloodPressureDiastolic}',
+                                'mmHg',
+                                model.getVitalSignStatus('bloodPressure', {
+                                  'systolic': model.latestVitals!.bloodPressureSystolic,
+                                  'diastolic': model.latestVitals!.bloodPressureDiastolic,
+                                }),
+                                Icons.favorite,
+                                Colors.red,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildVitalSignCard(
+                                context,
+                                'Heart Rate',
+                                '${model.latestVitals!.heartRate}',
+                                'bpm',
+                                model.getVitalSignStatus('heartRate', model.latestVitals!.heartRate),
+                                Icons.favorite,
+                                Colors.pink,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildVitalSignCard(
+                                context,
+                                'Temperature',
+                                '${model.latestVitals!.temperature}',
+                                '°F',
+                                model.getVitalSignStatus('temperature', model.latestVitals!.temperature),
+                                Icons.thermostat,
+                                Colors.orange,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildVitalSignCard(
+                                context,
+                                'O₂ Saturation',
+                                '${model.latestVitals!.oxygenSaturation}',
+                                '%',
+                                model.getVitalSignStatus('oxygenSaturation', model.latestVitals!.oxygenSaturation),
+                                Icons.air,
+                                Colors.blue,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildVitalSignCard(
+                                context,
+                                'Weight',
+                                '${model.latestVitals!.weight}',
+                                'kg',
+                                'normal',
+                                Icons.monitor_weight,
+                                Colors.green,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildVitalSignCard(
+                                context,
+                                'Height',
+                                '${model.latestVitals!.height}',
+                                'cm',
+                                'normal',
+                                Icons.height,
+                                Colors.purple,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+
+          // Health Metrics Section
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.1),
+                  spreadRadius: 1,
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.trending_up,
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Daily Health Metrics',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textBlack,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    children: model.healthMetrics.map((metric) {
+                      return _buildHealthMetricCard(context, metric);
+                    }).toList(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+
+          // Quick Add Vital Signs Button
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                // TODO: Navigate to add vital signs screen
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Add Vital Signs feature coming soon!'),
+                    backgroundColor: Colors.blue,
+                  ),
+                );
+              },
+              icon: const Icon(Icons.add),
+              label: const Text('Add New Vital Signs'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVitalSignCard(
+    BuildContext context,
+    String label,
+    String value,
+    String unit,
+    String status,
+    IconData icon,
+    Color color,
+  ) {
+    final statusColor = _getStatusColor(status);
+    
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: statusColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: statusColor.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                icon,
+                color: color,
+                size: 16,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                value,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: AppColors.textBlack,
+                ),
+              ),
+              const SizedBox(width: 2),
+              Text(
+                unit,
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 10,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: statusColor,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              status.toUpperCase(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 8,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHealthMetricCard(BuildContext context, Map<String, dynamic> metric) {
+    final statusColor = _getStatusColor(metric['status']);
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: metric['color'].withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              metric['icon'],
+              color: metric['color'],
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  metric['name'],
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: AppColors.textBlack,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Text(
+                      '${metric['value']} ${metric['unit']}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: metric['color'],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'of ${metric['target']}',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                LinearProgressIndicator(
+                  value: metric['progress'],
+                  backgroundColor: Colors.grey[300],
+                  valueColor: AlwaysStoppedAnimation<Color>(metric['color']),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: statusColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: statusColor.withOpacity(0.3)),
+            ),
+            child: Text(
+              metric['status'].toUpperCase(),
+              style: TextStyle(
+                color: statusColor,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'normal':
+      case 'good':
+        return Colors.green;
+      case 'elevated':
+      case 'low':
+      case 'high':
+      case 'warning':
+        return Colors.orange;
+      case 'critical':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
   }
 
   Widget _buildQuickActions(BuildContext context, DashboardViewModel model) {
@@ -923,13 +1387,13 @@ class DashboardScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: _getStatusColor(testCheckup.status).withOpacity(0.1),
+                  color: _getTestCheckupStatusColor(testCheckup.status).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   testCheckup.statusDisplayName,
                   style: TextStyle(
-                    color: _getStatusColor(testCheckup.status),
+                    color: _getTestCheckupStatusColor(testCheckup.status),
                     fontSize: 10,
                     fontWeight: FontWeight.w500,
                   ),
@@ -1014,7 +1478,7 @@ class DashboardScreen extends StatelessWidget {
     }
   }
 
-  Color _getStatusColor(status) {
+  Color _getTestCheckupStatusColor(status) {
     switch (status.toString()) {
       case 'TestCheckupStatus.scheduled':
         return Colors.blue;

@@ -18,6 +18,7 @@ import '../doctors/doctor_detail_screen.dart';
 import 'package:medico/views/home/hospital_detail_screen.dart';
 import 'find_hospitals_screen.dart';
 import 'package:medico/views/schedule/schedule_screen.dart';
+import '../appointments/all_appointments_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -260,7 +261,7 @@ class HomeScreen extends StatelessWidget {
                         onPressed: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                                builder: (context) => ScheduleScreen()),
+                                builder: (context) => AllAppointmentsScreen()),
                           );
                         },
                         child: const Text(
