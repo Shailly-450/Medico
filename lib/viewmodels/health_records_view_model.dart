@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/viewmodels/base_view_model.dart';
 import '../models/health_record.dart';
+import '../models/family_member.dart';
 
 class HealthRecordsViewModel extends BaseViewModel {
   List<HealthRecord> _allRecords = [];
@@ -8,6 +9,7 @@ class HealthRecordsViewModel extends BaseViewModel {
   String _selectedCategory = 'All';
   String _searchQuery = '';
   bool _showImportantOnly = false;
+  String? _currentFamilyMemberId; // Add this field
   
   // Vital signs data
   List<VitalSigns> _vitalSigns = [];
@@ -22,6 +24,7 @@ class HealthRecordsViewModel extends BaseViewModel {
   String get selectedCategory => _selectedCategory;
   String get searchQuery => _searchQuery;
   bool get showImportantOnly => _showImportantOnly;
+  String? get currentFamilyMemberId => _currentFamilyMemberId; // Add this getter
   List<VitalSigns> get vitalSigns => _vitalSigns;
   VitalSigns? get latestVitals => _latestVitals;
   List<LabResult> get labResults => _labResults;
@@ -108,6 +111,13 @@ class HealthRecordsViewModel extends BaseViewModel {
     ];
   }
 
+  // Add method to set current family member
+  void setCurrentFamilyMember(String? familyMemberId) {
+    _currentFamilyMemberId = familyMemberId;
+    _applyFilters();
+    notifyListeners();
+  }
+
   void setCategory(String category) {
     _selectedCategory = category;
     _applyFilters();
@@ -128,6 +138,11 @@ class HealthRecordsViewModel extends BaseViewModel {
 
   void _applyFilters() {
     _filteredRecords = _allRecords.where((record) {
+      // Family member filter
+      if (_currentFamilyMemberId != null && record.familyMemberId != _currentFamilyMemberId) {
+        return false;
+      }
+      
       // Category filter
       if (_selectedCategory != 'All' && record.category != _selectedCategory) {
         return false;
@@ -182,6 +197,7 @@ class HealthRecordsViewModel extends BaseViewModel {
         attachmentUrl: _allRecords[index].attachmentUrl,
         isImportant: !_allRecords[index].isImportant,
         status: _allRecords[index].status,
+        familyMemberId: _allRecords[index].familyMemberId, // Add this field
       );
       _applyFilters();
       notifyListeners();
@@ -198,6 +214,37 @@ class HealthRecordsViewModel extends BaseViewModel {
 
   List<HealthRecord> getImportantRecords() {
     return _allRecords.where((record) => record.isImportant).toList();
+  }
+
+  // Add method to get records for a specific family member
+  List<HealthRecord> getRecordsForFamilyMember(String familyMemberId) {
+    return _allRecords.where((record) => record.familyMemberId == familyMemberId).toList();
+  }
+
+  // Add method to get records count for a specific family member
+  int getRecordsCountForFamilyMember(String familyMemberId) {
+    return _allRecords.where((record) => record.familyMemberId == familyMemberId).length;
+  }
+
+  // Add method to get all records for all family members
+  Map<String, List<HealthRecord>> getRecordsByFamilyMember() {
+    final Map<String, List<HealthRecord>> recordsByFamily = {};
+    for (final record in _allRecords) {
+      if (!recordsByFamily.containsKey(record.familyMemberId)) {
+        recordsByFamily[record.familyMemberId] = [];
+      }
+      recordsByFamily[record.familyMemberId]!.add(record);
+    }
+    return recordsByFamily;
+  }
+
+  // Add method to get summary statistics
+  Map<String, int> getFamilyMemberRecordCounts() {
+    final Map<String, int> counts = {};
+    for (final record in _allRecords) {
+      counts[record.familyMemberId] = (counts[record.familyMemberId] ?? 0) + 1;
+    }
+    return counts;
   }
 
   String formatDate(DateTime date) {

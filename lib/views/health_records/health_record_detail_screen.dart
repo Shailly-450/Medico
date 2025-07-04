@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../models/health_record.dart';
+import '../../models/family_member.dart';
+import '../../viewmodels/family_members_view_model.dart';
 import '../../core/theme/app_colors.dart';
 
 class HealthRecordDetailScreen extends StatelessWidget {
@@ -216,6 +219,12 @@ class HealthRecordDetailScreen extends StatelessWidget {
   }
 
   Widget _buildDetailsCard(BuildContext context) {
+    final familyVM = context.watch<FamilyMembersViewModel>();
+    final familyMember = familyVM.members.firstWhere(
+      (member) => member.id == record.familyMemberId,
+      orElse: () => FamilyMember(id: '', name: 'Unknown', role: '', imageUrl: ''),
+    );
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       elevation: 2,
@@ -231,6 +240,50 @@ class HealthRecordDetailScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     color: AppColors.textBlack,
                   ),
+            ),
+            const SizedBox(height: 16),
+            // Family Member Row
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 16,
+                  backgroundImage: familyMember.imageUrl.isNotEmpty 
+                    ? NetworkImage(familyMember.imageUrl) 
+                    : null,
+                  backgroundColor: AppColors.primary.withOpacity(0.2),
+                  child: familyMember.imageUrl.isEmpty 
+                    ? Text(
+                        familyMember.name.isNotEmpty ? familyMember.name[0].toUpperCase() : '?',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    : null,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Family Member',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      Text(
+                        familyMember.name,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             _buildDetailRow('Category', record.category),

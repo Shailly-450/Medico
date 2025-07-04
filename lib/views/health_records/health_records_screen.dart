@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/views/base_view.dart';
 import '../../viewmodels/health_records_view_model.dart';
+import '../../viewmodels/family_members_view_model.dart';
 import '../../core/theme/app_colors.dart';
+import '../../models/family_member.dart';
 import 'widgets/health_record_card.dart';
 import 'widgets/search_filter_bar.dart';
 import 'widgets/category_filter_chips.dart';
@@ -13,21 +16,25 @@ class HealthRecordsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final familyVM = context.watch<FamilyMembersViewModel>();
+    final currentProfile = familyVM.currentProfile;
+
     return BaseView<HealthRecordsViewModel>(
-      viewModelBuilder: () => HealthRecordsViewModel(),
+      viewModelBuilder: () {
+        final viewModel = HealthRecordsViewModel();
+        // Set the current family member based on the current profile
+        if (currentProfile != null) {
+          viewModel.setCurrentFamilyMember(currentProfile.id);
+        }
+        return viewModel;
+      },
       builder: (context, model, child) => Scaffold(
         backgroundColor: Colors.grey[50],
         body: SafeArea(
           child: Column(
             children: [
-              // Header
-              ProfileHeader(
-                name: 'Health Records',
-                location: 'Your medical history',
-                subtitle: '${model.allRecords.length} records available',
-                notificationCount: 0,
-                onNotificationTap: () {},
-              ),
+              // Header with Family Member Selector
+              _buildHeader(context, model, familyVM, currentProfile),
 
               // Search and Filter Bar
               SearchFilterBar(
@@ -50,12 +57,20 @@ class HealthRecordsScreen extends StatelessWidget {
                   onRefresh: () async {
                     // Refresh data
                     model.init();
+                    if (currentProfile != null) {
+                      model.setCurrentFamilyMember(currentProfile.id);
+                    }
                   },
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        const SizedBox(height: 20),
+
+                        // Family Summary Section
+                        _buildFamilySummarySection(context, model, familyVM),
+
                         const SizedBox(height: 20),
 
                         // Records Section
@@ -75,11 +90,272 @@ class HealthRecordsScreen extends StatelessWidget {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            _showAddRecordDialog(context, model);
+            _showAddRecordDialog(context, model, currentProfile);
           },
           backgroundColor: AppColors.primary,
           child: const Icon(Icons.add, color: Colors.white),
         ),
+      ),
+    );
+  }
+
+  Widget _buildFamilySummarySection(BuildContext context, HealthRecordsViewModel model, FamilyMembersViewModel familyVM) {
+    final recordCounts = model.getFamilyMemberRecordCounts();
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Family Health Summary',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppColors.textBlack,
+              ),
+        ),
+        const SizedBox(height: 12), // slightly reduced
+        SizedBox(
+          height: 100, // reduced from 100
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: familyVM.members.length,
+            itemBuilder: (context, index) {
+              final member = familyVM.members[index];
+              final recordCount = recordCounts[member.id] ?? 0;
+              final isCurrentProfile = familyVM.currentProfile?.id == member.id;
+              
+              return Container(
+                width: 150, // reduced from 120
+
+                margin: const EdgeInsets.only(right: 8), // reduced
+                child: Card(
+                  elevation: isCurrentProfile ? 4 : 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    side: isCurrentProfile 
+                      ? BorderSide(color: AppColors.primary, width: 2)
+                      : BorderSide.none,
+                  ),
+                  child: InkWell(
+                    onTap: () {
+                      familyVM.switchProfile(member);
+                      model.setCurrentFamilyMember(member.id);
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4.0), // reduced from 12
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircleAvatar(
+                            radius: 16, // reduced from 20
+                            backgroundImage: member.imageUrl.isNotEmpty 
+                              ? NetworkImage(member.imageUrl) 
+                              : null,
+                            backgroundColor: AppColors.primary.withOpacity(0.2),
+                            child: member.imageUrl.isEmpty 
+                              ? Text(
+                                  member.name.isNotEmpty ? member.name[0].toUpperCase() : '?',
+                                  style: TextStyle(
+                                    color: AppColors.primary,
+                                    fontSize: 12, // reduced from 16
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              : null,
+                          ),
+                          const SizedBox(height: 4), // reduced from 8
+                          Text(
+                            member.name,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                              fontSize: 12, // smaller font
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            '$recordCount records',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.textSecondary,
+                              fontSize: 11, // smaller font
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, HealthRecordsViewModel model, FamilyMembersViewModel familyVM, FamilyMember? currentProfile) {
+    final textTheme = Theme.of(context).textTheme;
+    
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Title and Family Member Selector
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Health Records',
+                      style: textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      currentProfile != null 
+                        ? '${model.getRecordsCountForFamilyMember(currentProfile.id)} records for ${currentProfile.name}'
+                        : 'Select a family member',
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Family Member Selector
+              if (familyVM.members.isNotEmpty)
+                PopupMenuButton<FamilyMember>(
+                  offset: const Offset(0, 40),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (currentProfile != null) ...[
+                          CircleAvatar(
+                            radius: 12,
+                            backgroundImage: currentProfile.imageUrl.isNotEmpty 
+                              ? NetworkImage(currentProfile.imageUrl) 
+                              : null,
+                            backgroundColor: AppColors.primary.withOpacity(0.2),
+                            child: currentProfile.imageUrl.isEmpty 
+                              ? Text(
+                                  currentProfile.name.isNotEmpty ? currentProfile.name[0].toUpperCase() : '?',
+                                  style: TextStyle(
+                                    color: AppColors.primary,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              : null,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            currentProfile.name,
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ] else ...[
+                          Icon(Icons.person, size: 16, color: AppColors.primary),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Select Member',
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                        const SizedBox(width: 4),
+                        Icon(Icons.arrow_drop_down, color: AppColors.primary),
+                      ],
+                    ),
+                  ),
+                  itemBuilder: (context) => familyVM.members.map((member) {
+                    final isSelected = currentProfile?.id == member.id;
+                    return PopupMenuItem<FamilyMember>(
+                      value: member,
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 16,
+                            backgroundImage: member.imageUrl.isNotEmpty 
+                              ? NetworkImage(member.imageUrl) 
+                              : null,
+                            backgroundColor: AppColors.primary.withOpacity(0.2),
+                            child: member.imageUrl.isEmpty 
+                              ? Text(
+                                  member.name.isNotEmpty ? member.name[0].toUpperCase() : '?',
+                                  style: TextStyle(
+                                    color: AppColors.primary,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              : null,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  member.name,
+                                  style: textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                                Text(
+                                  '${model.getRecordsCountForFamilyMember(member.id)} records',
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (isSelected)
+                            Icon(Icons.check_circle, color: AppColors.primary, size: 20),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  onSelected: (member) {
+                    familyVM.switchProfile(member);
+                    model.setCurrentFamilyMember(member.id);
+                  },
+                ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -162,6 +438,9 @@ class HealthRecordsScreen extends StatelessWidget {
   }
 
   Widget _buildQuickActions(BuildContext context, HealthRecordsViewModel model) {
+    final familyVM = context.watch<FamilyMembersViewModel>();
+    final currentProfile = familyVM.currentProfile;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -186,28 +465,28 @@ class HealthRecordsScreen extends StatelessWidget {
               'Add Vital Signs',
               Icons.favorite,
               AppColors.primary,
-              () => _showAddVitalSignsDialog(context, model),
+              () => _showAddVitalSignsDialog(context, model, currentProfile),
             ),
             _buildQuickActionCard(
               context,
               'Upload Document',
               Icons.upload_file,
               AppColors.accent,
-              () => _showUploadDialog(context),
+              () => _showUploadDialog(context, currentProfile),
             ),
             _buildQuickActionCard(
               context,
               'Export Records',
               Icons.download,
               Colors.blue,
-              () => _showExportDialog(context),
+              () => _showExportDialog(context, currentProfile),
             ),
             _buildQuickActionCard(
               context,
               'Share Records',
               Icons.share,
               Colors.green,
-              () => _showShareDialog(context),
+              () => _showShareDialog(context, currentProfile),
             ),
           ],
         ),
@@ -254,12 +533,58 @@ class HealthRecordsScreen extends StatelessWidget {
     );
   }
 
-  void _showAddRecordDialog(BuildContext context, HealthRecordsViewModel model) {
+  void _showAddRecordDialog(BuildContext context, HealthRecordsViewModel model, FamilyMember? currentProfile) {
+    if (currentProfile == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a family member first'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add Health Record'),
-        content: const Text('This feature will allow you to add new health records.'),
+        title: Text('Add Health Record for ${currentProfile.name}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('This feature will allow you to add new health records for ${currentProfile.name}.'),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 16,
+                  backgroundImage: currentProfile.imageUrl.isNotEmpty 
+                    ? NetworkImage(currentProfile.imageUrl) 
+                    : null,
+                  backgroundColor: AppColors.primary.withOpacity(0.2),
+                  child: currentProfile.imageUrl.isEmpty 
+                    ? Text(
+                        currentProfile.name.isNotEmpty ? currentProfile.name[0].toUpperCase() : '?',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    : null,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  currentProfile.name,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -274,12 +599,58 @@ class HealthRecordsScreen extends StatelessWidget {
     );
   }
 
-  void _showAddVitalSignsDialog(BuildContext context, HealthRecordsViewModel model) {
+  void _showAddVitalSignsDialog(BuildContext context, HealthRecordsViewModel model, FamilyMember? currentProfile) {
+    if (currentProfile == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a family member first'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add Vital Signs'),
-        content: const Text('This feature will allow you to manually enter vital signs.'),
+        title: Text('Add Vital Signs for ${currentProfile.name}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('This feature will allow you to manually enter vital signs for ${currentProfile.name}.'),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 16,
+                  backgroundImage: currentProfile.imageUrl.isNotEmpty 
+                    ? NetworkImage(currentProfile.imageUrl) 
+                    : null,
+                  backgroundColor: AppColors.primary.withOpacity(0.2),
+                  child: currentProfile.imageUrl.isEmpty 
+                    ? Text(
+                        currentProfile.name.isNotEmpty ? currentProfile.name[0].toUpperCase() : '?',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    : null,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  currentProfile.name,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -294,12 +665,58 @@ class HealthRecordsScreen extends StatelessWidget {
     );
   }
 
-  void _showUploadDialog(BuildContext context) {
+  void _showUploadDialog(BuildContext context, FamilyMember? currentProfile) {
+    if (currentProfile == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a family member first'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Upload Document'),
-        content: const Text('This feature will allow you to upload medical documents.'),
+        title: Text('Upload Document for ${currentProfile.name}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('This feature will allow you to upload medical documents for ${currentProfile.name}.'),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 16,
+                  backgroundImage: currentProfile.imageUrl.isNotEmpty 
+                    ? NetworkImage(currentProfile.imageUrl) 
+                    : null,
+                  backgroundColor: AppColors.primary.withOpacity(0.2),
+                  child: currentProfile.imageUrl.isEmpty 
+                    ? Text(
+                        currentProfile.name.isNotEmpty ? currentProfile.name[0].toUpperCase() : '?',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    : null,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  currentProfile.name,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -314,12 +731,58 @@ class HealthRecordsScreen extends StatelessWidget {
     );
   }
 
-  void _showExportDialog(BuildContext context) {
+  void _showExportDialog(BuildContext context, FamilyMember? currentProfile) {
+    if (currentProfile == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a family member first'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Export Records'),
-        content: const Text('This feature will allow you to export your health records.'),
+        title: Text('Export Records for ${currentProfile.name}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('This feature will allow you to export health records for ${currentProfile.name}.'),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 16,
+                  backgroundImage: currentProfile.imageUrl.isNotEmpty 
+                    ? NetworkImage(currentProfile.imageUrl) 
+                    : null,
+                  backgroundColor: AppColors.primary.withOpacity(0.2),
+                  child: currentProfile.imageUrl.isEmpty 
+                    ? Text(
+                        currentProfile.name.isNotEmpty ? currentProfile.name[0].toUpperCase() : '?',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    : null,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  currentProfile.name,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -334,12 +797,58 @@ class HealthRecordsScreen extends StatelessWidget {
     );
   }
 
-  void _showShareDialog(BuildContext context) {
+  void _showShareDialog(BuildContext context, FamilyMember? currentProfile) {
+    if (currentProfile == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a family member first'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Share Records'),
-        content: const Text('This feature will allow you to share your health records with healthcare providers.'),
+        title: Text('Share Records for ${currentProfile.name}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('This feature will allow you to share health records for ${currentProfile.name} with healthcare providers.'),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 16,
+                  backgroundImage: currentProfile.imageUrl.isNotEmpty 
+                    ? NetworkImage(currentProfile.imageUrl) 
+                    : null,
+                  backgroundColor: AppColors.primary.withOpacity(0.2),
+                  child: currentProfile.imageUrl.isEmpty 
+                    ? Text(
+                        currentProfile.name.isNotEmpty ? currentProfile.name[0].toUpperCase() : '?',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    : null,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  currentProfile.name,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),

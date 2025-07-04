@@ -45,7 +45,7 @@ class FamilyMembersScreen extends StatelessWidget {
                 final member = members[index];
                 return ListTile(
                   leading: CircleAvatar(
-                    radius: 28,
+                    radius: 8,
                     backgroundImage: NetworkImage(member.imageUrl),
                   ),
                   title: Text(

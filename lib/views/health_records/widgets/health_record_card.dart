@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../models/health_record.dart';
+import '../../../models/family_member.dart';
+import '../../../viewmodels/family_members_view_model.dart';
 import '../../../core/theme/app_colors.dart';
 
 class HealthRecordCard extends StatelessWidget {
@@ -51,12 +54,48 @@ class HealthRecordCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          record.title,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textBlack,
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                record.title,
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.textBlack,
+                                    ),
                               ),
+                            ),
+                            // Family Member Indicator
+                            Consumer<FamilyMembersViewModel>(
+                              builder: (context, familyVM, child) {
+                                final familyMember = familyVM.members.firstWhere(
+                                  (member) => member.id == record.familyMemberId,
+                                  orElse: () => FamilyMember(id: '', name: 'Unknown', role: '', imageUrl: ''),
+                                );
+                                
+                                return Container(
+                                  margin: const EdgeInsets.only(left: 8),
+                                  child: CircleAvatar(
+                                    radius: 10,
+                                    backgroundImage: familyMember.imageUrl.isNotEmpty 
+                                      ? NetworkImage(familyMember.imageUrl) 
+                                      : null,
+                                    backgroundColor: AppColors.primary.withOpacity(0.2),
+                                    child: familyMember.imageUrl.isEmpty 
+                                      ? Text(
+                                          familyMember.name.isNotEmpty ? familyMember.name[0].toUpperCase() : '?',
+                                          style: TextStyle(
+                                            color: AppColors.primary,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        )
+                                      : null,
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 4),
                         Text(

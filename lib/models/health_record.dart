@@ -10,6 +10,7 @@ class HealthRecord {
   final String? attachmentUrl;
   final bool isImportant;
   final String status;
+  final String familyMemberId; // Add this field
 
   HealthRecord({
     required this.id,
@@ -23,6 +24,7 @@ class HealthRecord {
     this.attachmentUrl,
     this.isImportant = false,
     this.status = 'completed',
+    required this.familyMemberId, // Add this parameter
   });
 
   factory HealthRecord.fromJson(Map<String, dynamic> json) {
@@ -38,6 +40,7 @@ class HealthRecord {
       attachmentUrl: json['attachmentUrl'] as String?,
       isImportant: json['isImportant'] as bool? ?? false,
       status: json['status'] as String? ?? 'completed',
+      familyMemberId: json['familyMemberId'] as String, // Add this field
     );
   }
 
@@ -54,11 +57,13 @@ class HealthRecord {
       'attachmentUrl': attachmentUrl,
       'isImportant': isImportant,
       'status': status,
+      'familyMemberId': familyMemberId, // Add this field
     };
   }
 
   static List<HealthRecord> dummyList() {
     return [
+      // John Doe (Father)
       HealthRecord(
         id: 'rec1',
         title: 'Annual Physical Exam',
@@ -82,6 +87,7 @@ class HealthRecord {
         attachmentUrl: null,
         isImportant: true,
         status: 'completed',
+        familyMemberId: '1',
       ),
       HealthRecord(
         id: 'rec2',
@@ -102,21 +108,14 @@ class HealthRecord {
               'date': DateTime.now().subtract(const Duration(days: 28)).toIso8601String(),
               'labName': 'LabCorp',
             },
-            {
-              'testName': 'WBC',
-              'result': '6.2',
-              'unit': 'x10^3/uL',
-              'normalRange': '4.0-10.0',
-              'status': 'normal',
-              'date': DateTime.now().subtract(const Duration(days: 28)).toIso8601String(),
-              'labName': 'LabCorp',
-            },
           ],
         },
         attachmentUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
         isImportant: false,
         status: 'completed',
+        familyMemberId: '1',
       ),
+      // Sara Doe (Mom)
       HealthRecord(
         id: 'rec3',
         title: 'Chest X-Ray',
@@ -129,6 +128,7 @@ class HealthRecord {
         attachmentUrl: 'https://dummyimage.com/600x400/000/fff.jpg&text=Chest+X-Ray',
         isImportant: false,
         status: 'completed',
+        familyMemberId: '2',
       ),
       HealthRecord(
         id: 'rec4',
@@ -145,7 +145,9 @@ class HealthRecord {
         attachmentUrl: null,
         isImportant: false,
         status: 'completed',
+        familyMemberId: '2',
       ),
+      // Jak Doe (First-child)
       HealthRecord(
         id: 'rec5',
         title: 'Prescription - Amoxicillin',
@@ -163,6 +165,7 @@ class HealthRecord {
         attachmentUrl: null,
         isImportant: false,
         status: 'active',
+        familyMemberId: '3',
       ),
       HealthRecord(
         id: 'rec6',
@@ -179,6 +182,50 @@ class HealthRecord {
         },
         isImportant: true,
         status: 'completed',
+        familyMemberId: '3',
+      ),
+      // Ben Doe (Second-child)
+      HealthRecord(
+        id: 'rec7',
+        title: 'Annual Pediatric Checkup',
+        description: 'Routine annual checkup for child.',
+        date: DateTime.now().subtract(const Duration(days: 20)),
+        category: 'Vital Signs',
+        provider: 'Children\'s Medical Center',
+        providerImage: 'https://randomuser.me/api/portraits/women/16.jpg',
+        data: {
+          'vitalSigns': {
+            'bloodPressureSystolic': 110.0,
+            'bloodPressureDiastolic': 70.0,
+            'heartRate': 85,
+            'temperature': 37.0,
+            'oxygenSaturation': 99,
+            'weight': 25.0,
+            'height': 120.0,
+            'date': DateTime.now().subtract(const Duration(days: 20)).toIso8601String(),
+          },
+        },
+        attachmentUrl: null,
+        isImportant: false,
+        status: 'completed',
+        familyMemberId: '4',
+      ),
+      HealthRecord(
+        id: 'rec8',
+        title: 'Flu Shot',
+        description: 'Annual flu vaccination.',
+        date: DateTime.now().subtract(const Duration(days: 60)),
+        category: 'Immunizations',
+        provider: 'Community Pharmacy',
+        providerImage: 'https://randomuser.me/api/portraits/men/17.jpg',
+        data: {
+          'vaccine': 'Influenza',
+          'dose': 1,
+        },
+        attachmentUrl: null,
+        isImportant: false,
+        status: 'completed',
+        familyMemberId: '4',
       ),
     ];
   }
