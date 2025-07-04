@@ -19,6 +19,7 @@ import '../test_checkups/test_checkups_screen.dart';
 import '../policy/policy_documents_screen.dart';
 import 'widgets/pre_approval_summary_card.dart';
 import 'widgets/policy_documents_card.dart';
+import 'widgets/vitals_graph_section.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -76,6 +77,10 @@ class DashboardScreen extends StatelessWidget {
 
                 // Health Tracker - Vital Signs and Metrics
                 _buildHealthTracker(context, model),
+
+                // Vitals Trends Graph
+                const SizedBox(height: 16),
+                const VitalsGraphSection(),
 
                 // Quick Actions - Easy Access to Common Tasks
                 _buildQuickActions(context, model),
@@ -344,10 +349,11 @@ class DashboardScreen extends StatelessWidget {
                         const SizedBox(width: 8),
                         Text(
                           'Latest Vital Signs',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textBlack,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textBlack,
+                                  ),
                         ),
                         const Spacer(),
                         Text(
@@ -373,8 +379,10 @@ class DashboardScreen extends StatelessWidget {
                                 '${model.latestVitals!.bloodPressureSystolic}/${model.latestVitals!.bloodPressureDiastolic}',
                                 'mmHg',
                                 model.getVitalSignStatus('bloodPressure', {
-                                  'systolic': model.latestVitals!.bloodPressureSystolic,
-                                  'diastolic': model.latestVitals!.bloodPressureDiastolic,
+                                  'systolic':
+                                      model.latestVitals!.bloodPressureSystolic,
+                                  'diastolic': model
+                                      .latestVitals!.bloodPressureDiastolic,
                                 }),
                                 Icons.favorite,
                                 Colors.red,
@@ -387,7 +395,8 @@ class DashboardScreen extends StatelessWidget {
                                 'Heart Rate',
                                 '${model.latestVitals!.heartRate}',
                                 'bpm',
-                                model.getVitalSignStatus('heartRate', model.latestVitals!.heartRate),
+                                model.getVitalSignStatus(
+                                    'heartRate', model.latestVitals!.heartRate),
                                 Icons.favorite,
                                 Colors.pink,
                               ),
@@ -403,7 +412,8 @@ class DashboardScreen extends StatelessWidget {
                                 'Temperature',
                                 '${model.latestVitals!.temperature}',
                                 '°F',
-                                model.getVitalSignStatus('temperature', model.latestVitals!.temperature),
+                                model.getVitalSignStatus('temperature',
+                                    model.latestVitals!.temperature),
                                 Icons.thermostat,
                                 Colors.orange,
                               ),
@@ -415,7 +425,8 @@ class DashboardScreen extends StatelessWidget {
                                 'O₂ Saturation',
                                 '${model.latestVitals!.oxygenSaturation}',
                                 '%',
-                                model.getVitalSignStatus('oxygenSaturation', model.latestVitals!.oxygenSaturation),
+                                model.getVitalSignStatus('oxygenSaturation',
+                                    model.latestVitals!.oxygenSaturation),
                                 Icons.air,
                                 Colors.blue,
                               ),
@@ -551,7 +562,7 @@ class DashboardScreen extends StatelessWidget {
     Color color,
   ) {
     final statusColor = _getStatusColor(status);
-    
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -626,9 +637,10 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHealthMetricCard(BuildContext context, Map<String, dynamic> metric) {
+  Widget _buildHealthMetricCard(
+      BuildContext context, Map<String, dynamic> metric) {
     final statusColor = _getStatusColor(metric['status']);
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
@@ -1377,7 +1389,8 @@ class DashboardScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: _getTestCheckupStatusColor(testCheckup.status).withOpacity(0.1),
+                  color: _getTestCheckupStatusColor(testCheckup.status)
+                      .withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
