@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../models/appointment.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/services/pre_approval_service.dart';
 import '../../appointments/appointment_detail_screen.dart';
 import '../../schedule/schedule_screen.dart';
 
@@ -20,25 +19,13 @@ class AppointmentCard extends StatelessWidget {
     final statusColor = isVideo ? AppColors.accent : AppColors.secondary;
     final statusIcon = isVideo ? Icons.videocam_rounded : Icons.person_rounded;
 
-    // Pre-approval status colors
-    final preApprovalColor =
-        _getPreApprovalColor(appointment.preApprovalStatus);
-    final preApprovalText = _getPreApprovalText(appointment.preApprovalStatus);
-
     return GestureDetector(
       onTap: () {
-        // Check if pre-approval is required and not approved
-        if (appointment.preApprovalStatus == PreApprovalStatus.pending ||
-            appointment.preApprovalStatus == PreApprovalStatus.rejected) {
-          _showPreApprovalDialog(context);
-          return;
-        }
-
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => AppointmentDetailScreen(
               appointment: appointment,
-              appointmentId: appointment.id,
+              appointmentId: '1680', // You can generate or pass real ID
               patientName: 'Abdullah Alshahrani',
               gender: 'Male',
               age: 28,
@@ -49,6 +36,7 @@ class AppointmentCard extends StatelessWidget {
         );
       },
       child: Container(
+        margin: const EdgeInsets.only(bottom: 20),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
@@ -77,7 +65,6 @@ class AppointmentCard extends StatelessWidget {
             Container(
               height: 4,
               decoration: BoxDecoration(
-<<<<<<< HEAD
                 gradient: LinearGradient(
                   colors: [
                     AppColors.primary,
@@ -86,16 +73,13 @@ class AppointmentCard extends StatelessWidget {
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                 ),
-=======
-                color: preApprovalColor,
->>>>>>> a1ca5a940a0bcaa9f6de658287bf3ec13bc08aa8
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(20),
                   topRight: Radius.circular(20),
                 ),
               ),
             ),
-            
+
             // Main content
             Padding(
               padding: const EdgeInsets.all(20.0),
@@ -139,9 +123,9 @@ class AppointmentCard extends StatelessWidget {
                               : null,
                         ),
                       ),
-                      
+
                       const SizedBox(width: 16),
-                      
+
                       // Doctor details
                       Expanded(
                         child: Column(
@@ -209,9 +193,9 @@ class AppointmentCard extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            
+
                             const SizedBox(height: 8),
-                            
+
                             // Specialty badge
                             Container(
                               padding: const EdgeInsets.symmetric(
@@ -235,9 +219,9 @@ class AppointmentCard extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            
+
                             const SizedBox(height: 12),
-                            
+
                             // Date and time with enhanced styling
                             Container(
                               padding: const EdgeInsets.symmetric(
@@ -277,9 +261,9 @@ class AppointmentCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 20),
-                  
+
                   // Enhanced divider
                   Container(
                     height: 1,
@@ -293,9 +277,9 @@ class AppointmentCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Action buttons with enhanced styling
                   Row(
                     children: [
@@ -341,9 +325,9 @@ class AppointmentCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                      
+
                       const SizedBox(width: 12),
-                      
+
                       // Reschedule button
                       Expanded(
                         child: Container(
@@ -365,29 +349,6 @@ class AppointmentCard extends StatelessWidget {
                                 offset: const Offset(0, 4),
                                 spreadRadius: 0,
                               ),
-                              if (appointment.preApprovalStatus !=
-                                  PreApprovalStatus.notRequired) ...[
-                                const SizedBox(height: 4),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: preApprovalColor.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(
-                                      color: preApprovalColor.withOpacity(0.3),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    preApprovalText,
-                                    style: TextStyle(
-                                      color: preApprovalColor,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              ],
                             ],
                           ),
                           child: Material(
@@ -428,95 +389,6 @@ class AppointmentCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Color _getPreApprovalColor(PreApprovalStatus status) {
-    switch (status) {
-      case PreApprovalStatus.approved:
-        return Colors.green;
-      case PreApprovalStatus.pending:
-        return Colors.orange;
-      case PreApprovalStatus.rejected:
-        return Colors.red;
-      case PreApprovalStatus.notRequired:
-        return AppColors.accent;
-    }
-  }
-
-  String _getPreApprovalText(PreApprovalStatus status) {
-    switch (status) {
-      case PreApprovalStatus.approved:
-        return 'Pre-approved';
-      case PreApprovalStatus.pending:
-        return 'Pre-approval Pending';
-      case PreApprovalStatus.rejected:
-        return 'Pre-approval Required';
-      case PreApprovalStatus.notRequired:
-        return '';
-    }
-  }
-
-  void _showPreApprovalDialog(BuildContext context) {
-    final preApprovalService = PreApprovalService();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          appointment.preApprovalStatus == PreApprovalStatus.rejected
-              ? 'Pre-approval Required'
-              : 'Pre-approval Pending',
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(preApprovalService
-                .getPreApprovalRequirements(appointment.specialty)),
-            const SizedBox(height: 16),
-            if (appointment.preApprovalStatus == PreApprovalStatus.rejected)
-              ElevatedButton(
-                onPressed: () async {
-                  Navigator.pop(context);
-                  final success =
-                      await preApprovalService.submitPreApprovalRequest(
-                    appointmentId: appointment.id,
-                    patientName: 'Abdullah Alshahrani',
-                    specialty: appointment.specialty,
-                    insuranceNumber: '123456789',
-                  );
-                  if (success) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content:
-                            Text('Pre-approval request submitted successfully'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Failed to submit pre-approval request'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Submit Pre-approval Request'),
-              ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-          ),
-        ],
       ),
     );
   }
