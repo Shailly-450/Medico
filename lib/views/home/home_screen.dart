@@ -180,33 +180,60 @@ class HomeScreen extends StatelessWidget {
                 ),
 
                 // Categories
-                SizedBox(
-                  height: 100,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0, vertical: 8.0),
-                    scrollDirection: Axis.horizontal,
-                    itemCount: model.categories.length,
-                    itemBuilder: (context, index) {
-                      final category = model.categories[index];
-                      final isActive =
-                          model.selectedCategory == category['name'];
-                      return GestureDetector(
-                        onTap: () {
-                          model.setCategory(category['name']);
-                          Navigator.pushNamed(
-                            context,
-                            '/category',
-                            arguments: category['name'],
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: List.generate(2, (i) {
+                          final category = model.categories[i];
+                          final isActive = model.selectedCategory == category['name'];
+                          return Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.only(right: i == 0 ? 8 : 0),
+                              child: _CategoryGridCard(
+                                icon: category['icon'],
+                                label: category['name'],
+                                isActive: isActive,
+                                onTap: () {
+                                  model.setCategory(category['name']);
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/category',
+                                    arguments: category['name'],
+                                  );
+                                },
+                              ),
+                            ),
                           );
-                        },
-                        child: CategoryCard(
-                          icon: category['icon'],
-                          title: category['name'],
-                          isActive: isActive,
-                        ),
-                      );
-                    },
+                        }),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: List.generate(2, (i) {
+                          final category = model.categories[i + 2];
+                          final isActive = model.selectedCategory == category['name'];
+                          return Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.only(right: i == 0 ? 8 : 0),
+                              child: _CategoryGridCard(
+                                icon: category['icon'],
+                                label: category['name'],
+                                isActive: isActive,
+                                onTap: () {
+                                  model.setCategory(category['name']);
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/category',
+                                    arguments: category['name'],
+                                  );
+                                },
+                              ),
+                            ),
+                          );
+                        }),
+                      ),
+                    ],
                   ),
                 ),
 
@@ -226,7 +253,7 @@ class HomeScreen extends StatelessWidget {
                       TextButton(
                         style: TextButton.styleFrom(
                           foregroundColor: AppColors.primary,
-                          padding: EdgeInsets.zero,
+                          padding: EdgeInsets.all(4),
                           minimumSize: const Size(0, 0),
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
@@ -251,22 +278,24 @@ class HomeScreen extends StatelessWidget {
                 // Appointment Cards
                 if (model.upcomingAppointments.isNotEmpty)
                   SizedBox(
-                    height: 210,
+                    height: 280,
                     child: ListView.builder(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       scrollDirection: Axis.horizontal,
                       itemCount: model.upcomingAppointments.length,
                       itemBuilder: (context, index) {
-                        return SizedBox(
-                          width: 350,
-                          child: AppointmentCard(
-                            appointment: model.upcomingAppointments[index],
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0), // <-- Add this line
+                          child: SizedBox(
+                            width: 350,
+                            child: AppointmentCard(
+                              appointment: model.upcomingAppointments[index],
+                            ),
                           ),
                         );
                       },
                     ),
                   ),
-
                 // Offers & Packages Section
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
@@ -673,6 +702,70 @@ class HomeScreen extends StatelessWidget {
                       textStyle: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.bold),
                     ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CategoryGridCard extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isActive;
+  final VoidCallback onTap;
+  const _CategoryGridCard({
+    required this.icon,
+    required this.label,
+    required this.isActive,
+    required this.onTap,
+  });
+  @override
+  Widget build(BuildContext context) {
+    final selectedBg = AppColors.secondary.withOpacity(0.5); // solid but light
+    final selectedFg = AppColors.secondary;
+    return Material(
+      color: isActive ? selectedBg : Colors.white,
+      elevation: isActive ? 3 : 1,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.primary, width: 1),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  backgroundColor: AppColors.primary.withOpacity(0.13),
+                  child: Icon(
+                    icon,
+                    color: AppColors.primary,
+                    size: 22,
+                  ),
+                  radius: 16,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    label,
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textBlack,
+                      fontSize: 16,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
