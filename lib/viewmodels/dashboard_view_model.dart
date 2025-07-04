@@ -3,6 +3,7 @@ import '../core/viewmodels/base_view_model.dart';
 import '../models/appointment.dart';
 import '../models/doctor.dart';
 import '../models/test_checkup.dart';
+import '../models/health_record.dart';
 
 class DashboardViewModel extends BaseViewModel {
   String userName = 'John Doe';
@@ -14,6 +15,16 @@ class DashboardViewModel extends BaseViewModel {
   int visitsThisYear = 12;
   double healthScore = 85.0;
   bool hasInsurance = true;
+
+  // Health Tracker Data
+  VitalSigns? _latestVitals;
+  List<VitalSigns> _vitalSignsHistory = [];
+  List<Map<String, dynamic>> _healthMetrics = [];
+
+  // Getters for health tracking
+  VitalSigns? get latestVitals => _latestVitals;
+  List<VitalSigns> get vitalSignsHistory => _vitalSignsHistory;
+  List<Map<String, dynamic>> get healthMetrics => _healthMetrics;
 
   // Recent Medical History
   List<Map<String, dynamic>> recentVisits = [
@@ -243,14 +254,14 @@ class DashboardViewModel extends BaseViewModel {
       'color': Colors.blue,
     },
     {
-      'title': 'Calendar View',
-      'icon': Icons.calendar_month,
-      'color': Colors.indigo,
+      'title': 'Health Tracker',
+      'icon': Icons.health_and_safety,
+      'color': Colors.green,
     },
     {
       'title': 'Medicine Reminders',
       'icon': Icons.medication,
-      'color': Colors.green,
+      'color': Colors.orange,
     },
     {
       'title': 'Test Checkups',
@@ -260,9 +271,102 @@ class DashboardViewModel extends BaseViewModel {
     {
       'title': 'Health Records',
       'icon': Icons.folder,
-      'color': Colors.orange,
+      'color': Colors.indigo,
+    },
+    {
+      'title': 'Calendar View',
+      'icon': Icons.calendar_month,
+      'color': Colors.teal,
     },
   ];
+
+  @override
+  void init() {
+    super.init();
+    _loadHealthTrackingData();
+  }
+
+  void _loadHealthTrackingData() {
+    // Mock vital signs data
+    _vitalSignsHistory = [
+      VitalSigns(
+        bloodPressureSystolic: 120,
+        bloodPressureDiastolic: 80,
+        heartRate: 72,
+        temperature: 98.6,
+        oxygenSaturation: 98,
+        weight: 70.0,
+        height: 175.0,
+        date: DateTime.now().subtract(Duration(days: 2)),
+      ),
+      VitalSigns(
+        bloodPressureSystolic: 118,
+        bloodPressureDiastolic: 78,
+        heartRate: 70,
+        temperature: 98.4,
+        oxygenSaturation: 99,
+        weight: 69.5,
+        height: 175.0,
+        date: DateTime.now().subtract(Duration(days: 7)),
+      ),
+      VitalSigns(
+        bloodPressureSystolic: 125,
+        bloodPressureDiastolic: 82,
+        heartRate: 75,
+        temperature: 98.8,
+        oxygenSaturation: 97,
+        weight: 70.2,
+        height: 175.0,
+        date: DateTime.now().subtract(Duration(days: 14)),
+      ),
+    ];
+
+    _latestVitals = _vitalSignsHistory.isNotEmpty ? _vitalSignsHistory.first : null;
+
+    // Mock health metrics
+    _healthMetrics = [
+      {
+        'name': 'Steps Today',
+        'value': '8,432',
+        'target': '10,000',
+        'unit': 'steps',
+        'icon': Icons.directions_walk,
+        'color': Colors.blue,
+        'progress': 0.84,
+        'status': 'good',
+      },
+      {
+        'name': 'Sleep Last Night',
+        'value': '7.5',
+        'target': '8.0',
+        'unit': 'hours',
+        'icon': Icons.bedtime,
+        'color': Colors.indigo,
+        'progress': 0.94,
+        'status': 'good',
+      },
+      {
+        'name': 'Water Intake',
+        'value': '1.8',
+        'target': '2.5',
+        'unit': 'liters',
+        'icon': Icons.water_drop,
+        'color': Colors.cyan,
+        'progress': 0.72,
+        'status': 'warning',
+      },
+      {
+        'name': 'Calories Burned',
+        'value': '420',
+        'target': '500',
+        'unit': 'calories',
+        'icon': Icons.local_fire_department,
+        'color': Colors.orange,
+        'progress': 0.84,
+        'status': 'good',
+      },
+    ];
+  }
 
   // Methods
   void markNotificationAsRead(int index) {
@@ -332,6 +436,68 @@ class DashboardViewModel extends BaseViewModel {
         return testCheckups.where((test) => test.isOverdue).length;
       default:
         return testCheckups.length;
+    }
+  }
+
+  // Health Tracking Methods
+  String getVitalSignStatus(String vitalType, dynamic value) {
+    switch (vitalType) {
+      case 'bloodPressure':
+        final systolic = value['systolic'] as double;
+        final diastolic = value['diastolic'] as double;
+        if (systolic < 120 && diastolic < 80) return 'normal';
+        if (systolic >= 120 && systolic < 130 && diastolic < 80) return 'elevated';
+        if (systolic >= 130 || diastolic >= 80) return 'high';
+        return 'normal';
+      case 'heartRate':
+        final hr = value as int;
+        if (hr >= 60 && hr <= 100) return 'normal';
+        if (hr < 60) return 'low';
+        return 'high';
+      case 'temperature':
+        final temp = value as double;
+        if (temp >= 97.0 && temp <= 99.0) return 'normal';
+        if (temp > 99.0) return 'high';
+        return 'low';
+      case 'oxygenSaturation':
+        final o2 = value as int;
+        if (o2 >= 95) return 'normal';
+        if (o2 >= 90) return 'low';
+        return 'critical';
+      default:
+        return 'normal';
+    }
+  }
+
+  Color getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'normal':
+      case 'good':
+        return Colors.green;
+      case 'elevated':
+      case 'low':
+      case 'high':
+      case 'warning':
+        return Colors.orange;
+      case 'critical':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  String formatDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date).inDays;
+    
+    if (difference == 0) {
+      return 'Today';
+    } else if (difference == 1) {
+      return 'Yesterday';
+    } else if (difference < 7) {
+      return '$difference days ago';
+    } else {
+      return '${date.day}/${date.month}/${date.year}';
     }
   }
 
