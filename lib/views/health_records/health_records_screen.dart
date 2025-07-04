@@ -201,7 +201,7 @@ class HealthRecordsScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.primary,
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.1),
@@ -216,6 +216,20 @@ class HealthRecordsScreen extends StatelessWidget {
           // Title and Family Member Selector
           Row(
             children: [
+              // Back Button
+              IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(
+                  Icons.arrow_back,
+                  color: AppColors.background,
+                  size: 24,
+                ),
+                style: IconButton.styleFrom(
+                  backgroundColor: AppColors.background.withOpacity(0.2),
+                  shape: const CircleBorder(),
+                ),
+              ),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -224,7 +238,7 @@ class HealthRecordsScreen extends StatelessWidget {
                       'Health Records',
                       style: textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                        color: AppColors.background,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -233,7 +247,7 @@ class HealthRecordsScreen extends StatelessWidget {
                         ? '${model.getRecordsCountForFamilyMember(currentProfile.id)} records for ${currentProfile.name}'
                         : 'Select a family member',
                       style: textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: AppColors.background,
                       ),
                     ),
                   ],
@@ -249,7 +263,7 @@ class HealthRecordsScreen extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
+                      color: AppColors.background,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: AppColors.primary.withOpacity(0.3)),
                     ),
