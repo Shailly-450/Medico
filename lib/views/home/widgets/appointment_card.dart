@@ -110,7 +110,8 @@ class AppointmentCard extends StatelessWidget {
                         child: CircleAvatar(
                           radius: 32,
                           backgroundColor: AppColors.secondary.withOpacity(0.1),
-                          backgroundImage: NetworkImage(appointment.doctorImage),
+                          backgroundImage:
+                              NetworkImage(appointment.doctorImage),
                           onBackgroundImageError: (exception, stackTrace) {
                             // Handle image loading error
                           },

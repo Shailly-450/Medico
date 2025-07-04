@@ -16,7 +16,9 @@ import '../schedule/schedule_screen.dart';
 import '../health_records/health_records_screen.dart';
 import '../medicine_reminders/medicine_reminders_screen.dart';
 import '../test_checkups/test_checkups_screen.dart';
+import '../policy/policy_documents_screen.dart';
 import 'widgets/pre_approval_summary_card.dart';
+import 'widgets/policy_documents_card.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -37,7 +39,9 @@ class DashboardScreen extends StatelessWidget {
           ),
           actions: [
             IconButton(
-              icon: Icon(Icons.medical_information, ),
+              icon: Icon(
+                Icons.medical_information,
+              ),
               tooltip: 'Health Records',
               onPressed: () {
                 Navigator.of(context).push(
@@ -47,7 +51,9 @@ class DashboardScreen extends StatelessWidget {
               },
             ),
             IconButton(
-              icon: Icon(Icons.compare_arrows,),
+              icon: Icon(
+                Icons.compare_arrows,
+              ),
               tooltip: 'Compare Services',
               onPressed: () {
                 Navigator.of(context).push(
@@ -78,8 +84,9 @@ class DashboardScreen extends StatelessWidget {
                 const SizedBox(height: 16),
                 const PreApprovalSummaryCard(),
 
-                // Today's Medicine Reminders - Time-sensitive
-                _buildMedicineReminders(context, model),
+                // Policy Documents - Important for Insurance
+                const SizedBox(height: 16),
+                const PolicyDocumentsCard(),
 
                 // Recent Medical History
                 _buildRecentHistory(context, model),
@@ -94,6 +101,8 @@ class DashboardScreen extends StatelessWidget {
                 _buildRecommendations(context, model),
 
                 const SizedBox(height: 32),
+                // Add bottom padding to prevent overflow with bottom navigation
+                const SizedBox(height: 80),
               ],
             ),
           ),
@@ -104,27 +113,39 @@ class DashboardScreen extends StatelessWidget {
 
   Widget _buildWelcomeHeader(BuildContext context, DashboardViewModel model) {
     return Container(
+      margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        gradient: LinearGradient(
+          colors: [
+            AppColors.primary,
+            AppColors.accent,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: AppColors.primary.withOpacity(0.3),
             spreadRadius: 1,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 25,
-            backgroundColor: AppColors.primary.withOpacity(0.1),
-            child: Icon(
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
               Icons.person,
-              color: AppColors.primary,
-              size: 30,
+              color: Colors.white,
+              size: 32,
             ),
           ),
           const SizedBox(width: 16),
@@ -134,61 +155,26 @@ class DashboardScreen extends StatelessWidget {
               children: [
                 Text(
                   'Welcome back!',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  model.userName.isNotEmpty ? model.userName : 'User',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textBlack,
-                  ),
+                  'Abdullah Alshahrani',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Stack(
-              children: [
-                Icon(
-                  Icons.notifications_outlined,
-                  color: AppColors.primary,
-                  size: 24,
+                const SizedBox(height: 4),
+                Text(
+                  'How can we help you today?',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.white.withOpacity(0.9),
+                      ),
                 ),
-                if (model.getUnreadNotificationsCount() > 0)
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      constraints: const BoxConstraints(
-                        minWidth: 16,
-                        minHeight: 16,
-                      ),
-                      child: Text(
-                        '${model.getUnreadNotificationsCount()}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
               ],
             ),
           ),
@@ -838,7 +824,7 @@ class DashboardScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          
+
           // Show actual reminders if available, otherwise show setup card
           if (model.activeMedications.isNotEmpty) ...[
             Container(
@@ -1059,7 +1045,6 @@ class DashboardScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-
           Container(
             decoration: BoxDecoration(
               color: Colors.white,
@@ -1084,10 +1069,11 @@ class DashboardScreen extends StatelessWidget {
                       children: [
                         Text(
                           'Current Medications',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textBlack,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textBlack,
+                                  ),
                         ),
                         const SizedBox(height: 8),
                         ...model.activeMedications.map((medication) {
@@ -1114,10 +1100,11 @@ class DashboardScreen extends StatelessWidget {
                       children: [
                         Text(
                           'Ongoing Treatments',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textBlack,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textBlack,
+                                  ),
                         ),
                         const SizedBox(height: 8),
                         ...model.ongoingTreatments.map((treatment) {
@@ -1134,7 +1121,8 @@ class DashboardScreen extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         treatment['type'],
@@ -1147,8 +1135,10 @@ class DashboardScreen extends StatelessWidget {
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 8, vertical: 4),
                                         decoration: BoxDecoration(
-                                          color: AppColors.primary.withOpacity(0.1),
-                                          borderRadius: BorderRadius.circular(12),
+                                          color: AppColors.primary
+                                              .withOpacity(0.1),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
                                         ),
                                         child: Text(
                                           treatment['sessions'],
@@ -1165,8 +1155,8 @@ class DashboardScreen extends StatelessWidget {
                                   LinearProgressIndicator(
                                     value: treatment['progress'],
                                     backgroundColor: Colors.grey[300],
-                                    valueColor:
-                                        AlwaysStoppedAnimation<Color>(AppColors.primary),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        AppColors.primary),
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
@@ -1546,4 +1536,3 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 }
-
