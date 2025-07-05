@@ -264,6 +264,11 @@ class DashboardViewModel extends BaseViewModel {
       'color': Colors.orange,
     },
     {
+      'title': 'E-Prescriptions',
+      'icon': Icons.receipt_long,
+      'color': Colors.red,
+    },
+    {
       'title': 'Test Checkups',
       'icon': Icons.science,
       'color': Colors.purple,
@@ -272,11 +277,6 @@ class DashboardViewModel extends BaseViewModel {
       'title': 'Health Records',
       'icon': Icons.folder,
       'color': Colors.indigo,
-    },
-    {
-      'title': 'Calendar View',
-      'icon': Icons.calendar_month,
-      'color': Colors.teal,
     },
   ];
 
@@ -321,7 +321,8 @@ class DashboardViewModel extends BaseViewModel {
       ),
     ];
 
-    _latestVitals = _vitalSignsHistory.isNotEmpty ? _vitalSignsHistory.first : null;
+    _latestVitals =
+        _vitalSignsHistory.isNotEmpty ? _vitalSignsHistory.first : null;
 
     // Mock health metrics
     _healthMetrics = [
@@ -446,7 +447,8 @@ class DashboardViewModel extends BaseViewModel {
         final systolic = value['systolic'] as double;
         final diastolic = value['diastolic'] as double;
         if (systolic < 120 && diastolic < 80) return 'normal';
-        if (systolic >= 120 && systolic < 130 && diastolic < 80) return 'elevated';
+        if (systolic >= 120 && systolic < 130 && diastolic < 80)
+          return 'elevated';
         if (systolic >= 130 || diastolic >= 80) return 'high';
         return 'normal';
       case 'heartRate':
@@ -489,7 +491,7 @@ class DashboardViewModel extends BaseViewModel {
   String formatDate(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date).inDays;
-    
+
     if (difference == 0) {
       return 'Today';
     } else if (difference == 1) {

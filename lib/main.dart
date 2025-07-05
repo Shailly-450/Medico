@@ -18,6 +18,8 @@ import 'viewmodels/home_view_model.dart';
 import 'viewmodels/order_view_model.dart';
 import 'views/profile/profile_screen.dart';
 import 'viewmodels/family_members_view_model.dart';
+import 'views/prescriptions/prescriptions_screen.dart';
+import 'views/prescriptions/test_prescriptions_screen.dart';
 
 void main() {
   // Initialize mock data for OrderService
@@ -35,7 +37,8 @@ class MyApp extends StatelessWidget {
         Provider<NavigationService>(create: (_) => NavigationService()),
         ChangeNotifierProvider<HomeViewModel>(create: (_) => HomeViewModel()),
         ChangeNotifierProvider<OrderViewModel>(create: (_) => OrderViewModel()),
-        ChangeNotifierProvider<FamilyMembersViewModel>(create: (_) => FamilyMembersViewModel()),
+        ChangeNotifierProvider<FamilyMembersViewModel>(
+            create: (_) => FamilyMembersViewModel()),
       ],
       child: Builder(
         builder: (context) => MaterialApp(
@@ -57,6 +60,8 @@ class MyApp extends StatelessWidget {
             '/appointment-calendar': (context) =>
                 const AppointmentCalendarScreen(),
             '/orders': (context) => const OrdersScreen(),
+            '/prescriptions': (context) => const PrescriptionsScreen(),
+            '/test-prescriptions': (context) => const TestPrescriptionsScreen(),
           },
           onGenerateRoute: (settings) {
             print('Navigating to: ${settings.name}');
