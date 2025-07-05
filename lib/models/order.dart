@@ -45,7 +45,7 @@ class Order {
     this.tax = 0.0,
     this.discount = 0.0,
     required this.total,
-    this.currency = 'USD',
+    this.currency = 'INR',
     this.status = OrderStatus.pending,
     this.paymentStatus = PaymentStatus.pending,
     required this.orderDate,
@@ -69,7 +69,7 @@ class Order {
       tax: (json['tax'] ?? 0.0).toDouble(),
       discount: (json['discount'] ?? 0.0).toDouble(),
       total: (json['total'] ?? 0.0).toDouble(),
-      currency: json['currency'] ?? 'USD',
+      currency: json['currency'] ?? 'INR',
       status: OrderStatus.values.firstWhere(
         (e) => e.toString() == 'OrderStatus.${json['status']}',
         orElse: () => OrderStatus.pending,

@@ -87,7 +87,7 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildAppBar(BuildContext context, HomeViewModel model) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -436,7 +436,7 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildCategoriesSection(BuildContext context, HomeViewModel model) {
     return Container(
-      margin: const EdgeInsets.all(20),
+      margin: const EdgeInsets.all(10),
                   child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

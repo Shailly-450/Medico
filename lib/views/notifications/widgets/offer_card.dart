@@ -114,7 +114,7 @@ class OfferCard extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        '\$${offer.discountedPrice.toStringAsFixed(2)}',
+                        '₹${offer.discountedPrice.toStringAsFixed(2)}',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: AppColors.primary,
@@ -122,7 +122,7 @@ class OfferCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        '\$${offer.originalPrice.toStringAsFixed(2)}',
+                        '₹${offer.originalPrice.toStringAsFixed(2)}',
                         style: const TextStyle(
                           color: AppColors.textSecondary,
                           fontSize: 16,
@@ -138,7 +138,7 @@ class OfferCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          'Save \$${(offer.originalPrice - offer.discountedPrice).toStringAsFixed(2)}',
+                          'Save ₹${(offer.originalPrice - offer.discountedPrice).toStringAsFixed(2)}',
                           style: const TextStyle(
                             color: Colors.green,
                             fontSize: 12,

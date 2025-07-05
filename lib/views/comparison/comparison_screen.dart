@@ -464,21 +464,21 @@ class _ComparisonScreenBodyState extends State<_ComparisonScreenBody> {
               Expanded(
                 child: _buildSummaryItem(
                   'Lowest',
-                  '\$${minPrice.toStringAsFixed(0)}',
+                  '₹${minPrice.toStringAsFixed(0)}',
                   Colors.green,
                 ),
               ),
               Expanded(
                 child: _buildSummaryItem(
                   'Average',
-                  '\$${avgPrice.toStringAsFixed(0)}',
+                  '₹${avgPrice.toStringAsFixed(0)}',
                   AppColors.primary,
                 ),
               ),
               Expanded(
                 child: _buildSummaryItem(
                   'Highest',
-                  '\$${maxPrice.toStringAsFixed(0)}',
+                  '₹${maxPrice.toStringAsFixed(0)}',
                   Colors.red,
                 ),
               ),

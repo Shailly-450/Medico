@@ -7,6 +7,7 @@ import 'widgets/medicine_reminder_card.dart';
 import 'widgets/reminder_stats_card.dart';
 import 'add_medicine_reminder_screen.dart';
 import 'medicine_reminder_detail_screen.dart';
+import '../rx_orders/rx_orders_screen.dart';
 
 class MedicineRemindersScreen extends StatefulWidget {
   const MedicineRemindersScreen({Key? key}) : super(key: key);
@@ -112,10 +113,23 @@ class _MedicineRemindersScreenState extends State<MedicineRemindersScreen>
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => _navigateToAddReminder(context, model),
-          backgroundColor: AppColors.primary,
-          child: const Icon(Icons.add, color: Colors.white),
+        floatingActionButton: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            FloatingActionButton(
+              onPressed: () => _navigateToRxOrders(context),
+              backgroundColor: Colors.orange,
+              heroTag: 'rx_orders',
+              child: const Icon(Icons.local_pharmacy, color: Colors.white),
+            ),
+            const SizedBox(height: 16),
+            FloatingActionButton(
+              onPressed: () => _navigateToAddReminder(context, model),
+              backgroundColor: AppColors.primary,
+              heroTag: 'add_reminder',
+              child: const Icon(Icons.add, color: Colors.white),
+            ),
+          ],
         ),
       ),
     );
@@ -140,6 +154,7 @@ class _MedicineRemindersScreenState extends State<MedicineRemindersScreen>
           onTap: () => _navigateToDetail(context, reminder),
           onTakeDose: () => model.markDoseTaken(reminder.id),
           onSkipDose: () => model.markDoseSkipped(reminder.id),
+          onRefill: reminder.medicine?.needsRefill == true ? () => _navigateToRxOrders(context) : null,
           showDoseActions: true,
         );
       },
@@ -190,6 +205,7 @@ class _MedicineRemindersScreenState extends State<MedicineRemindersScreen>
           onTap: () => _navigateToDetail(context, reminder),
           onTakeDose: () => model.markDoseTaken(reminder.id),
           onSkipDose: () => model.markDoseSkipped(reminder.id),
+          onRefill: reminder.medicine?.needsRefill == true ? () => _navigateToRxOrders(context) : null,
           showDoseActions: true,
           isOverdue: true,
         );
@@ -262,6 +278,15 @@ class _MedicineRemindersScreenState extends State<MedicineRemindersScreen>
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _navigateToRxOrders(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const RxOrdersScreen(),
       ),
     );
   }
