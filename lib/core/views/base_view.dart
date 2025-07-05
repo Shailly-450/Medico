@@ -24,6 +24,8 @@ class _BaseViewState<T extends BaseViewModel> extends State<BaseView<T>> {
   @override
   void initState() {
     model = widget.viewModelBuilder();
+    // Call the init method to load data
+    model.init();
     if (widget.onModelReady != null) {
       widget.onModelReady!(model);
     }
@@ -39,4 +41,4 @@ class _BaseViewState<T extends BaseViewModel> extends State<BaseView<T>> {
       ),
     );
   }
-} 
+}
