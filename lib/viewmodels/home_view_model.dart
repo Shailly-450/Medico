@@ -19,7 +19,6 @@ class HomeViewModel extends BaseViewModel {
     {'name': 'Cardiology', 'icon': Icons.favorite},
     {'name': 'Dental', 'icon': Icons.face},
     {'name': 'Eye Care', 'icon': Icons.remove_red_eye},
-    {'name': 'Pediatric', 'icon': Icons.child_care},
   ];
 
   String selectedCategory = 'General';
