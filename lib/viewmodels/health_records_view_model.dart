@@ -42,6 +42,10 @@ class HealthRecordsViewModel extends BaseViewModel {
     'Conditions',
   ];
 
+  HealthRecordsViewModel() {
+    init();
+  }
+
   @override
   void init() {
     super.init();

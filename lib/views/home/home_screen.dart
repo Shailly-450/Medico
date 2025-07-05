@@ -28,73 +28,182 @@ class HomeScreen extends StatelessWidget {
     return BaseView<HomeViewModel>(
       viewModelBuilder: () => HomeViewModel(),
       builder: (context, model, child) => Scaffold(
-        backgroundColor: Colors.grey[50],
+        backgroundColor: AppColors.paleBackground,
         body: SafeArea(
-          child: SingleChildScrollView(
+          child: CustomScrollView(
+            slivers: [
+              // App Bar with Profile
+              SliverToBoxAdapter(
+                child: _buildAppBar(context, model),
+              ),
+              
+              // Search Section
+              SliverToBoxAdapter(
+                child: _buildSearchSection(context),
+              ),
+              
+              // Quick Actions
+              SliverToBoxAdapter(
+                child: _buildQuickActions(context, model),
+              ),
+              
+              // Categories Grid
+              SliverToBoxAdapter(
+                child: _buildCategoriesSection(context, model),
+              ),
+              
+              // Upcoming Appointments
+              if (model.upcomingAppointments.isNotEmpty)
+                SliverToBoxAdapter(
+                  child: _buildAppointmentsSection(context, model),
+                ),
+              
+              // Offers Section
+              if (model.offers.isNotEmpty)
+                SliverToBoxAdapter(
+                  child: _buildOffersSection(context, model),
+                ),
+              
+              // Doctors Section
+              SliverToBoxAdapter(
+                child: _buildDoctorsSection(context, model),
+              ),
+              
+              // Hospitals Section
+              SliverToBoxAdapter(
+                child: _buildHospitalsSection(context, model),
+              ),
+              
+              // Bottom padding
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 24),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAppBar(BuildContext context, HomeViewModel model) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Profile Avatar
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [AppColors.primary, AppColors.accent],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: const Icon(
+              Icons.person,
+              color: Colors.white,
+              size: 24,
+            ),
+          ),
+          
+          const SizedBox(width: 16),
+          
+          // User Info
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // User Profile Section
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 24,
-                        backgroundColor: AppColors.secondary,
-                        child:
-                            const Icon(Icons.location_on, color: Colors.white),
+                Text(
+                  'Welcome back,',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
+                const SizedBox(height: 2),
                             Text(
                               model.userName,
-                              style: Theme.of(context).textTheme.titleLarge,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textBlack,
+                  ),
+                ),
+              ],
+            ),
                             ),
+          
+          // Location & Notifications
                             Row(
                               children: [
+              // Location
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.secondary.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.location_on,
+                      size: 16,
+                      color: AppColors.primary,
+                    ),
+                    const SizedBox(width: 4),
                                 Text(
                                   model.userLocation,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium
-                                      ?.copyWith(
-                                        color: Colors.grey[600],
-                                      ),
-                                ),
-                                const Icon(Icons.keyboard_arrow_down,
-                                    color: AppColors.primary),
-                              ],
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.primary,
+                      ),
                             ),
                           ],
                         ),
                       ),
+              
+              const SizedBox(width: 12),
+              
+              // Notifications
                       Stack(
                         children: [
-                          IconButton(
-                            icon: const Icon(Icons.notifications_none,
-                                color: Colors.blueGrey),
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const NotificationScreen(),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.secondary.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.notifications_none,
+                      color: AppColors.primary,
+                      size: 20,
                                 ),
-                              );
-                            },
                           ),
                           if (model.unreadCount > 0)
                             Positioned(
-                              right: 8,
-                              top: 8,
+                      right: 0,
+                      top: 0,
                               child: Container(
                                 padding: const EdgeInsets.all(2),
                                 decoration: BoxDecoration(
-                                  color: Colors.red,
-                                  borderRadius: BorderRadius.circular(10),
+                          color: AppColors.error,
+                          borderRadius: BorderRadius.circular(8),
                                 ),
                                 constraints: const BoxConstraints(
                                   minWidth: 16,
@@ -104,7 +213,7 @@ class HomeScreen extends StatelessWidget {
                                   '${model.unreadCount}',
                                   style: const TextStyle(
                                     color: Colors.white,
-                                    fontSize: 12,
+                            fontSize: 10,
                                     fontWeight: FontWeight.bold,
                                   ),
                                   textAlign: TextAlign.center,
@@ -115,208 +224,403 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                ),
+        ],
+      ),
+    );
+  }
 
-                // Search Bar with lighter border
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+    Widget _buildSearchSection(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
                   child: GestureDetector(
                     onTap: () => Navigator.pushNamed(context, '/search'),
-                    child: AbsorbPointer(
-                      child: TextField(
-                        readOnly: true,
-                        decoration: InputDecoration(
-                          hintText: 'Search doctor or symptoms',
-                          prefixIcon:
-                              Icon(Icons.search, color: AppColors.primary),
-                          suffixIcon:
-                              Icon(Icons.tune, color: AppColors.primary),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            borderSide: BorderSide(color: AppColors.secondary),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.search,
+                color: AppColors.textSecondary,
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Search doctors, hospitals, or symptoms...',
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 16,
+                ),
                           ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            borderSide: BorderSide(color: AppColors.secondary),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            borderSide: BorderSide(color: AppColors.primary),
-                          ),
-                          filled: true,
-                          fillColor: Colors.white,
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.tune,
+                  color: AppColors.primary,
+                  size: 16,
+                ),
                         ),
-                      ),
+            ],
                     ),
                   ),
                 ),
+    );
+  }
 
-                // After the search bar Padding, insert:
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
+  Widget _buildQuickActions(BuildContext context, HomeViewModel model) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Quick Actions',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textBlack,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+                            Expanded(
+                child: _buildQuickActionCard(
+                  context,
+                  imagePath: 'assets/images/hospital.png',
+                  title: 'Find Hospitals',
+                  subtitle: 'On Map',
+                  color: AppColors.primary,
+                  onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (_) => const FindHospitalsScreen()),
+                        builder: (_) => const FindHospitalsScreen(),
+                      ),
                         );
                       },
-                      icon: const Icon(Icons.map_outlined),
-                      label: const Text('Find Hospitals on Map'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        textStyle: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                    ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildQuickActionCard(
+                  context,
+                  imagePath: 'assets/images/appointment.png',
+                  title: 'Book',
+                  subtitle: 'Appointment',
+                  color: AppColors.accent,
+                  onTap: () {
+                    Navigator.pushNamed(context, '/schedule');
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+    Widget _buildQuickActionCard(
+    BuildContext context, {
+    required String imagePath,
+    required String title,
+    required String subtitle,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 120,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppColors.primary.withOpacity(0.2),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Stack(
+            children: [
+              // Background Image
+              Positioned.fill(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Image.asset(
+                    imagePath,
+                    fit: BoxFit.contain,
                   ),
                 ),
+              ),
 
-                // Categories
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              // Content
+              Positioned(
+                bottom: 6,
+                left: 12,
+                right: 12,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Row(
-                        children: List.generate(2, (i) {
-                          final category = model.categories[i];
-                          final isActive = model.selectedCategory == category['name'];
-                          return Expanded(
-                            child: Padding(
-                              padding: EdgeInsets.only(right: i == 0 ? 8 : 0),
-                              child: _CategoryGridCard(
-                                icon: category['icon'],
-                                label: category['name'],
-                                isActive: isActive,
-                                onTap: () {
-                                  model.setCategory(category['name']);
-                                  Navigator.pushNamed(
-                                    context,
-                                    '/category',
-                                    arguments: category['name'],
-                                  );
-                                },
-                              ),
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.primary,
+                          shadows: [
+                            Shadow(
+                              offset: Offset(0, 1),
+                              blurRadius: 2,
+                              color: Colors.black.withOpacity(0.12),
                             ),
-                          );
-                        }),
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: List.generate(2, (i) {
-                          final category = model.categories[i + 2];
-                          final isActive = model.selectedCategory == category['name'];
-                          return Expanded(
-                            child: Padding(
-                              padding: EdgeInsets.only(right: i == 0 ? 8 : 0),
-                              child: _CategoryGridCard(
-                                icon: category['icon'],
-                                label: category['name'],
-                                isActive: isActive,
-                                onTap: () {
-                                  model.setCategory(category['name']);
-                                  Navigator.pushNamed(
-                                    context,
-                                    '/category',
-                                    arguments: category['name'],
-                                  );
-                                },
-                              ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textSecondary,
+                          shadows: [
+                            Shadow(
+                              offset: Offset(0, 1),
+                              blurRadius: 2,
+                              color: Colors.black.withOpacity(0.10),
                             ),
-                          );
-                        }),
+                          ],
+                        ),
                       ),
                     ],
                   ),
                 ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
-                // Upcoming Appointments with shadow
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                  child: Row(
+  Widget _buildCategoriesSection(BuildContext context, HomeViewModel model) {
+    return Container(
+      margin: const EdgeInsets.all(20),
+                  child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+          Text(
+            'Services',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textBlack,
+            ),
+                      ),
+          const SizedBox(height: 16),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 16,
+              childAspectRatio: 0.8,
+            ),
+            itemCount: model.categories.length,
+            itemBuilder: (context, index) {
+              final category = model.categories[index];
+                          final isActive = model.selectedCategory == category['name'];
+              
+              return _buildCategoryCard(
+                context,
+                                icon: category['icon'],
+                                label: category['name'],
+                                isActive: isActive,
+                                onTap: () {
+                                  model.setCategory(category['name']);
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/category',
+                                    arguments: category['name'],
+                                  );
+                                },
+                                  );
+                                },
+                              ),
+        ],
+                            ),
+                          );
+  }
+
+  Widget _buildCategoryCard(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required bool isActive,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Circular Avatar with Icon
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: isActive 
+                      ? AppColors.primary
+                      : AppColors.primary.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  icon,
+                  color: isActive ? Colors.white : AppColors.primary,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(height: 8),
+              // Category Name
+              Text(
+                label,
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: isActive ? AppColors.primary : AppColors.textBlack,
+                  fontSize: 12,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+      ),
+    );
+  }
+
+  Widget _buildAppointmentsSection(BuildContext context, HomeViewModel model) {
+    return Container(
+      margin: const EdgeInsets.all(5),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Upcoming Appointments (${model.upcomingAppointments.length})',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                'Upcoming Appointments',
+                style: TextStyle(
+                  fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: AppColors.textBlack,
                             ),
                       ),
                       TextButton(
-                        style: TextButton.styleFrom(
-                          foregroundColor: AppColors.primary,
-                          padding: EdgeInsets.all(4),
-                          minimumSize: const Size(0, 0),
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
                         onPressed: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                                builder: (context) => AllAppointmentsScreen()),
+                      builder: (context) => AllAppointmentsScreen(),
+                    ),
                           );
                         },
-                        child: const Text(
+                child: Text(
                           'See All',
                           style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            decoration: TextDecoration.underline,
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
                           ),
                         ),
-                      )
+              ),
                     ],
                   ),
-                ),
-
-                // Appointment Cards
-                if (model.upcomingAppointments.isNotEmpty)
+          const SizedBox(height: 16),
                   SizedBox(
-                    height: 280,
+            height: 240,
                     child: ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       scrollDirection: Axis.horizontal,
                       itemCount: model.upcomingAppointments.length,
                       itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0), // <-- Add this line
-                          child: SizedBox(
-                            width: 350,
+                return Container(
+                  width: 300,
+                  margin: const EdgeInsets.only(right: 16),
                             child: AppointmentCard(
                               appointment: model.upcomingAppointments[index],
-                            ),
                           ),
                         );
                       },
                     ),
                   ),
-                // Offers & Packages Section
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-                  child: Row(
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOffersSection(BuildContext context, HomeViewModel model) {
+    return Container(
+      margin: const EdgeInsets.all(5),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Offers & Packages',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                'Special Offers',
+                style: TextStyle(
+                  fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: AppColors.textBlack,
                             ),
                       ),
                       TextButton(
-                        style: TextButton.styleFrom(
-                          foregroundColor: AppColors.primary,
-                          padding: EdgeInsets.zero,
-                          minimumSize: const Size(0, 0),
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
                         onPressed: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
@@ -324,64 +628,64 @@ class HomeScreen extends StatelessWidget {
                             ),
                           );
                         },
-                        child: const Text(
+                child: Text(
                           'View All',
                           style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            decoration: TextDecoration.underline,
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
                     ],
                   ),
-                ),
-
-                // Offer Cards
-                if (model.offers.isNotEmpty)
+          const SizedBox(height: 16),
                   SizedBox(
-                    height: 340,
+            height: 220,
                     child: ListView.builder(
-                      padding: const EdgeInsets.only(left: 16.0),
                       scrollDirection: Axis.horizontal,
                       itemCount: model.offers.length,
                       itemBuilder: (context, index) {
-                        return OfferCard(
+                return Container(
+                  width: 280,
+                  margin: const EdgeInsets.only(right: 16),
+                  child: OfferCard(
                           offer: model.offers[index],
                           onTap: () {
-                            // Handle offer card tap - could navigate to offer details
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(
-                                    'Booking ${model.offers[index].title}...'),
+                          content: Text('Booking ${model.offers[index].title}...'),
                                 duration: const Duration(seconds: 2),
                               ),
                             );
                           },
+                  ),
                         );
                       },
                     ),
                   ),
+        ],
+      ),
+    );
+  }
 
-                // Find Your Doctor Section with bold text
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                  child: Row(
+  Widget _buildDoctorsSection(BuildContext context, HomeViewModel model) {
+    return Container(
+      margin: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Find Your Doctor',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                'Top Doctors',
+                style: TextStyle(
+                  fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: AppColors.textBlack,
                             ),
                       ),
                       TextButton(
-                        style: TextButton.styleFrom(
-                          foregroundColor: AppColors.primary,
-                          padding: EdgeInsets.zero,
-                          minimumSize: const Size(0, 0),
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
                         onPressed: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
@@ -389,52 +693,43 @@ class HomeScreen extends StatelessWidget {
                             ),
                           );
                         },
-                        child: const Text(
+                child: Text(
                           'See All',
                           style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            decoration: TextDecoration.underline,
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
                     ],
                   ),
-                ),
+          const SizedBox(height: 16),
 
-                // Specialties Filter with consistent style
+          // Specialties Filter
                 SizedBox(
                   height: 40,
                   child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     scrollDirection: Axis.horizontal,
                     itemCount: model.specialties.length,
                     itemBuilder: (context, index) {
                       final specialty = model.specialties[index];
                       final isSelected = model.selectedSpecialty == specialty;
-                      final isAll = specialty == 'All';
 
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
+                return Container(
+                  margin: const EdgeInsets.only(right: 8),
                         child: FilterChip(
                           label: Text(
                             specialty,
                             style: TextStyle(
-                              color:
-                                  isSelected ? Colors.white : AppColors.primary,
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : FontWeight.w500,
+                        color: isSelected ? Colors.white : AppColors.primary,
+                        fontWeight: FontWeight.w500,
                             ),
                           ),
                           selected: isSelected,
-                          backgroundColor: isSelected
-                              ? AppColors.primary
-                              : AppColors.secondary,
+                    backgroundColor: AppColors.secondary.withOpacity(0.2),
                           selectedColor: AppColors.primary,
                           checkmarkColor: Colors.white,
-                          side: BorderSide(
-                            color: Colors.transparent,
-                          ),
+                    side: BorderSide.none,
                           onSelected: (selected) {
                             if (selected) {
                               model.setSpecialty(specialty);
@@ -445,15 +740,18 @@ class HomeScreen extends StatelessWidget {
                     },
                   ),
                 ),
+          
+          const SizedBox(height: 16),
 
                 // Doctor Cards
                 ListView.builder(
-                  padding: const EdgeInsets.all(16.0),
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: model.doctors.length,
                   itemBuilder: (context, index) {
-                    return GestureDetector(
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                child: GestureDetector(
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
@@ -465,31 +763,34 @@ class HomeScreen extends StatelessWidget {
                       },
                       child: DoctorCard(
                         doctor: model.doctors[index],
+                  ),
                       ),
                     );
                   },
                 ),
+        ],
+      ),
+    );
+  }
 
-                // Find Hospitals/Clinics Section
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                  child: Row(
+    Widget _buildHospitalsSection(BuildContext context, HomeViewModel model) {
+    return Container(
+      margin: const EdgeInsets.all(5),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Find Hospitals/Clinics',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                'Hospitals & Clinics',
+                style: TextStyle(
+                  fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: AppColors.textBlack,
                             ),
                       ),
                       TextButton(
-                        style: TextButton.styleFrom(
-                          foregroundColor: AppColors.primary,
-                          padding: EdgeInsets.zero,
-                          minimumSize: const Size(0, 0),
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
                         onPressed: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
@@ -497,169 +798,71 @@ class HomeScreen extends StatelessWidget {
                             ),
                           );
                         },
-                        child: const Text(
+                child: Text(
                           'View All',
                           style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            decoration: TextDecoration.underline,
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
                     ],
                   ),
-                ),
-
-                // Hospital Type Filter
-                SizedBox(
-                  height: 40,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    scrollDirection: Axis.horizontal,
-                    itemCount: model.hospitalTypes.length,
-                    itemBuilder: (context, index) {
-                      final hospitalType = model.hospitalTypes[index];
-                      final isSelected =
-                          model.selectedHospitalType == hospitalType;
-
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: FilterChip(
-                          label: Text(
-                            hospitalType,
-                            style: TextStyle(
-                              color:
-                                  isSelected ? Colors.white : AppColors.primary,
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : FontWeight.w500,
-                            ),
-                          ),
-                          selected: isSelected,
-                          backgroundColor: isSelected
-                              ? AppColors.primary
-                              : AppColors.secondary,
-                          selectedColor: AppColors.primary,
-                          checkmarkColor: Colors.white,
-                          side: BorderSide(
-                            color: Colors.transparent,
-                          ),
-                          onSelected: (selected) {
-                            if (selected) {
-                              model.setHospitalType(hospitalType);
+          const SizedBox(height: 16),
+          
+          // Dropdown-like Filters
+          Row(
+            children: [
+              // Hospital Type Dropdown
+              Expanded(
+                child: _buildFilterDropdown(
+                  context,
+                  title: 'Type',
+                  selectedValue: model.selectedHospitalType,
+                  items: model.hospitalTypes,
+                  onChanged: (value) {
+                    if (value != null) {
+                      model.setHospitalType(value);
                             }
                           },
                         ),
-                      );
-                    },
-                  ),
-                ),
-
-                // Cost Category Filter
-                SizedBox(
-                  height: 40,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    scrollDirection: Axis.horizontal,
-                    itemCount: model.costCategories.length,
-                    itemBuilder: (context, index) {
-                      final costCategory = model.costCategories[index];
-                      final isSelected =
-                          model.selectedCostCategory == costCategory;
-
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: FilterChip(
-                          label: Text(
-                            costCategory,
-                            style: TextStyle(
-                              color:
-                                  isSelected ? Colors.white : AppColors.primary,
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : FontWeight.w500,
-                            ),
-                          ),
-                          selected: isSelected,
-                          backgroundColor: isSelected
-                              ? AppColors.primary
-                              : AppColors.secondary,
-                          selectedColor: AppColors.primary,
-                          checkmarkColor: Colors.white,
-                          side: BorderSide(
-                            color: Colors.transparent,
-                          ),
-                          onSelected: (selected) {
-                            if (selected) {
-                              model.setCostCategory(costCategory);
+              ),
+              const SizedBox(width: 10),
+              // Cost Category Dropdown
+              Expanded(
+                child: _buildFilterDropdown(
+                  context,
+                  title: 'Cost',
+                  selectedValue: model.selectedCostCategory,
+                  items: model.costCategories,
+                  onChanged: (value) {
+                    if (value != null) {
+                      model.setCostCategory(value);
                             }
                           },
                         ),
-                      );
-                    },
-                  ),
+              ),
+            ],
                 ),
 
-                // Hospital Specialties Filter
-                SizedBox(
-                  height: 40,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    scrollDirection: Axis.horizontal,
-                    itemCount: model.hospitalSpecialties.length,
-                    itemBuilder: (context, index) {
-                      final specialty = model.hospitalSpecialties[index];
-                      final isSelected =
-                          model.selectedHospitalSpecialty == specialty;
-
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: FilterChip(
-                          label: Text(
-                            specialty,
-                            style: TextStyle(
-                              color:
-                                  isSelected ? Colors.white : AppColors.primary,
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : FontWeight.w500,
-                            ),
-                          ),
-                          selected: isSelected,
-                          backgroundColor: isSelected
-                              ? AppColors.primary
-                              : AppColors.secondary,
-                          selectedColor: AppColors.primary,
-                          checkmarkColor: Colors.white,
-                          side: BorderSide(
-                            color: Colors.transparent,
-                          ),
-                          onSelected: (selected) {
-                            if (selected) {
-                              model.setHospitalSpecialty(specialty);
-                            }
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                ),
+          const SizedBox(height: 16),
 
                 // Hospital Cards
                 ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: model.filteredHospitals.length,
                   itemBuilder: (context, index) {
                     final hospital = model.filteredHospitals[index];
-                    return HospitalCard(
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                child: HospitalCard(
                       hospital: hospital,
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                HospitalDetailScreen(hospital: hospital),
+                        builder: (context) => HospitalDetailScreen(hospital: hospital),
                           ),
                         );
                       },
@@ -672,107 +875,74 @@ class HomeScreen extends StatelessWidget {
                               hospitals: model.filteredHospitals,
                             ),
                           ),
-                        );
-                      },
                     );
                   },
                 ),
-
-                const SizedBox(height: 20),
-
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const FindHospitalsScreen()),
-                      );
-                    },
-                    icon: const Icon(Icons.map_outlined),
-                    label: const Text('Find Hospitals on Map'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 14, horizontal: 20),
-                      textStyle: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-              ],
+              );
+            },
             ),
-          ),
-        ),
+        ],
       ),
     );
   }
-}
 
-class _CategoryGridCard extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool isActive;
-  final VoidCallback onTap;
-  const _CategoryGridCard({
-    required this.icon,
-    required this.label,
-    required this.isActive,
-    required this.onTap,
-  });
-  @override
-  Widget build(BuildContext context) {
-    final selectedBg = AppColors.secondary.withOpacity(0.5); // solid but light
-    final selectedFg = AppColors.secondary;
-    return Material(
-      color: isActive ? selectedBg : Colors.white,
-      elevation: isActive ? 3 : 1,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
+  Widget _buildFilterDropdown(
+    BuildContext context, {
+    required String title,
+    required String selectedValue,
+    required List<String> items,
+    required Function(String?) onChanged,
+  }) {
+    return Container(
         decoration: BoxDecoration(
-          border: Border.all(color: AppColors.primary, width: 1),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircleAvatar(
-                  backgroundColor: AppColors.primary.withOpacity(0.13),
-                  child: Icon(
-                    icon,
-                    color: AppColors.primary,
-                    size: 22,
-                  ),
-                  radius: 16,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    label,
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textBlack,
-                      fontSize: 16,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.secondary.withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
                 ),
               ],
             ),
+      child: DropdownButtonFormField<String>(
+        value: selectedValue,
+        decoration: InputDecoration(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          border: InputBorder.none,
+          labelText: title,
+          labelStyle: TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
           ),
+          floatingLabelBehavior: FloatingLabelBehavior.never,
         ),
+        style: TextStyle(
+          color: AppColors.textBlack,
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+        ),
+        icon: Icon(
+          Icons.keyboard_arrow_down,
+          color: AppColors.primary,
+          size: 18,
+        ),
+        dropdownColor: Colors.white,
+        items: items.map((String item) {
+          return DropdownMenuItem<String>(
+            value: item,
+            child: Text(
+              item,
+              style: TextStyle(
+                color: item == selectedValue ? AppColors.primary : AppColors.textBlack,
+                fontWeight: item == selectedValue ? FontWeight.w600 : FontWeight.w500,
+              ),
+            ),
+          );
+        }).toList(),
+        onChanged: onChanged,
       ),
     );
   }

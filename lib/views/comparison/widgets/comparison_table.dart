@@ -446,18 +446,9 @@ class ComparisonTable extends StatelessWidget {
       {'label': 'Accreditation', 'key': 'accreditation'},
       {'label': 'Location', 'key': 'location'},
       {'label': 'Contact', 'key': 'contact'},
-      {'label': 'Website', 'key': 'website'},
-      {'label': 'Insurance Coverage', 'key': 'insurance'},
-      {'label': 'Availability', 'key': 'availability'},
       {'label': 'Doctor Experience', 'key': 'doctor'},
       {'label': 'Facilities', 'key': 'facilities'},
       {'label': 'Customer Ratings', 'key': 'rating'},
-      {'label': 'Reviews', 'key': 'reviews'},
-      {'label': 'Waiting Time', 'key': 'waiting'},
-      {'label': 'Service Duration', 'key': 'duration'},
-      {'label': 'Home Visit', 'key': 'homeVisit'},
-      {'label': 'Teleconsultation', 'key': 'teleconsult'},
-      {'label': 'Success Rate', 'key': 'success'},
     ];
 
     // Add Book Now row
