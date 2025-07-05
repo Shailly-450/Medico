@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../models/prescription.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/services/pdf_service.dart';
 
 class PrescriptionDetailScreen extends StatelessWidget {
   final Prescription prescription;
@@ -492,13 +493,48 @@ class PrescriptionDetailScreen extends StatelessWidget {
     );
   }
 
-  void _downloadPrescription(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Downloading prescription...'),
-        backgroundColor: Colors.green,
-      ),
-    );
+  void _downloadPrescription(BuildContext context) async {
+    try {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Generating prescription PDF...'),
+          backgroundColor: Colors.blue,
+        ),
+      );
+
+      final file = await PdfService.generatePrescriptionPdf(prescription);
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('PDF generated successfully!'),
+          backgroundColor: Colors.green,
+          action: SnackBarAction(
+            label: 'Open',
+            textColor: Colors.white,
+            onPressed: () async {
+              try {
+                await PdfService.openPdf(file);
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Error opening PDF: ${e.toString()}'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+          ),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error generating PDF: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _refillPrescription(BuildContext context) {
