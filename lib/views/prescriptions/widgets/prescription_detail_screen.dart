@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../models/prescription.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/services/pdf_service.dart';
+import '../../chat/chat_list_screen.dart';
 
 class PrescriptionDetailScreen extends StatelessWidget {
   final Prescription prescription;
@@ -547,10 +548,11 @@ class PrescriptionDetailScreen extends StatelessWidget {
   }
 
   void _contactDoctor(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Opening chat with doctor...'),
-        backgroundColor: Colors.blue,
+    // Navigate to chat screen
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const ChatListScreen(),
       ),
     );
   }

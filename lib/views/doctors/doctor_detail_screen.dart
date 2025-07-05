@@ -7,6 +7,8 @@ import '../../models/doctor_review.dart';
 import '../../views/home/widgets/star_rating_widget.dart';
 import 'widgets/doctor_review_card.dart';
 import 'widgets/add_review_section.dart';
+import '../chat/chat_screen.dart';
+import '../../models/chat_message.dart';
 
 class DoctorDetailScreen extends StatefulWidget {
   final Doctor doctor;
@@ -765,6 +767,23 @@ class _DoctorDetailScreenState extends State<DoctorDetailScreen>
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
+                      onPressed: () => _startChatWithDoctor(context),
+                      icon: const Icon(Icons.chat),
+                      label: const Text('Chat with Doctor'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.teal,
+                        side: BorderSide(color: Colors.teal),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
                       onPressed: () {
                         // TODO: Navigate to video call
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -977,6 +996,36 @@ class _DoctorDetailScreenState extends State<DoctorDetailScreen>
           ],
         );
       },
+    );
+  }
+
+  void _startChatWithDoctor(BuildContext context) {
+    // Create a conversation for this doctor
+    final conversation = ChatConversation(
+      id: 'conv_${widget.doctor.id}',
+      patientId: 'patient_1',
+      patientName: 'Abdullah Alshahrani',
+      patientAvatar: null,
+      doctorId: widget.doctor.id,
+      doctorName: widget.doctor.name,
+      doctorAvatar:
+          widget.doctor.imageUrl.isNotEmpty ? widget.doctor.imageUrl : null,
+      doctorSpecialty: widget.doctor.specialty,
+      lastMessageTime: DateTime.now(),
+      lastMessage: 'Start a conversation with ${widget.doctor.name}',
+      unreadCount: 0,
+      isActive: true,
+      createdAt: DateTime.now(),
+    );
+
+    // Navigate to chat screen
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ChatScreen(
+          conversation: conversation,
+        ),
+      ),
     );
   }
 }

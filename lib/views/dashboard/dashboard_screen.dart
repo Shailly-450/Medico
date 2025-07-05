@@ -20,7 +20,7 @@ import '../policy/policy_documents_screen.dart';
 import 'widgets/pre_approval_summary_card.dart';
 import 'widgets/policy_documents_card.dart';
 import 'widgets/vitals_graph_section.dart';
-import '../prescriptions/test_prescriptions_screen.dart';
+import '../chat/chat_list_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -105,23 +105,6 @@ class DashboardScreen extends StatelessWidget {
 
                 // Smart Recommendations
                 _buildRecommendations(context, model),
-
-                const SizedBox(height: 32),
-                // Test button for prescriptions
-                Container(
-                  margin: const EdgeInsets.all(16),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const TestPrescriptionsScreen(),
-                        ),
-                      );
-                    },
-                    child: const Text('Test Prescriptions'),
-                  ),
-                ),
 
                 // Add bottom padding to prevent overflow with bottom navigation
                 const SizedBox(height: 80),
