@@ -36,44 +36,44 @@ class HomeScreen extends StatelessWidget {
               SliverToBoxAdapter(
                 child: _buildAppBar(context, model),
               ),
-              
+
               // Search Section
               SliverToBoxAdapter(
                 child: _buildSearchSection(context),
               ),
-              
+
               // Quick Actions
               SliverToBoxAdapter(
                 child: _buildQuickActions(context, model),
               ),
-              
+
               // Categories Grid
               SliverToBoxAdapter(
                 child: _buildCategoriesSection(context, model),
               ),
-              
+
               // Upcoming Appointments
               if (model.upcomingAppointments.isNotEmpty)
                 SliverToBoxAdapter(
                   child: _buildAppointmentsSection(context, model),
                 ),
-              
+
               // Offers Section
               if (model.offers.isNotEmpty)
                 SliverToBoxAdapter(
                   child: _buildOffersSection(context, model),
                 ),
-              
+
               // Doctors Section
               SliverToBoxAdapter(
                 child: _buildDoctorsSection(context, model),
               ),
-              
+
               // Hospitals Section
               SliverToBoxAdapter(
                 child: _buildHospitalsSection(context, model),
               ),
-              
+
               // Bottom padding
               const SliverToBoxAdapter(
                 child: SizedBox(height: 24),
@@ -118,9 +118,9 @@ class HomeScreen extends StatelessWidget {
               size: 24,
             ),
           ),
-          
+
           const SizedBox(width: 16),
-          
+
           // User Info
           Expanded(
             child: Column(
@@ -133,10 +133,10 @@ class HomeScreen extends StatelessWidget {
                     color: AppColors.textSecondary,
                     fontWeight: FontWeight.w500,
                   ),
-                      ),
+                ),
                 const SizedBox(height: 2),
-                            Text(
-                              model.userName,
+                Text(
+                  model.userName,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -145,14 +145,15 @@ class HomeScreen extends StatelessWidget {
                 ),
               ],
             ),
-                            ),
-          
+          ),
+
           // Location & Notifications
-                            Row(
-                              children: [
+          Row(
+            children: [
               // Location
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: AppColors.secondary.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
@@ -166,74 +167,84 @@ class HomeScreen extends StatelessWidget {
                       color: AppColors.primary,
                     ),
                     const SizedBox(width: 4),
-                                Text(
-                                  model.userLocation,
+                    Text(
+                      model.userLocation,
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                         color: AppColors.primary,
                       ),
-                            ),
-                          ],
-                        ),
-                      ),
-              
-              const SizedBox(width: 12),
-              
-              // Notifications
-                      Stack(
-                        children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: AppColors.secondary.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(
-                      Icons.notifications_none,
-                      color: AppColors.primary,
-                      size: 20,
-                                ),
-                          ),
-                          if (model.unreadCount > 0)
-                            Positioned(
+                  ],
+                ),
+              ),
+
+              const SizedBox(width: 12),
+
+              // Notifications
+              Stack(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const NotificationScreen(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.notifications_none,
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                  if (model.unreadCount > 0)
+                    Positioned(
                       right: 0,
                       top: 0,
-                              child: Container(
-                                padding: const EdgeInsets.all(2),
-                                decoration: BoxDecoration(
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
                           color: AppColors.error,
                           borderRadius: BorderRadius.circular(8),
-                                ),
-                                constraints: const BoxConstraints(
-                                  minWidth: 16,
-                                  minHeight: 16,
-                                ),
-                                child: Text(
-                                  '${model.unreadCount}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 16,
+                          minHeight: 16,
+                        ),
+                        child: Text(
+                          '${model.unreadCount}',
+                          style: const TextStyle(
+                            color: Colors.white,
                             fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
-                        ],
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                    ],
-                  ),
+                    ),
+                ],
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
 
-    Widget _buildSearchSection(BuildContext context) {
+  Widget _buildSearchSection(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-                  child: GestureDetector(
-                    onTap: () => Navigator.pushNamed(context, '/search'),
+      child: GestureDetector(
+        onTap: () => Navigator.pushNamed(context, '/search'),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           decoration: BoxDecoration(
@@ -261,7 +272,7 @@ class HomeScreen extends StatelessWidget {
                   color: AppColors.textSecondary,
                   fontSize: 16,
                 ),
-                          ),
+              ),
               const Spacer(),
               Container(
                 padding: const EdgeInsets.all(6),
@@ -274,11 +285,11 @@ class HomeScreen extends StatelessWidget {
                   color: AppColors.primary,
                   size: 16,
                 ),
-                        ),
+              ),
             ],
-                    ),
-                  ),
-                ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -299,7 +310,7 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: 16),
           Row(
             children: [
-                            Expanded(
+              Expanded(
                 child: _buildQuickActionCard(
                   context,
                   imagePath: 'assets/images/hospital.png',
@@ -307,13 +318,13 @@ class HomeScreen extends StatelessWidget {
                   subtitle: 'On Map',
                   color: AppColors.primary,
                   onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
                         builder: (_) => const FindHospitalsScreen(),
                       ),
-                        );
-                      },
+                    );
+                  },
                 ),
               ),
               const SizedBox(width: 12),
@@ -336,7 +347,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-    Widget _buildQuickActionCard(
+  Widget _buildQuickActionCard(
     BuildContext context, {
     required String imagePath,
     required String title,
@@ -383,7 +394,8 @@ class HomeScreen extends StatelessWidget {
                 left: 12,
                 right: 12,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.7),
                     borderRadius: BorderRadius.circular(8),
@@ -437,9 +449,9 @@ class HomeScreen extends StatelessWidget {
   Widget _buildCategoriesSection(BuildContext context, HomeViewModel model) {
     return Container(
       margin: const EdgeInsets.all(10),
-                  child: Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+        children: [
           Text(
             'Services',
             style: TextStyle(
@@ -447,7 +459,7 @@ class HomeScreen extends StatelessWidget {
               fontWeight: FontWeight.bold,
               color: AppColors.textBlack,
             ),
-                      ),
+          ),
           const SizedBox(height: 16),
           GridView.builder(
             shrinkWrap: true,
@@ -461,27 +473,27 @@ class HomeScreen extends StatelessWidget {
             itemCount: model.categories.length,
             itemBuilder: (context, index) {
               final category = model.categories[index];
-                          final isActive = model.selectedCategory == category['name'];
-              
+              final isActive = model.selectedCategory == category['name'];
+
               return _buildCategoryCard(
                 context,
-                                icon: category['icon'],
-                                label: category['name'],
-                                isActive: isActive,
-                                onTap: () {
-                                  model.setCategory(category['name']);
-                                  Navigator.pushNamed(
-                                    context,
-                                    '/category',
-                                    arguments: category['name'],
-                                  );
-                                },
-                                  );
-                                },
-                              ),
+                icon: category['icon'],
+                label: category['name'],
+                isActive: isActive,
+                onTap: () {
+                  model.setCategory(category['name']);
+                  Navigator.pushNamed(
+                    context,
+                    '/category',
+                    arguments: category['name'],
+                  );
+                },
+              );
+            },
+          ),
         ],
-                            ),
-                          );
+      ),
+    );
   }
 
   Widget _buildCategoryCard(
@@ -515,7 +527,7 @@ class HomeScreen extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: isActive 
+                  color: isActive
                       ? AppColors.primary
                       : AppColors.primary.withOpacity(0.1),
                   shape: BoxShape.circle,
@@ -538,10 +550,10 @@ class HomeScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -553,51 +565,51 @@ class HomeScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
                 'Upcoming Appointments',
                 style: TextStyle(
                   fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textBlack,
-                            ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textBlack,
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
                       builder: (context) => AllAppointmentsScreen(),
                     ),
-                          );
-                        },
+                  );
+                },
                 child: Text(
-                          'See All',
-                          style: TextStyle(
+                  'See All',
+                  style: TextStyle(
                     color: AppColors.primary,
                     fontWeight: FontWeight.w600,
-                          ),
-                        ),
-              ),
-                    ],
                   ),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 16),
-                  SizedBox(
+          SizedBox(
             height: 240,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: model.upcomingAppointments.length,
-                      itemBuilder: (context, index) {
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: model.upcomingAppointments.length,
+              itemBuilder: (context, index) {
                 return Container(
                   width: 300,
                   margin: const EdgeInsets.only(right: 16),
-                            child: AppointmentCard(
-                              appointment: model.upcomingAppointments[index],
-                          ),
-                        );
-                      },
-                    ),
+                  child: AppointmentCard(
+                    appointment: model.upcomingAppointments[index],
                   ),
+                );
+              },
+            ),
+          ),
         ],
       ),
     );
@@ -610,59 +622,60 @@ class HomeScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
                 'Special Offers',
                 style: TextStyle(
                   fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textBlack,
-                            ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const OffersScreen(),
-                            ),
-                          );
-                        },
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textBlack,
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const OffersScreen(),
+                    ),
+                  );
+                },
                 child: Text(
-                          'View All',
-                          style: TextStyle(
+                  'View All',
+                  style: TextStyle(
                     color: AppColors.primary,
                     fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 16),
-                  SizedBox(
+          SizedBox(
             height: 220,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: model.offers.length,
-                      itemBuilder: (context, index) {
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: model.offers.length,
+              itemBuilder: (context, index) {
                 return Container(
                   width: 280,
                   margin: const EdgeInsets.only(right: 16),
                   child: OfferCard(
-                          offer: model.offers[index],
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                          content: Text('Booking ${model.offers[index].title}...'),
-                                duration: const Duration(seconds: 2),
-                              ),
-                            );
-                          },
+                    offer: model.offers[index],
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content:
+                              Text('Booking ${model.offers[index].title}...'),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    },
                   ),
-                        );
-                      },
-                    ),
-                  ),
+                );
+              },
+            ),
+          ),
         ],
       ),
     );
@@ -675,141 +688,141 @@ class HomeScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
                 'Top Doctors',
                 style: TextStyle(
                   fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textBlack,
-                            ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const DoctorsScreen(),
-                            ),
-                          );
-                        },
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textBlack,
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const DoctorsScreen(),
+                    ),
+                  );
+                },
                 child: Text(
-                          'See All',
-                          style: TextStyle(
+                  'See All',
+                  style: TextStyle(
                     color: AppColors.primary,
                     fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 16),
 
           // Specialties Filter
-                SizedBox(
-                  height: 40,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: model.specialties.length,
-                    itemBuilder: (context, index) {
-                      final specialty = model.specialties[index];
-                      final isSelected = model.selectedSpecialty == specialty;
+          SizedBox(
+            height: 40,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: model.specialties.length,
+              itemBuilder: (context, index) {
+                final specialty = model.specialties[index];
+                final isSelected = model.selectedSpecialty == specialty;
 
                 return Container(
                   margin: const EdgeInsets.only(right: 8),
-                        child: FilterChip(
-                          label: Text(
-                            specialty,
-                            style: TextStyle(
+                  child: FilterChip(
+                    label: Text(
+                      specialty,
+                      style: TextStyle(
                         color: isSelected ? Colors.white : AppColors.primary,
                         fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          selected: isSelected,
+                      ),
+                    ),
+                    selected: isSelected,
                     backgroundColor: AppColors.secondary.withOpacity(0.2),
-                          selectedColor: AppColors.primary,
-                          checkmarkColor: Colors.white,
+                    selectedColor: AppColors.primary,
+                    checkmarkColor: Colors.white,
                     side: BorderSide.none,
-                          onSelected: (selected) {
-                            if (selected) {
-                              model.setSpecialty(specialty);
-                            }
-                          },
-                        ),
-                      );
+                    onSelected: (selected) {
+                      if (selected) {
+                        model.setSpecialty(specialty);
+                      }
                     },
                   ),
-                ),
-          
+                );
+              },
+            ),
+          ),
+
           const SizedBox(height: 16),
 
-                // Doctor Cards
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: model.doctors.length,
-                  itemBuilder: (context, index) {
+          // Doctor Cards
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: model.doctors.length,
+            itemBuilder: (context, index) {
               return Container(
                 margin: const EdgeInsets.only(bottom: 12),
                 child: GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => DoctorDetailScreen(
-                              doctor: model.doctors[index],
-                            ),
-                          ),
-                        );
-                      },
-                      child: DoctorCard(
-                        doctor: model.doctors[index],
-                  ),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => DoctorDetailScreen(
+                          doctor: model.doctors[index],
+                        ),
                       ),
                     );
                   },
+                  child: DoctorCard(
+                    doctor: model.doctors[index],
+                  ),
                 ),
+              );
+            },
+          ),
         ],
       ),
     );
   }
 
-    Widget _buildHospitalsSection(BuildContext context, HomeViewModel model) {
+  Widget _buildHospitalsSection(BuildContext context, HomeViewModel model) {
     return Container(
       margin: const EdgeInsets.all(5),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
                 'Hospitals & Clinics',
                 style: TextStyle(
                   fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textBlack,
-                            ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const HospitalsScreen(),
-                            ),
-                          );
-                        },
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textBlack,
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const HospitalsScreen(),
+                    ),
+                  );
+                },
                 child: Text(
-                          'View All',
-                          style: TextStyle(
+                  'View All',
+                  style: TextStyle(
                     color: AppColors.primary,
                     fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 16),
-          
+
           // Dropdown-like Filters
           Row(
             children: [
@@ -823,9 +836,9 @@ class HomeScreen extends StatelessWidget {
                   onChanged: (value) {
                     if (value != null) {
                       model.setHospitalType(value);
-                            }
-                          },
-                        ),
+                    }
+                  },
+                ),
               ),
               const SizedBox(width: 10),
               // Cost Category Dropdown
@@ -838,49 +851,50 @@ class HomeScreen extends StatelessWidget {
                   onChanged: (value) {
                     if (value != null) {
                       model.setCostCategory(value);
-                            }
-                          },
-                        ),
+                    }
+                  },
+                ),
               ),
             ],
-                ),
+          ),
 
           const SizedBox(height: 16),
 
-                // Hospital Cards
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: model.filteredHospitals.length,
-                  itemBuilder: (context, index) {
-                    final hospital = model.filteredHospitals[index];
+          // Hospital Cards
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: model.filteredHospitals.length,
+            itemBuilder: (context, index) {
+              final hospital = model.filteredHospitals[index];
               return Container(
                 margin: const EdgeInsets.only(bottom: 12),
                 child: HospitalCard(
-                      hospital: hospital,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                        builder: (context) => HospitalDetailScreen(hospital: hospital),
-                          ),
-                        );
-                      },
-                      onMapTap: (selectedHospital) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => HospitalMapScreen(
-                              selectedHospital: selectedHospital,
-                              hospitals: model.filteredHospitals,
-                            ),
-                          ),
+                  hospital: hospital,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            HospitalDetailScreen(hospital: hospital),
+                      ),
+                    );
+                  },
+                  onMapTap: (selectedHospital) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => HospitalMapScreen(
+                          selectedHospital: selectedHospital,
+                          hospitals: model.filteredHospitals,
+                        ),
+                      ),
                     );
                   },
                 ),
               );
             },
-            ),
+          ),
         ],
       ),
     );
@@ -894,7 +908,7 @@ class HomeScreen extends StatelessWidget {
     required Function(String?) onChanged,
   }) {
     return Container(
-        decoration: BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: AppColors.secondary.withOpacity(0.3)),
@@ -903,13 +917,14 @@ class HomeScreen extends StatelessWidget {
             color: Colors.black.withOpacity(0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
-                ),
-              ],
-            ),
+          ),
+        ],
+      ),
       child: DropdownButtonFormField<String>(
         value: selectedValue,
         decoration: InputDecoration(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           border: InputBorder.none,
           labelText: title,
           labelStyle: TextStyle(
@@ -936,8 +951,11 @@ class HomeScreen extends StatelessWidget {
             child: Text(
               item,
               style: TextStyle(
-                color: item == selectedValue ? AppColors.primary : AppColors.textBlack,
-                fontWeight: item == selectedValue ? FontWeight.w600 : FontWeight.w500,
+                color: item == selectedValue
+                    ? AppColors.primary
+                    : AppColors.textBlack,
+                fontWeight:
+                    item == selectedValue ? FontWeight.w600 : FontWeight.w500,
               ),
             ),
           );
