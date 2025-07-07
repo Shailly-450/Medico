@@ -24,6 +24,7 @@
     <!-- Additional permissions for file access -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <application
         android:label="medico"
         android:name="${applicationName}"

@@ -9,6 +9,8 @@ class SearchBarWidget extends StatelessWidget {
   final VoidCallback? onClear;
   final bool showClearButton;
   final bool autofocus;
+  final bool isListening;
+  final VoidCallback? onVoiceTap;
 
   const SearchBarWidget({
     Key? key,
@@ -19,6 +21,8 @@ class SearchBarWidget extends StatelessWidget {
     this.onClear,
     this.showClearButton = true,
     this.autofocus = false,
+    this.isListening = false,
+    this.onVoiceTap,
   }) : super(key: key);
 
   @override
@@ -48,8 +52,11 @@ class SearchBarWidget extends StatelessWidget {
             Icons.search,
             color: AppColors.textSecondary,
           ),
-          suffixIcon: showClearButton && controller.text.isNotEmpty
-              ? IconButton(
+          suffixIcon: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (showClearButton && controller.text.isNotEmpty)
+                IconButton(
                   icon: Icon(
                     Icons.clear,
                     color: AppColors.textSecondary,
@@ -58,8 +65,19 @@ class SearchBarWidget extends StatelessWidget {
                     controller.clear();
                     onClear?.call();
                   },
-                )
-              : null,
+                ),
+              IconButton(
+                icon: Icon(
+                  Icons.mic,
+                  color: isListening ? AppColors.primary : AppColors.textSecondary,
+                ),
+                onPressed: onVoiceTap,
+                tooltip: 'Voice Search',
+                splashColor: isListening ? AppColors.primary.withOpacity(0.2) : null,
+                highlightColor: isListening ? AppColors.primary.withOpacity(0.1) : null,
+              ),
+            ],
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,

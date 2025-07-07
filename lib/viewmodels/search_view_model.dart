@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/viewmodels/base_view_model.dart';
 import '../models/doctor.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 enum SearchFilter {
   all,
@@ -20,6 +21,11 @@ class SearchViewModel extends BaseViewModel {
   bool isSearching = false;
   bool hasSearchResults = false;
 
+  // Voice search state
+  late stt.SpeechToText _speech;
+  bool isListening = false;
+  String lastRecognizedWords = '';
+
   @override
   void init() {
     _loadDummyData();
@@ -29,6 +35,37 @@ class SearchViewModel extends BaseViewModel {
     // Test symptom search
     _testSymptomSearch();
 
+    notifyListeners();
+  }
+
+  void initVoice() {
+    _speech = stt.SpeechToText();
+  }
+
+  Future<void> startListening() async {
+    if (!_speech.isAvailable) {
+      await _speech.initialize();
+    }
+    isListening = true;
+    notifyListeners();
+    await _speech.listen(
+      onResult: (result) {
+        lastRecognizedWords = result.recognizedWords;
+        searchController.text = lastRecognizedWords;
+        onSearchChanged(lastRecognizedWords);
+        notifyListeners();
+      },
+      listenFor: const Duration(seconds: 8),
+      pauseFor: const Duration(seconds: 2),
+      localeId: 'en_US',
+      cancelOnError: true,
+      partialResults: true,
+    );
+  }
+
+  Future<void> stopListening() async {
+    await _speech.stop();
+    isListening = false;
     notifyListeners();
   }
 

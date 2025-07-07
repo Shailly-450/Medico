@@ -24,6 +24,10 @@ class CategoryCard extends StatelessWidget {
       elevation: 0,
       color: bgColor,
       margin: const EdgeInsets.only(right: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: AppColors.primary, width: 1.5),
+      ),
       child: Container(
         width: 80,
         padding: const EdgeInsets.all(8),

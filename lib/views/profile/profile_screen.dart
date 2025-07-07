@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/theme/app_theme.dart';
 import '../../models/family_member.dart';
 import '../../viewmodels/family_members_view_model.dart';
 import 'family_members_screen.dart';
 import 'insurance_form_screen.dart';
+import 'settings_screen.dart';
+import 'help_support_screen.dart';
+import 'privacy_policy_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -230,7 +232,12 @@ class ProfileScreen extends StatelessWidget {
                   _ProfileItem(
                     icon: Icons.settings,
                     title: 'Settings',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -242,12 +249,22 @@ class ProfileScreen extends StatelessWidget {
                   _ProfileItem(
                     icon: Icons.support_agent,
                     title: 'Help & Support',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const HelpSupportScreen()),
+                      );
+                    },
                   ),
                   _ProfileItem(
                     icon: Icons.privacy_tip,
                     title: 'Privacy & Policy',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen()),
+                      );
+                    },
                   ),
                 ],
               ),
