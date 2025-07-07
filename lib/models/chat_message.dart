@@ -16,7 +16,7 @@ class ChatMessage {
   final MessageStatus status;
   final bool isFromPatient;
   final Map<String, dynamic>?
-      metadata; // For additional data like file info, prescription details, etc.
+  metadata; // For additional data like file info, prescription details, etc.
 
   ChatMessage({
     required this.id,
@@ -48,8 +48,9 @@ class ChatMessage {
         (e) => e.toString() == 'MessageType.${json['type']}',
         orElse: () => MessageType.text,
       ),
-      timestamp:
-          DateTime.parse(json['timestamp'] ?? DateTime.now().toIso8601String()),
+      timestamp: DateTime.parse(
+        json['timestamp'] ?? DateTime.now().toIso8601String(),
+      ),
       status: MessageStatus.values.firstWhere(
         (e) => e.toString() == 'MessageStatus.${json['status']}',
         orElse: () => MessageStatus.sent,
@@ -152,12 +153,14 @@ class ChatConversation {
       doctorAvatar: json['doctorAvatar'],
       doctorSpecialty: json['doctorSpecialty'] ?? '',
       lastMessageTime: DateTime.parse(
-          json['lastMessageTime'] ?? DateTime.now().toIso8601String()),
+        json['lastMessageTime'] ?? DateTime.now().toIso8601String(),
+      ),
       lastMessage: json['lastMessage'] ?? '',
       unreadCount: json['unreadCount'] ?? 0,
       isActive: json['isActive'] ?? true,
-      createdAt:
-          DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
+      createdAt: DateTime.parse(
+        json['createdAt'] ?? DateTime.now().toIso8601String(),
+      ),
     );
   }
 

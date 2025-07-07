@@ -5,14 +5,15 @@ import '../../core/theme/app_colors.dart';
 import '../../models/chat_message.dart';
 import 'widgets/message_bubble.dart';
 import 'widgets/chat_input.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import '../../models/prescription.dart';
 
 class ChatScreen extends StatefulWidget {
   final ChatConversation conversation;
 
-  const ChatScreen({
-    Key? key,
-    required this.conversation,
-  }) : super(key: key);
+  const ChatScreen({Key? key, required this.conversation}) : super(key: key);
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -174,9 +175,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _buildMessagesList(ChatViewModel model) {
     if (model.isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (model.messages.isEmpty) {
@@ -196,6 +195,7 @@ class _ChatScreenState extends State<ChatScreen> {
           child: MessageBubble(
             message: message,
             showTime: isLastMessage || _shouldShowTime(model.messages, index),
+            context: context,
           ),
         );
       },
@@ -265,11 +265,7 @@ class _ChatScreenState extends State<ChatScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.chat_bubble_outline,
-            size: 64,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.chat_bubble_outline, size: 64, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             'Start a conversation',
@@ -282,10 +278,7 @@ class _ChatScreenState extends State<ChatScreen> {
           const SizedBox(height: 8),
           Text(
             'Send a message to ${widget.conversation.doctorName}',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[500],
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
           ),
         ],
       ),
@@ -335,6 +328,22 @@ class _ChatScreenState extends State<ChatScreen> {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.description, color: Colors.deepPurple),
+              title: const Text('Send Report'),
+              onTap: () {
+                Navigator.pop(context);
+                _sendReport(model);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.medication, color: Colors.teal),
+              title: const Text('Send Prescription'),
+              onTap: () {
+                Navigator.pop(context);
+                _sendPrescription(model);
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.camera_alt, color: Colors.orange),
               title: const Text('Take Photo'),
               onTap: () {
@@ -370,6 +379,189 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
+  void _sendReport(ChatViewModel model) async {
+    // Pick PDF or image file
+    final result = await showModalBottomSheet<String>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.picture_as_pdf),
+              title: const Text('Choose PDF'),
+              onTap: () async {
+                Navigator.pop(context, 'pdf');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.image),
+              title: const Text('Choose Image'),
+              onTap: () async {
+                Navigator.pop(context, 'image');
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+    if (result == null) return;
+    File? file;
+    String? fileName;
+    String? fileType;
+    if (result == 'pdf') {
+      final picked = await FilePicker.platform
+          .pickFiles(type: FileType.custom, allowedExtensions: ['pdf']);
+      if (picked != null && picked.files.single.path != null) {
+        file = File(picked.files.single.path!);
+        fileName = picked.files.single.name;
+        fileType = 'pdf';
+      }
+    } else if (result == 'image') {
+      final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+      if (picked != null) {
+        file = File(picked.path);
+        fileName = picked.name;
+        fileType = 'image';
+      }
+    }
+    if (file != null && fileName != null && fileType != null) {
+      model.sendMessage(
+        fileName,
+        type: MessageType.file,
+        metadata: {
+          'filePath': file.path,
+          'fileName': fileName,
+          'fileType': fileType,
+        },
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('No file selected'), backgroundColor: Colors.orange),
+      );
+    }
+  }
+
+  void _sendPrescription(ChatViewModel model) async {
+    // Option: Upload new or select existing
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.upload_file),
+              title: const Text('Upload Prescription File'),
+              onTap: () => Navigator.pop(context, 'upload'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.list),
+              title: const Text('Select Existing Prescription'),
+              onTap: () => Navigator.pop(context, 'select'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (action == 'upload') {
+      // Upload prescription file (PDF/image)
+      final picked = await FilePicker.platform.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png']);
+      if (picked != null && picked.files.single.path != null) {
+        final file = File(picked.files.single.path!);
+        final fileName = picked.files.single.name;
+        final fileType = fileName.split('.').last;
+        model.sendMessage(
+          fileName,
+          type: MessageType.prescription,
+          metadata: {
+            'filePath': file.path,
+            'fileName': fileName,
+            'fileType': fileType,
+          },
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('No file selected'),
+              backgroundColor: Colors.orange),
+        );
+      }
+    } else if (action == 'select') {
+      // Select from existing prescriptions
+      final prescription = await _showPrescriptionSelector(context);
+      if (prescription != null) {
+        model.sendMessage(
+          'Prescription: ${prescription.id}',
+          type: MessageType.prescription,
+          metadata: {
+            'prescriptionId': prescription.id,
+            'doctorName': prescription.doctorName,
+            'date': prescription.prescriptionDate.toIso8601String(),
+            'diagnosis': prescription.diagnosis,
+            'medications':
+                prescription.medications.map((m) => m.toJson()).toList(),
+          },
+        );
+      }
+    }
+  }
+
+  Future<Prescription?> _showPrescriptionSelector(BuildContext context) async {
+    // TODO: Implement actual prescription fetching from viewmodel/provider
+    // For now, show a mock list
+    final mockPrescriptions = [
+      Prescription(
+        id: 'RX001',
+        patientName: 'Abdullah Alshahrani',
+        doctorName: 'Dr. Smith',
+        doctorSpecialty: 'Cardiology',
+        prescriptionDate: DateTime.now().subtract(const Duration(days: 2)),
+        expiryDate: DateTime.now().add(const Duration(days: 28)),
+        diagnosis: 'Hypertension',
+        medications: [],
+        notes: 'Take daily',
+        status: PrescriptionStatus.active,
+        prescriptionImageUrl: null,
+        digitalSignature: null,
+      ),
+      // Add more mock prescriptions if needed
+    ];
+    return showDialog<Prescription>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Select Prescription'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: mockPrescriptions.length,
+            itemBuilder: (context, index) {
+              final p = mockPrescriptions[index];
+              return ListTile(
+                title: Text('Dr. ${p.doctorName}'),
+                subtitle:
+                    Text('${p.diagnosis} • ${_formatDate(p.prescriptionDate)}'),
+                onTap: () => Navigator.pop(context, p),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
   void _takePhoto(ChatViewModel model) {
     // TODO: Implement photo taking
     ScaffoldMessenger.of(context).showSnackBar(
@@ -388,7 +580,8 @@ class _ChatScreenState extends State<ChatScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-            'Starting video call with ${widget.conversation.doctorName}...'),
+          'Starting video call with ${widget.conversation.doctorName}...',
+        ),
         backgroundColor: Colors.green,
       ),
     );
@@ -398,7 +591,8 @@ class _ChatScreenState extends State<ChatScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-            'Starting voice call with ${widget.conversation.doctorName}...'),
+          'Starting voice call with ${widget.conversation.doctorName}...',
+        ),
         backgroundColor: Colors.blue,
       ),
     );
@@ -454,7 +648,8 @@ class _ChatScreenState extends State<ChatScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-            'Booking appointment with ${widget.conversation.doctorName}...'),
+          'Booking appointment with ${widget.conversation.doctorName}...',
+        ),
         backgroundColor: Colors.blue,
       ),
     );
@@ -476,7 +671,8 @@ class _ChatScreenState extends State<ChatScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Clear Chat'),
         content: const Text(
-            'Are you sure you want to clear all messages? This action cannot be undone.'),
+          'Are you sure you want to clear all messages? This action cannot be undone.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -486,9 +682,9 @@ class _ChatScreenState extends State<ChatScreen> {
             onPressed: () {
               Navigator.pop(context);
               // TODO: Implement clear chat functionality
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Chat cleared')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('Chat cleared')));
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Clear'),
@@ -504,8 +700,9 @@ class _ChatScreenState extends State<ChatScreen> {
     final currentMessage = messages[index];
     final previousMessage = messages[index - 1];
 
-    final timeDifference =
-        currentMessage.timestamp.difference(previousMessage.timestamp);
+    final timeDifference = currentMessage.timestamp.difference(
+      previousMessage.timestamp,
+    );
     return timeDifference.inMinutes > 5;
   }
 }

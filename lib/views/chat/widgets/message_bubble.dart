@@ -5,12 +5,14 @@ import '../../../core/theme/app_colors.dart';
 class MessageBubble extends StatelessWidget {
   final ChatMessage message;
   final bool showTime;
+  final BuildContext context;
 
-  const MessageBubble({
-    Key? key,
-    required this.message,
-    required this.showTime,
-  }) : super(key: key);
+  const MessageBubble(
+      {Key? key,
+      required this.message,
+      required this.showTime,
+      required this.context})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -29,9 +31,7 @@ class MessageBubble extends StatelessWidget {
               _buildAvatar(),
               const SizedBox(width: 8),
             ],
-            Flexible(
-              child: _buildMessageContent(),
-            ),
+            Flexible(child: _buildMessageContent()),
             if (message.isFromPatient) ...[
               const SizedBox(width: 8),
               _buildAvatar(),
@@ -47,10 +47,7 @@ class MessageBubble extends StatelessWidget {
             ),
             child: Text(
               _formatTime(message.timestamp),
-              style: TextStyle(
-                fontSize: 11,
-                color: Colors.grey[500],
-              ),
+              style: TextStyle(fontSize: 11, color: Colors.grey[500]),
             ),
           ),
         ],
@@ -168,40 +165,100 @@ class MessageBubble extends StatelessWidget {
   }
 
   Widget _buildFileAttachment() {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[300]!),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.attach_file, color: Colors.grey),
-          const SizedBox(width: 8),
-          const Text('Document.pdf', style: TextStyle(fontSize: 12)),
-        ],
+    final fileName =
+        message.metadata != null && message.metadata!['fileName'] != null
+            ? message.metadata!['fileName'] as String
+            : 'Document.pdf';
+    final filePath = message.metadata != null
+        ? message.metadata!['filePath'] as String?
+        : null;
+    return InkWell(
+      onTap: filePath != null ? () => _openFile(context, filePath) : null,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.grey[300]!),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.attach_file, color: Colors.grey),
+            const SizedBox(width: 8),
+            Flexible(
+                child: Text(fileName,
+                    style: const TextStyle(fontSize: 12),
+                    overflow: TextOverflow.ellipsis)),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildPrescriptionAttachment() {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.blue[50],
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.blue[200]!),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.medication, color: Colors.blue),
-          const SizedBox(width: 8),
-          const Text('Prescription',
-              style: TextStyle(fontSize: 12, color: Colors.blue)),
-        ],
+    final prescriptionId = message.metadata != null
+        ? message.metadata!['prescriptionId'] as String?
+        : null;
+    final fileName = message.metadata != null
+        ? message.metadata!['fileName'] as String?
+        : null;
+    final filePath = message.metadata != null
+        ? message.metadata!['filePath'] as String?
+        : null;
+    final doctorName = message.metadata != null
+        ? message.metadata!['doctorName'] as String?
+        : null;
+    final diagnosis = message.metadata != null
+        ? message.metadata!['diagnosis'] as String?
+        : null;
+    final date = message.metadata != null && message.metadata!['date'] != null
+        ? message.metadata!['date'] as String
+        : null;
+    return InkWell(
+      onTap: filePath != null ? () => _openFile(context, filePath) : null,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.blue[50],
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.blue[200]!),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.medication, color: Colors.blue),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (fileName != null) ...[
+                    Text(fileName,
+                        style:
+                            const TextStyle(fontSize: 12, color: Colors.blue)),
+                  ] else if (prescriptionId != null) ...[
+                    Text('Prescription #$prescriptionId',
+                        style:
+                            const TextStyle(fontSize: 12, color: Colors.blue)),
+                  ] else ...[
+                    const Text('Prescription',
+                        style: TextStyle(fontSize: 12, color: Colors.blue)),
+                  ],
+                  if (doctorName != null)
+                    Text('Dr. $doctorName',
+                        style: const TextStyle(fontSize: 11)),
+                  if (diagnosis != null)
+                    Text(diagnosis, style: const TextStyle(fontSize: 11)),
+                  if (date != null)
+                    Text(date.split('T').first,
+                        style:
+                            const TextStyle(fontSize: 10, color: Colors.grey)),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -219,8 +276,10 @@ class MessageBubble extends StatelessWidget {
         children: [
           const Icon(Icons.calendar_today, color: Colors.green),
           const SizedBox(width: 8),
-          const Text('Appointment',
-              style: TextStyle(fontSize: 12, color: Colors.green)),
+          const Text(
+            'Appointment',
+            style: TextStyle(fontSize: 12, color: Colors.green),
+          ),
         ],
       ),
     );
@@ -251,13 +310,7 @@ class MessageBubble extends StatelessWidget {
 
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          statusIcon,
-          size: 14,
-          color: statusColor,
-        ),
-      ],
+      children: [Icon(statusIcon, size: 14, color: statusColor)],
     );
   }
 
@@ -273,5 +326,13 @@ class MessageBubble extends StatelessWidget {
     } else {
       return '${time.day}/${time.month}/${time.year} at ${time.hour}:${time.minute.toString().padLeft(2, '0')}';
     }
+  }
+
+  void _openFile(BuildContext context, String filePath) async {
+    // TODO: Use open_file package or similar to open the file
+    // For now, just show a snackbar
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Opening file: $filePath')),
+    );
   }
 }

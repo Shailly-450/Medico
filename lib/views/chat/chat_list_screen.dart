@@ -141,11 +141,7 @@ class ChatListScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            size: 64,
-            color: Colors.grey[400],
-          ),
+          Icon(icon, size: 64, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             message,
@@ -159,10 +155,7 @@ class ChatListScreen extends StatelessWidget {
           if (model.searchQuery.isEmpty)
             Text(
               'Start a conversation with your doctor',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[500],
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
             ),
           const SizedBox(height: 24),
           if (model.searchQuery.isEmpty)
@@ -173,8 +166,10 @@ class ChatListScreen extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
               ),
             ),
         ],
@@ -182,14 +177,15 @@ class ChatListScreen extends StatelessWidget {
     );
   }
 
-  void _navigateToChat(BuildContext context, ChatViewModel model,
-      ChatConversation conversation) {
+  void _navigateToChat(
+    BuildContext context,
+    ChatViewModel model,
+    ChatConversation conversation,
+  ) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ChatScreen(
-          conversation: conversation,
-        ),
+        builder: (context) => ChatScreen(conversation: conversation),
       ),
     );
   }
@@ -227,7 +223,8 @@ class ChatListScreen extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: const Text('Start New Chat'),
         content: const Text(
-            'This feature will allow you to start a new conversation with any available doctor. Coming soon!'),
+          'This feature will allow you to start a new conversation with any available doctor. Coming soon!',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -239,7 +236,9 @@ class ChatListScreen extends StatelessWidget {
   }
 
   void _showConversationOptions(
-      BuildContext context, ChatConversation conversation) {
+    BuildContext context,
+    ChatConversation conversation,
+  ) {
     showModalBottomSheet(
       context: context,
       builder: (context) => Container(
@@ -260,8 +259,10 @@ class ChatListScreen extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.delete, color: Colors.red),
-              title: const Text('Delete Conversation',
-                  style: TextStyle(color: Colors.red)),
+              title: const Text(
+                'Delete Conversation',
+                style: TextStyle(color: Colors.red),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 _showDeleteConfirmation(context, conversation);
@@ -274,13 +275,16 @@ class ChatListScreen extends StatelessWidget {
   }
 
   void _showDeleteConfirmation(
-      BuildContext context, ChatConversation conversation) {
+    BuildContext context,
+    ChatConversation conversation,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Conversation'),
         content: Text(
-            'Are you sure you want to delete the conversation with ${conversation.doctorName}? This action cannot be undone.'),
+          'Are you sure you want to delete the conversation with ${conversation.doctorName}? This action cannot be undone.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

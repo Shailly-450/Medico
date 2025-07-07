@@ -7,10 +7,8 @@ import '../../chat/chat_list_screen.dart';
 class PrescriptionDetailScreen extends StatelessWidget {
   final Prescription prescription;
 
-  const PrescriptionDetailScreen({
-    Key? key,
-    required this.prescription,
-  }) : super(key: key);
+  const PrescriptionDetailScreen({Key? key, required this.prescription})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -94,10 +92,7 @@ class PrescriptionDetailScreen extends StatelessWidget {
                       ),
                       Text(
                         prescription.doctorSpecialty,
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 14,
-                        ),
+                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
                       ),
                     ],
                   ),
@@ -110,7 +105,9 @@ class PrescriptionDetailScreen extends StatelessWidget {
             _buildInfoRow('Date', _formatDate(prescription.prescriptionDate)),
             if (prescription.expiryDate != null)
               _buildInfoRow(
-                  'Expiry Date', _formatDate(prescription.expiryDate!)),
+                'Expiry Date',
+                _formatDate(prescription.expiryDate!),
+              ),
             _buildInfoRow('Status', prescription.status.displayName),
           ],
         ),
@@ -129,11 +126,7 @@ class PrescriptionDetailScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.medical_information,
-                  color: Colors.blue,
-                  size: 20,
-                ),
+                Icon(Icons.medical_information, color: Colors.blue, size: 20),
                 const SizedBox(width: 8),
                 const Text(
                   'Diagnosis',
@@ -179,11 +172,7 @@ class PrescriptionDetailScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.medication,
-                  color: Colors.green,
-                  size: 20,
-                ),
+                Icon(Icons.medication, color: Colors.green, size: 20),
                 const SizedBox(width: 8),
                 Text(
                   'Medications (${prescription.medications.length})',
@@ -231,8 +220,10 @@ class PrescriptionDetailScreen extends StatelessWidget {
               ),
               if (medication.isActive)
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.green.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -259,10 +250,14 @@ class PrescriptionDetailScreen extends StatelessWidget {
             _buildMedicationDetail('Instructions', medication.instructions!),
           if (medication.startDate != null)
             _buildMedicationDetail(
-                'Start Date', _formatDate(medication.startDate!)),
+              'Start Date',
+              _formatDate(medication.startDate!),
+            ),
           if (medication.endDate != null)
             _buildMedicationDetail(
-                'End Date', _formatDate(medication.endDate!)),
+              'End Date',
+              _formatDate(medication.endDate!),
+            ),
         ],
       ),
     );
@@ -288,10 +283,7 @@ class PrescriptionDetailScreen extends StatelessWidget {
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
-                fontSize: 12,
-                color: AppColors.textBlack,
-              ),
+              style: const TextStyle(fontSize: 12, color: AppColors.textBlack),
             ),
           ),
         ],
@@ -310,11 +302,7 @@ class PrescriptionDetailScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.note,
-                  color: Colors.orange,
-                  size: 20,
-                ),
+                Icon(Icons.note, color: Colors.orange, size: 20),
                 const SizedBox(width: 8),
                 const Text(
                   'Notes',
@@ -421,10 +409,7 @@ class PrescriptionDetailScreen extends StatelessWidget {
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.textBlack,
-              ),
+              style: const TextStyle(fontSize: 14, color: AppColors.textBlack),
             ),
           ),
         ],
@@ -551,9 +536,7 @@ class PrescriptionDetailScreen extends StatelessWidget {
     // Navigate to chat screen
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const ChatListScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const ChatListScreen()),
     );
   }
 }

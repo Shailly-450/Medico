@@ -80,14 +80,16 @@ class PrescriptionsViewModel extends BaseViewModel {
     // Apply search filter
     if (_searchQuery.isNotEmpty) {
       filtered = filtered.where((prescription) {
-        return prescription.doctorName
-                .toLowerCase()
-                .contains(_searchQuery.toLowerCase()) ||
-            prescription.diagnosis
-                .toLowerCase()
-                .contains(_searchQuery.toLowerCase()) ||
-            prescription.medications.any((med) =>
-                med.name.toLowerCase().contains(_searchQuery.toLowerCase()));
+        return prescription.doctorName.toLowerCase().contains(
+              _searchQuery.toLowerCase(),
+            ) ||
+            prescription.diagnosis.toLowerCase().contains(
+              _searchQuery.toLowerCase(),
+            ) ||
+            prescription.medications.any(
+              (med) =>
+                  med.name.toLowerCase().contains(_searchQuery.toLowerCase()),
+            );
       }).toList();
     }
 

@@ -47,8 +47,11 @@ class ChatViewModel extends BaseViewModel {
     });
   }
 
-  void sendMessage(String content,
-      {MessageType type = MessageType.text, Map<String, dynamic>? metadata}) {
+  void sendMessage(
+    String content, {
+    MessageType type = MessageType.text,
+    Map<String, dynamic>? metadata,
+  }) {
     if (content.trim().isEmpty) return;
 
     final message = ChatMessage(
@@ -91,15 +94,15 @@ class ChatViewModel extends BaseViewModel {
     }
 
     return _conversations.where((conversation) {
-      return conversation.doctorName
-              .toLowerCase()
-              .contains(_searchQuery.toLowerCase()) ||
-          conversation.doctorSpecialty
-              .toLowerCase()
-              .contains(_searchQuery.toLowerCase()) ||
-          conversation.lastMessage
-              .toLowerCase()
-              .contains(_searchQuery.toLowerCase());
+      return conversation.doctorName.toLowerCase().contains(
+            _searchQuery.toLowerCase(),
+          ) ||
+          conversation.doctorSpecialty.toLowerCase().contains(
+            _searchQuery.toLowerCase(),
+          ) ||
+          conversation.lastMessage.toLowerCase().contains(
+            _searchQuery.toLowerCase(),
+          );
     }).toList();
   }
 
@@ -144,8 +147,9 @@ class ChatViewModel extends BaseViewModel {
   }
 
   void _updateConversationLastMessage(String conversationId, String message) {
-    final index =
-        _conversations.indexWhere((conv) => conv.id == conversationId);
+    final index = _conversations.indexWhere(
+      (conv) => conv.id == conversationId,
+    );
     if (index != -1) {
       final conversation = _conversations[index];
       _conversations[index] = ChatConversation(
