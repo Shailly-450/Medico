@@ -3,6 +3,10 @@ import '../../core/theme/app_colors.dart';
 import 'widgets/call_controls.dart';
 import 'widgets/chat_panel.dart';
 import 'widgets/incoming_call_overlay.dart';
+import 'widgets/screen_sharing_overlay.dart';
+import 'widgets/screen_sharing_dialog.dart';
+import 'widgets/screen_sharing_content_viewer.dart';
+import 'screen_sharing_full_screen.dart';
 
 class VideoCallScreen extends StatefulWidget {
   final String doctorName;
@@ -28,6 +32,8 @@ class _VideoCallScreenState extends State<VideoCallScreen>
   bool _isChatOpen = false;
   bool _isRecording = false;
   bool _isScreenSharing = false;
+  String? _screenSharingType;
+  String? _screenSharingTitle;
   bool _isCallConnected = false;
   bool _isIncomingCall = true;
 
@@ -135,11 +141,19 @@ class _VideoCallScreenState extends State<VideoCallScreen>
                     setState(() => _isSpeakerOn = !_isSpeakerOn),
                 onRecordingToggle: () =>
                     setState(() => _isRecording = !_isRecording),
-                onScreenShareToggle: () =>
-                    setState(() => _isScreenSharing = !_isScreenSharing),
+                onScreenShareToggle: _handleScreenSharing,
                 onEndCall: _showEndCallDialog,
                 onMoreOptions: _showMoreOptions,
               ),
+            ),
+
+          // Screen sharing overlay
+          if (_isScreenSharing)
+            ScreenSharingOverlay(
+              isActive: _isScreenSharing,
+              onStopSharing: _stopScreenSharing,
+              onTapToFullScreen: _openScreenSharingFullScreen,
+              sharedContentTitle: _screenSharingTitle,
             ),
 
           // Chat panel
@@ -493,5 +507,86 @@ class _VideoCallScreenState extends State<VideoCallScreen>
         'time': DateTime.now(),
       });
     });
+  }
+
+  void _handleScreenSharing() {
+    if (_isScreenSharing) {
+      _stopScreenSharing();
+    } else {
+      _showScreenSharingDialog();
+    }
+  }
+
+  void _stopScreenSharing() {
+    setState(() {
+      _isScreenSharing = false;
+      _screenSharingType = null;
+      _screenSharingTitle = null;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Screen sharing stopped'),
+        backgroundColor: Colors.orange,
+      ),
+    );
+  }
+
+  void _showScreenSharingDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => ScreenSharingDialog(
+        onShareSelected: (String shareType) {
+          _startScreenSharing(shareType);
+        },
+      ),
+    );
+  }
+
+  void _startScreenSharing(String shareType) {
+    setState(() {
+      _isScreenSharing = true;
+      _screenSharingType = shareType;
+      _screenSharingTitle = _getShareTypeTitle(shareType);
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Started sharing: ${_getShareTypeTitle(shareType)}'),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+
+  String _getShareTypeTitle(String shareType) {
+    switch (shareType) {
+      case 'entire_screen':
+        return 'Entire Screen';
+      case 'photo_gallery':
+        return 'Photo Gallery';
+      case 'documents':
+        return 'Documents';
+      case 'camera':
+        return 'Live Camera';
+      case 'health_records':
+        return 'Health Records';
+      default:
+        return 'Screen Content';
+    }
+  }
+
+  void _openScreenSharingFullScreen() {
+    if (_isScreenSharing && _screenSharingType != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ScreenSharingFullScreen(
+            contentType: _screenSharingType!,
+            contentTitle: _screenSharingTitle,
+            onClose: () => Navigator.pop(context),
+          ),
+        ),
+      );
+    }
   }
 }
