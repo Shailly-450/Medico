@@ -9,6 +9,7 @@ import 'widgets/doctor_review_card.dart';
 import 'widgets/add_review_section.dart';
 import '../chat/chat_screen.dart';
 import '../../models/chat_message.dart';
+import '../video_call/video_call_screen.dart';
 
 class DoctorDetailScreen extends StatefulWidget {
   final Doctor doctor;
@@ -785,12 +786,16 @@ class _DoctorDetailScreenState extends State<DoctorDetailScreen>
                     width: double.infinity,
                     child: OutlinedButton.icon(
                       onPressed: () {
-                        // TODO: Navigate to video call
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                                'Starting video call with ${widget.doctor.name}...'),
-                            duration: const Duration(seconds: 2),
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => VideoCallScreen(
+                              doctorName: widget.doctor.name,
+                              doctorSpecialty: widget.doctor.specialty,
+                              doctorImage: widget.doctor.imageUrl.isNotEmpty
+                                  ? widget.doctor.imageUrl
+                                  : null,
+                            ),
                           ),
                         );
                       },
