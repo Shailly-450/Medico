@@ -26,7 +26,9 @@ class QuickActionCard extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(8),
         onTap: () {
-          if (action['title'] == 'Book Appointment') {
+          if (action['title'] == 'AI Symptom Check') {
+            Navigator.pushNamed(context, '/ai-symptom-chat');
+          } else if (action['title'] == 'Book Appointment') {
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -62,6 +64,8 @@ class QuickActionCard extends StatelessWidget {
               MaterialPageRoute(
                   builder: (context) => const PrescriptionsScreen()),
             );
+          } else if (action['title'] == 'Medical Workflow') {
+            Navigator.pushNamed(context, '/workflow-demo');
           }
         },
         child: Column(

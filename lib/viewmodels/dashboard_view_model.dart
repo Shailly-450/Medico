@@ -249,9 +249,19 @@ class DashboardViewModel extends BaseViewModel {
   // Quick Actions
   List<Map<String, dynamic>> quickActions = [
     {
+      'title': 'AI Symptom Check',
+      'icon': Icons.smart_toy,
+      'color': Colors.purple,
+    },
+    {
       'title': 'Book Appointment',
       'icon': Icons.calendar_today,
       'color': Colors.blue,
+    },
+    {
+      'title': 'Medical Workflow',
+      'icon': Icons.timeline,
+      'color': Colors.teal,
     },
     {
       'title': 'Health Tracker',

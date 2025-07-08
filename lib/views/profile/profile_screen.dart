@@ -8,6 +8,7 @@ import 'insurance_form_screen.dart';
 import 'settings_screen.dart';
 import 'help_support_screen.dart';
 import 'privacy_policy_screen.dart';
+import 'prescriptions_reports_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -38,17 +39,20 @@ class ProfileScreen extends StatelessWidget {
                 child: Card(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
-                    side: BorderSide(color: AppColors.primary.withOpacity(0.08), width: 1.5),
+                    side: BorderSide(
+                        color: AppColors.primary.withOpacity(0.08), width: 1.5),
                   ),
                   elevation: 4,
                   shadowColor: AppColors.primary.withOpacity(0.08),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 24),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 18, vertical: 24),
                     child: Row(
                       children: [
                         AnimatedSwitcher(
                           duration: const Duration(milliseconds: 350),
-                          transitionBuilder: (child, anim) => FadeTransition(opacity: anim, child: child),
+                          transitionBuilder: (child, anim) =>
+                              FadeTransition(opacity: anim, child: child),
                           child: _ProfileAvatar(
                             key: ValueKey(currentProfile?.id),
                             name: currentProfile?.name,
@@ -59,7 +63,8 @@ class ProfileScreen extends StatelessWidget {
                         Expanded(
                           child: AnimatedSwitcher(
                             duration: const Duration(milliseconds: 350),
-                            transitionBuilder: (child, anim) => FadeTransition(opacity: anim, child: child),
+                            transitionBuilder: (child, anim) =>
+                                FadeTransition(opacity: anim, child: child),
                             child: Column(
                               key: ValueKey(currentProfile?.id),
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,47 +91,71 @@ class ProfileScreen extends StatelessWidget {
                         Tooltip(
                           message: 'Switch Profile',
                           child: IconButton(
-                            icon: const Icon(Icons.switch_account, color: AppColors.primary),
+                            icon: const Icon(Icons.switch_account,
+                                color: AppColors.primary),
                             onPressed: () async {
-                              final selected = await showModalBottomSheet<FamilyMember>(
+                              final selected =
+                                  await showModalBottomSheet<FamilyMember>(
                                 context: context,
                                 shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                                  borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(20)),
                                 ),
                                 builder: (ctx) {
                                   return Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 16, horizontal: 8),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Center(
                                           child: Container(
                                             width: 40,
                                             height: 4,
-                                            margin: const EdgeInsets.only(bottom: 12),
+                                            margin: const EdgeInsets.only(
+                                                bottom: 12),
                                             decoration: BoxDecoration(
                                               color: Colors.grey[300],
-                                              borderRadius: BorderRadius.circular(2),
+                                              borderRadius:
+                                                  BorderRadius.circular(2),
                                             ),
                                           ),
                                         ),
                                         Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                                          child: Text('Switch Profile', style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 12),
+                                          child: Text('Switch Profile',
+                                              style: textTheme.titleMedium
+                                                  ?.copyWith(
+                                                      fontWeight:
+                                                          FontWeight.bold)),
                                         ),
                                         const Divider(height: 20),
-                                        ...familyVM.members.asMap().entries.map((entry) {
+                                        ...familyVM.members
+                                            .asMap()
+                                            .entries
+                                            .map((entry) {
                                           final member = entry.value;
-                                          final isActive = member.id == currentProfile?.id;
+                                          final isActive =
+                                              member.id == currentProfile?.id;
                                           final isMain = entry.key == 0;
                                           return Material(
-                                            color: isActive ? AppColors.primary.withOpacity(0.08) : Colors.transparent,
+                                            color: isActive
+                                                ? AppColors.primary
+                                                    .withOpacity(0.08)
+                                                : Colors.transparent,
                                             child: InkWell(
-                                              borderRadius: BorderRadius.circular(12),
-                                              onTap: () => Navigator.pop(ctx, member),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              onTap: () =>
+                                                  Navigator.pop(ctx, member),
                                               child: Padding(
-                                                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        vertical: 8,
+                                                        horizontal: 8),
                                                 child: Row(
                                                   children: [
                                                     _ProfileAvatar(
@@ -137,38 +166,73 @@ class ProfileScreen extends StatelessWidget {
                                                     const SizedBox(width: 14),
                                                     Expanded(
                                                       child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
                                                         children: [
                                                           Row(
                                                             children: [
                                                               Text(
                                                                 member.name,
-                                                                style: textTheme.bodyLarge?.copyWith(
-                                                                  fontWeight: FontWeight.w600,
-                                                                  color: AppColors.textPrimary,
+                                                                style: textTheme
+                                                                    .bodyLarge
+                                                                    ?.copyWith(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                  color: AppColors
+                                                                      .textPrimary,
                                                                 ),
                                                               ),
                                                               if (isMain)
                                                                 Container(
-                                                                  margin: const EdgeInsets.only(left: 8),
-                                                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                                                  decoration: BoxDecoration(
-                                                                    color: AppColors.primary.withOpacity(0.12),
-                                                                    borderRadius: BorderRadius.circular(8),
+                                                                  margin:
+                                                                      const EdgeInsets
+                                                                          .only(
+                                                                          left:
+                                                                              8),
+                                                                  padding: const EdgeInsets
+                                                                      .symmetric(
+                                                                      horizontal:
+                                                                          8,
+                                                                      vertical:
+                                                                          2),
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    color: AppColors
+                                                                        .primary
+                                                                        .withOpacity(
+                                                                            0.12),
+                                                                    borderRadius:
+                                                                        BorderRadius
+                                                                            .circular(8),
                                                                   ),
-                                                                  child: Text('You', style: textTheme.bodySmall?.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                                                                  child: Text(
+                                                                      'You',
+                                                                      style: textTheme.bodySmall?.copyWith(
+                                                                          color: AppColors
+                                                                              .primary,
+                                                                          fontWeight:
+                                                                              FontWeight.bold)),
                                                                 ),
                                                             ],
                                                           ),
                                                           Text(
                                                             member.role,
-                                                            style: textTheme.bodySmall?.copyWith(color: AppColors.primary),
+                                                            style: textTheme
+                                                                .bodySmall
+                                                                ?.copyWith(
+                                                                    color: AppColors
+                                                                        .primary),
                                                           ),
                                                         ],
                                                       ),
                                                     ),
                                                     if (isActive)
-                                                      const Icon(Icons.check_circle, color: AppColors.success),
+                                                      const Icon(
+                                                          Icons.check_circle,
+                                                          color: AppColors
+                                                              .success),
                                                   ],
                                                 ),
                                               ),
@@ -200,23 +264,34 @@ class ProfileScreen extends StatelessWidget {
                   _ProfileItem(
                     icon: Icons.group,
                     title: 'Family Members',
-                    trailing: Text('$familyCount', style: textTheme.bodyMedium?.copyWith(color: AppColors.primary)),
+                    trailing: Text('$familyCount',
+                        style: textTheme.bodyMedium
+                            ?.copyWith(color: AppColors.primary)),
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const FamilyMembersScreen()),
+                        MaterialPageRoute(
+                            builder: (_) => const FamilyMembersScreen()),
                       );
                     },
                   ),
                   _ProfileItem(
                     icon: Icons.description,
                     title: 'Prescriptions & Reports',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const PrescriptionsReportsScreen()),
+                      );
+                    },
                   ),
                   _ProfileItem(
                     icon: Icons.account_balance_wallet,
                     title: 'Payment Methods',
-                    trailing: Text('Wallet', style: textTheme.bodyMedium?.copyWith(color: AppColors.primary)),
+                    trailing: Text('Wallet',
+                        style: textTheme.bodyMedium
+                            ?.copyWith(color: AppColors.primary)),
                     onTap: () {},
                   ),
                   _ProfileItem(
@@ -225,7 +300,8 @@ class ProfileScreen extends StatelessWidget {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const InsuranceFormScreen()),
+                        MaterialPageRoute(
+                            builder: (_) => const InsuranceFormScreen()),
                       );
                     },
                   ),
@@ -235,7 +311,8 @@ class ProfileScreen extends StatelessWidget {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                        MaterialPageRoute(
+                            builder: (_) => const SettingsScreen()),
                       );
                     },
                   ),
@@ -252,7 +329,8 @@ class ProfileScreen extends StatelessWidget {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const HelpSupportScreen()),
+                        MaterialPageRoute(
+                            builder: (_) => const HelpSupportScreen()),
                       );
                     },
                   ),
@@ -262,7 +340,8 @@ class ProfileScreen extends StatelessWidget {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen()),
+                        MaterialPageRoute(
+                            builder: (_) => const PrivacyPolicyScreen()),
                       );
                     },
                   ),
@@ -273,7 +352,8 @@ class ProfileScreen extends StatelessWidget {
 
               // Logout Button
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                 child: SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
@@ -297,7 +377,8 @@ class ProfileScreen extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 16, top: 4),
                 child: Text(
                   'version 1.0.0',
-                  style: textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                  style: textTheme.bodySmall
+                      ?.copyWith(color: AppColors.textSecondary),
                 ),
               ),
             ],
@@ -381,7 +462,8 @@ class _ProfileAvatar extends StatelessWidget {
   final String? name;
   final String? imageUrl;
   final double radius;
-  const _ProfileAvatar({Key? key, this.name, this.imageUrl, this.radius = 32}) : super(key: key);
+  const _ProfileAvatar({Key? key, this.name, this.imageUrl, this.radius = 32})
+      : super(key: key);
 
   String getInitials() {
     if (name == null || name!.trim().isEmpty) return '';
@@ -413,4 +495,4 @@ class _ProfileAvatar extends StatelessWidget {
       ),
     );
   }
-} 
+}

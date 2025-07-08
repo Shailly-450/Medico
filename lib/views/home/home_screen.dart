@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../core/views/base_view.dart';
 import '../../viewmodels/home_view_model.dart';
 import '../../core/theme/app_colors.dart';
@@ -21,247 +20,106 @@ import 'find_hospitals_screen.dart';
 import 'package:medico/views/schedule/schedule_screen.dart';
 import '../appointments/all_appointments_screen.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen>
-    with TickerProviderStateMixin {
-  late AnimationController _fadeController;
-  late AnimationController _slideController;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _fadeController = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    );
-    _slideController = AnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
-    );
-
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    ));
-
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOutCubic,
-    ));
-
-    _fadeController.forward();
-    _slideController.forward();
-  }
-
-  @override
-  void dispose() {
-    _fadeController.dispose();
-    _slideController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     return BaseView<HomeViewModel>(
       viewModelBuilder: () => HomeViewModel(),
       builder: (context, model, child) => Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color(0xFFF8FAFC), // Very light blue-gray
-                Color(0xFFF1F5F9), // Light slate
-                Color(0xFFE2E8F0), // Slightly darker slate
-              ],
-              stops: [0.0, 0.5, 1.0],
-            ),
-          ),
-          child: SafeArea(
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: SlideTransition(
-                position: _slideAnimation,
-                child: CustomScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  slivers: [
-                    // App Bar with Profile
-                    SliverToBoxAdapter(
-                      child: _buildAppBar(context, model),
-                    ),
-
-                    // Search Section
-                    SliverToBoxAdapter(
-                      child: _buildSearchSection(context),
-                    ),
-
-                    // Quick Actions
-                    SliverToBoxAdapter(
-                      child: _buildQuickActions(context, model),
-                    ),
-
-                    // Categories Grid
-                    SliverToBoxAdapter(
-                      child: _buildCategoriesSection(context, model),
-                    ),
-
-                    // Upcoming Appointments
-                    if (model.upcomingAppointments.isNotEmpty)
-                      SliverToBoxAdapter(
-                        child: _buildAppointmentsSection(context, model),
-                      ),
-
-                    // Offers Section
-                    if (model.offers.isNotEmpty)
-                      SliverToBoxAdapter(
-                        child: _buildOffersSection(context, model),
-                      ),
-
-                    // Doctors Section
-                    SliverToBoxAdapter(
-                      child: _buildDoctorsSection(context, model),
-                    ),
-
-                    // Hospitals Section
-                    SliverToBoxAdapter(
-                      child: _buildHospitalsSection(context, model),
-                    ),
-
-                    // Bottom padding
-                    const SliverToBoxAdapter(
-                      child: SizedBox(height: 32),
-                    ),
-                  ],
-                ),
+        backgroundColor: AppColors.paleBackground,
+        body: SafeArea(
+          child: CustomScrollView(
+            slivers: [
+              // App Bar with Profile
+              SliverToBoxAdapter(
+                child: _buildAppBar(context, model),
               ),
-            ),
+
+              // Search Section
+              SliverToBoxAdapter(
+                child: _buildSearchSection(context),
+              ),
+
+              // Quick Actions
+              SliverToBoxAdapter(
+                child: _buildQuickActions(context, model),
+              ),
+
+              // Categories Grid
+              SliverToBoxAdapter(
+                child: _buildCategoriesSection(context, model),
+              ),
+
+              // Upcoming Appointments
+              if (model.upcomingAppointments.isNotEmpty)
+                SliverToBoxAdapter(
+                  child: _buildAppointmentsSection(context, model),
+                ),
+
+              // Offers Section
+              if (model.offers.isNotEmpty)
+                SliverToBoxAdapter(
+                  child: _buildOffersSection(context, model),
+                ),
+
+              // Doctors Section
+              SliverToBoxAdapter(
+                child: _buildDoctorsSection(context, model),
+              ),
+
+              // Hospitals Section
+              SliverToBoxAdapter(
+                child: _buildHospitalsSection(context, model),
+              ),
+
+              // Bottom padding
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 24),
+              ),
+            ],
           ),
         ),
-        floatingActionButton: _buildFloatingActionButton(context),
       ),
     );
   }
 
-  Widget _buildFloatingActionButton(BuildContext context) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.0, end: 1.0),
-      duration: const Duration(milliseconds: 1200),
-      builder: (context, value, child) {
-        return Transform.scale(
-          scale: value,
-          child: Container(
+  Widget _buildAppBar(BuildContext context, HomeViewModel model) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Profile Avatar
+          Container(
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [AppColors.primary, AppColors.accent],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(28),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withOpacity(0.3),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
-                ),
-              ],
+              borderRadius: BorderRadius.circular(24),
             ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(28),
-                onTap: () {
-                  Navigator.pushNamed(context, '/schedule');
-                },
-                child: Container(
-                  width: 56,
-                  height: 56,
-                  child: const Icon(
-                    Icons.add,
-                    color: Colors.white,
-                    size: 28,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildAppBar(BuildContext context, HomeViewModel model) {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Profile Avatar with Animation
-          Hero(
-            tag: 'profile_avatar',
-            child: Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [AppColors.primary, AppColors.accent],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withOpacity(0.3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(18),
-                  onTap: () {
-                    // Profile tap animation
-                    HapticFeedback.lightImpact();
-                  },
-                  child: const Icon(
-                    Icons.person,
-                    color: Colors.white,
-                    size: 28,
-                  ),
-                ),
-              ),
+            child: const Icon(
+              Icons.person,
+              color: Colors.white,
+              size: 24,
             ),
           ),
 
-          const SizedBox(width: 20),
+          const SizedBox(width: 16),
 
           // User Info
           Expanded(
@@ -271,20 +129,18 @@ class _HomeScreenState extends State<HomeScreen>
                 Text(
                   'Welcome back,',
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 14,
                     color: AppColors.textSecondary,
                     fontWeight: FontWeight.w500,
-                    letterSpacing: 0.3,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   model.userName,
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textBlack,
-                    letterSpacing: 0.2,
                   ),
                 ),
               ],
@@ -296,29 +152,26 @@ class _HomeScreenState extends State<HomeScreen>
             children: [
               // Location
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: AppColors.secondary.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: AppColors.primary.withOpacity(0.2),
-                    width: 1,
-                  ),
+                  color: AppColors.secondary.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
                       Icons.location_on,
-                      size: 18,
+                      size: 16,
                       color: AppColors.primary,
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 4),
                     Text(
                       model.userLocation,
                       style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
                         color: AppColors.primary,
                       ),
                     ),
@@ -326,44 +179,30 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
               ),
 
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
 
-              // Notifications with Animation
+              // Notifications
               Stack(
                 children: [
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(16),
-                      onTap: () {
-                        HapticFeedback.lightImpact();
-                        Navigator.push(
-                          context,
-                          PageRouteBuilder(
-                            pageBuilder: (context, animation, secondaryAnimation) =>
-                                const NotificationScreen(),
-                            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                              return FadeTransition(opacity: animation, child: child);
-                            },
-                            transitionDuration: const Duration(milliseconds: 300),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppColors.secondary.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: AppColors.primary.withOpacity(0.2),
-                            width: 1,
-                          ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const NotificationScreen(),
                         ),
-                        child: Icon(
-                          Icons.notifications_none,
-                          color: AppColors.primary,
-                          size: 22,
-                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.notifications_none,
+                        color: AppColors.primary,
+                        size: 20,
                       ),
                     ),
                   ),
@@ -371,41 +210,25 @@ class _HomeScreenState extends State<HomeScreen>
                     Positioned(
                       right: 0,
                       top: 0,
-                      child: TweenAnimationBuilder<double>(
-                        tween: Tween(begin: 0.0, end: 1.0),
-                        duration: const Duration(milliseconds: 600),
-                        builder: (context, value, child) {
-                          return Transform.scale(
-                            scale: value,
-                            child: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                color: AppColors.error,
-                                borderRadius: BorderRadius.circular(10),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.error.withOpacity(0.3),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              constraints: const BoxConstraints(
-                                minWidth: 20,
-                                minHeight: 20,
-                              ),
-                              child: Text(
-                                '${model.unreadCount}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          );
-                        },
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: AppColors.error,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 16,
+                          minHeight: 16,
+                        ),
+                        child: Text(
+                          '${model.unreadCount}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
                 ],
@@ -419,63 +242,51 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _buildSearchSection(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(20),
-          onTap: () {
-            HapticFeedback.lightImpact();
-            Navigator.pushNamed(context, '/search');
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.06),
-                  blurRadius: 16,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.search,
+      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+      child: GestureDetector(
+        onTap: () => Navigator.pushNamed(context, '/search'),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.search,
+                color: AppColors.textSecondary,
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Search doctors, hospitals, or symptoms...',
+                style: TextStyle(
                   color: AppColors.textSecondary,
-                  size: 22,
+                  fontSize: 16,
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    'Search doctors, hospitals, or symptoms...',
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                  ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                const SizedBox(width: 12),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.tune,
-                    color: AppColors.primary,
-                    size: 18,
-                  ),
+                child: Icon(
+                  Icons.tune,
+                  color: AppColors.primary,
+                  size: 16,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -484,20 +295,19 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _buildQuickActions(BuildContext context, HomeViewModel model) {
     return Container(
-      margin: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(horizontal: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Quick Actions',
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
               color: AppColors.textBlack,
-              letterSpacing: 0.2,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
@@ -508,28 +318,16 @@ class _HomeScreenState extends State<HomeScreen>
                   subtitle: 'On Map',
                   color: AppColors.primary,
                   onTap: () {
-                    HapticFeedback.lightImpact();
                     Navigator.push(
                       context,
-                      PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            const FindHospitalsScreen(),
-                        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                          return SlideTransition(
-                            position: Tween<Offset>(
-                              begin: const Offset(1.0, 0.0),
-                              end: Offset.zero,
-                            ).animate(animation),
-                            child: child,
-                          );
-                        },
-                        transitionDuration: const Duration(milliseconds: 400),
+                      MaterialPageRoute(
+                        builder: (_) => const FindHospitalsScreen(),
                       ),
                     );
                   },
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               Expanded(
                 child: _buildQuickActionCard(
                   context,
@@ -538,7 +336,6 @@ class _HomeScreenState extends State<HomeScreen>
                   subtitle: 'Appointment',
                   color: AppColors.accent,
                   onTap: () {
-                    HapticFeedback.lightImpact();
                     Navigator.pushNamed(context, '/schedule');
                   },
                 ),
@@ -558,88 +355,91 @@ class _HomeScreenState extends State<HomeScreen>
     required Color color,
     required VoidCallback onTap,
   }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: onTap,
-        child: Container(
-          height: 140,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: AppColors.primary.withOpacity(0.15),
-              width: 1.5,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 120,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppColors.primary.withOpacity(0.2),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.06),
-                blurRadius: 16,
-                offset: const Offset(0, 4),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Stack(
+            children: [
+              // Background Image
+              Positioned.fill(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Image.asset(
+                    imagePath,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+
+              // Content
+              Positioned(
+                bottom: 6,
+                left: 12,
+                right: 12,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.primary,
+                          shadows: [
+                            Shadow(
+                              offset: Offset(0, 1),
+                              blurRadius: 2,
+                              color: Colors.black.withOpacity(0.12),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textSecondary,
+                          shadows: [
+                            Shadow(
+                              offset: Offset(0, 1),
+                              blurRadius: 2,
+                              color: Colors.black.withOpacity(0.10),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: Stack(
-              children: [
-                // Background Image
-                Positioned.fill(
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Image.asset(
-                      imagePath,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
-
-                // Content
-                Positioned(
-                  bottom: 8,
-                  left: 16,
-                  right: 16,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.9),
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          title,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
-                            letterSpacing: 0.3,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          subtitle,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ),
         ),
       ),
@@ -648,28 +448,27 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _buildCategoriesSection(BuildContext context, HomeViewModel model) {
     return Container(
-      margin: const EdgeInsets.all(16),
+      margin: const EdgeInsets.all(10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Services',
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
               color: AppColors.textBlack,
-              letterSpacing: 0.2,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 4,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 20,
-              childAspectRatio: 0.85,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 16,
+              childAspectRatio: 0.8,
             ),
             itemCount: model.categories.length,
             itemBuilder: (context, index) {
@@ -682,7 +481,6 @@ class _HomeScreenState extends State<HomeScreen>
                 label: category['name'],
                 isActive: isActive,
                 onTap: () {
-                  HapticFeedback.lightImpact();
                   model.setCategory(category['name']);
                   Navigator.pushNamed(
                     context,
@@ -705,73 +503,55 @@ class _HomeScreenState extends State<HomeScreen>
     required bool isActive,
     required VoidCallback onTap,
   }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isActive ? AppColors.primary : AppColors.primary.withOpacity(0.2),
-              width: isActive ? 2 : 1.5,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
-            boxShadow: [
-              BoxShadow(
-                color: isActive 
-                    ? AppColors.primary.withOpacity(0.2)
-                    : Colors.black.withOpacity(0.04),
-                blurRadius: isActive ? 12 : 8,
-                offset: const Offset(0, 4),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Circular Avatar with Icon
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: isActive
+                      ? AppColors.primary
+                      : AppColors.primary.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  icon,
+                  color: isActive ? Colors.white : AppColors.primary,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(height: 8),
+              // Category Name
+              Text(
+                label,
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: isActive ? AppColors.primary : AppColors.textBlack,
+                  fontSize: 12,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Circular Avatar with Icon
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: isActive
-                        ? AppColors.primary
-                        : AppColors.primary.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                    boxShadow: isActive ? [
-                      BoxShadow(
-                        color: AppColors.primary.withOpacity(0.3),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ] : null,
-                  ),
-                  child: Icon(
-                    icon,
-                    color: isActive ? Colors.white : AppColors.primary,
-                    size: 26,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                // Category Name
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: isActive ? AppColors.primary : AppColors.textBlack,
-                    fontSize: 12,
-                    letterSpacing: 0.2,
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
           ),
         ),
       ),
@@ -780,7 +560,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _buildAppointmentsSection(BuildContext context, HomeViewModel model) {
     return Container(
-      margin: const EdgeInsets.all(16),
+      margin: const EdgeInsets.all(5),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -790,78 +570,42 @@ class _HomeScreenState extends State<HomeScreen>
               Text(
                 'Upcoming Appointments',
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textBlack,
-                  letterSpacing: 0.2,
                 ),
               ),
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(20),
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    Navigator.of(context).push(
-                      PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            AllAppointmentsScreen(),
-                        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                          return SlideTransition(
-                            position: Tween<Offset>(
-                              begin: const Offset(1.0, 0.0),
-                              end: Offset.zero,
-                            ).animate(animation),
-                            child: child,
-                          );
-                        },
-                        transitionDuration: const Duration(milliseconds: 400),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Text(
-                      'See All',
-                      style: TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
-                      ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => AllAppointmentsScreen(),
                     ),
+                  );
+                },
+                child: Text(
+                  'See All',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           SizedBox(
-            height: 260,
+            height: 240,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
               itemCount: model.upcomingAppointments.length,
               itemBuilder: (context, index) {
-                return TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0.0, end: 1.0),
-                  duration: Duration(milliseconds: 600 + (index * 100)),
-                  builder: (context, value, child) {
-                    return Transform.translate(
-                      offset: Offset(0, 20 * (1 - value)),
-                      child: Opacity(
-                        opacity: value,
-                        child: Container(
-                          width: 320,
-                          margin: EdgeInsets.only(
-                            right: index == model.upcomingAppointments.length - 1 ? 0 : 20,
-                          ),
-                          child: AppointmentCard(
-                            appointment: model.upcomingAppointments[index],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
+                return Container(
+                  width: 300,
+                  margin: const EdgeInsets.only(right: 16),
+                  child: AppointmentCard(
+                    appointment: model.upcomingAppointments[index],
+                  ),
                 );
               },
             ),
@@ -873,7 +617,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _buildOffersSection(BuildContext context, HomeViewModel model) {
     return Container(
-      margin: const EdgeInsets.all(16),
+      margin: const EdgeInsets.all(5),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -883,91 +627,51 @@ class _HomeScreenState extends State<HomeScreen>
               Text(
                 'Special Offers',
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textBlack,
-                  letterSpacing: 0.2,
                 ),
               ),
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(20),
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    Navigator.of(context).push(
-                      PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            const OffersScreen(),
-                        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                          return SlideTransition(
-                            position: Tween<Offset>(
-                              begin: const Offset(1.0, 0.0),
-                              end: Offset.zero,
-                            ).animate(animation),
-                            child: child,
-                          );
-                        },
-                        transitionDuration: const Duration(milliseconds: 400),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Text(
-                      'View All',
-                      style: TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
-                      ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const OffersScreen(),
                     ),
+                  );
+                },
+                child: Text(
+                  'View All',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           SizedBox(
-            height: 240,
+            height: 220,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
               itemCount: model.offers.length,
               itemBuilder: (context, index) {
-                return TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0.0, end: 1.0),
-                  duration: Duration(milliseconds: 600 + (index * 100)),
-                  builder: (context, value, child) {
-                    return Transform.translate(
-                      offset: Offset(0, 20 * (1 - value)),
-                      child: Opacity(
-                        opacity: value,
-                        child: Container(
-                          width: 300,
-                          margin: EdgeInsets.only(
-                            right: index == model.offers.length - 1 ? 0 : 20,
-                          ),
-                          child: OfferCard(
-                            offer: model.offers[index],
-                            onTap: () {
-                              HapticFeedback.lightImpact();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Booking ${model.offers[index].title}...'),
-                                  duration: const Duration(seconds: 2),
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
+                return Container(
+                  width: 280,
+                  margin: const EdgeInsets.only(right: 16),
+                  child: OfferCard(
+                    offer: model.offers[index],
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content:
+                              Text('Booking ${model.offers[index].title}...'),
+                          duration: const Duration(seconds: 2),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 );
               },
             ),
@@ -979,7 +683,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _buildDoctorsSection(BuildContext context, HomeViewModel model) {
     return Container(
-      margin: const EdgeInsets.all(16),
+      margin: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -989,112 +693,68 @@ class _HomeScreenState extends State<HomeScreen>
               Text(
                 'Top Doctors',
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textBlack,
-                  letterSpacing: 0.2,
                 ),
               ),
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(20),
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    Navigator.of(context).push(
-                      PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            const DoctorsScreen(),
-                        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                          return SlideTransition(
-                            position: Tween<Offset>(
-                              begin: const Offset(1.0, 0.0),
-                              end: Offset.zero,
-                            ).animate(animation),
-                            child: child,
-                          );
-                        },
-                        transitionDuration: const Duration(milliseconds: 400),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Text(
-                      'See All',
-                      style: TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
-                      ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const DoctorsScreen(),
                     ),
+                  );
+                },
+                child: Text(
+                  'See All',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
 
           // Specialties Filter
           SizedBox(
-            height: 44,
+            height: 40,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
               itemCount: model.specialties.length,
               itemBuilder: (context, index) {
                 final specialty = model.specialties[index];
                 final isSelected = model.selectedSpecialty == specialty;
 
                 return Container(
-                  margin: const EdgeInsets.only(right: 12),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(22),
-                      onTap: () {
-                        HapticFeedback.lightImpact();
-                        if (isSelected) {
-                          model.setSpecialty('');
-                        } else {
-                          model.setSpecialty(specialty);
-                        }
-                      },
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: isSelected ? AppColors.primary : AppColors.secondary.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(22),
-                          border: Border.all(
-                            color: isSelected ? AppColors.primary : AppColors.primary.withOpacity(0.3),
-                            width: 1.5,
-                          ),
-                          boxShadow: isSelected ? [
-                            BoxShadow(
-                              color: AppColors.primary.withOpacity(0.3),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ] : null,
-                        ),
-                        child: Text(
-                          specialty,
-                          style: TextStyle(
-                            color: isSelected ? Colors.white : AppColors.primary,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
-                        ),
+                  margin: const EdgeInsets.only(right: 8),
+                  child: FilterChip(
+                    label: Text(
+                      specialty,
+                      style: TextStyle(
+                        color: isSelected ? Colors.white : AppColors.primary,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
+                    selected: isSelected,
+                    backgroundColor: AppColors.secondary.withOpacity(0.2),
+                    selectedColor: AppColors.primary,
+                    checkmarkColor: Colors.white,
+                    side: BorderSide.none,
+                    onSelected: (selected) {
+                      if (selected) {
+                        model.setSpecialty(specialty);
+                      }
+                    },
                   ),
                 );
               },
             ),
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
 
           // Doctor Cards
           ListView.builder(
@@ -1102,50 +762,22 @@ class _HomeScreenState extends State<HomeScreen>
             physics: const NeverScrollableScrollPhysics(),
             itemCount: model.doctors.length,
             itemBuilder: (context, index) {
-              return TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0.0, end: 1.0),
-                duration: Duration(milliseconds: 600 + (index * 100)),
-                builder: (context, value, child) {
-                  return Transform.translate(
-                    offset: Offset(0, 20 * (1 - value)),
-                    child: Opacity(
-                      opacity: value,
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(16),
-                            onTap: () {
-                              HapticFeedback.lightImpact();
-                              Navigator.of(context).push(
-                                PageRouteBuilder(
-                                  pageBuilder: (context, animation, secondaryAnimation) =>
-                                      DoctorDetailScreen(
-                                    doctor: model.doctors[index],
-                                  ),
-                                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                    return SlideTransition(
-                                      position: Tween<Offset>(
-                                        begin: const Offset(1.0, 0.0),
-                                        end: Offset.zero,
-                                      ).animate(animation),
-                                      child: child,
-                                    );
-                                  },
-                                  transitionDuration: const Duration(milliseconds: 400),
-                                ),
-                              );
-                            },
-                            child: DoctorCard(
-                              doctor: model.doctors[index],
-                            ),
-                          ),
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => DoctorDetailScreen(
+                          doctor: model.doctors[index],
                         ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                  child: DoctorCard(
+                    doctor: model.doctors[index],
+                  ),
+                ),
               );
             },
           ),
@@ -1156,7 +788,7 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _buildHospitalsSection(BuildContext context, HomeViewModel model) {
     return Container(
-      margin: const EdgeInsets.all(16),
+      margin: const EdgeInsets.all(5),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1166,51 +798,30 @@ class _HomeScreenState extends State<HomeScreen>
               Text(
                 'Hospitals & Clinics',
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textBlack,
-                  letterSpacing: 0.2,
                 ),
               ),
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(20),
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    Navigator.of(context).push(
-                      PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            const HospitalsScreen(),
-                        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                          return SlideTransition(
-                            position: Tween<Offset>(
-                              begin: const Offset(1.0, 0.0),
-                              end: Offset.zero,
-                            ).animate(animation),
-                            child: child,
-                          );
-                        },
-                        transitionDuration: const Duration(milliseconds: 400),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Text(
-                      'View All',
-                      style: TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
-                      ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const HospitalsScreen(),
                     ),
+                  );
+                },
+                child: Text(
+                  'View All',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
 
           // Dropdown-like Filters
           Row(
@@ -1223,14 +834,13 @@ class _HomeScreenState extends State<HomeScreen>
                   selectedValue: model.selectedHospitalType,
                   items: model.hospitalTypes,
                   onChanged: (value) {
-                    HapticFeedback.lightImpact();
                     if (value != null) {
                       model.setHospitalType(value);
                     }
                   },
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               // Cost Category Dropdown
               Expanded(
                 child: _buildFilterDropdown(
@@ -1239,7 +849,6 @@ class _HomeScreenState extends State<HomeScreen>
                   selectedValue: model.selectedCostCategory,
                   items: model.costCategories,
                   onChanged: (value) {
-                    HapticFeedback.lightImpact();
                     if (value != null) {
                       model.setCostCategory(value);
                     }
@@ -1249,7 +858,7 @@ class _HomeScreenState extends State<HomeScreen>
             ],
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
 
           // Hospital Cards
           ListView.builder(
@@ -1258,92 +867,31 @@ class _HomeScreenState extends State<HomeScreen>
             itemCount: model.filteredHospitals.length,
             itemBuilder: (context, index) {
               final hospital = model.filteredHospitals[index];
-              return TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0.0, end: 1.0),
-                duration: Duration(milliseconds: 600 + (index * 100)),
-                builder: (context, value, child) {
-                  return Transform.translate(
-                    offset: Offset(0, 20 * (1 - value)),
-                    child: Opacity(
-                      opacity: value,
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(16),
-                            onTap: () {
-                              HapticFeedback.lightImpact();
-                              Navigator.push(
-                                context,
-                                PageRouteBuilder(
-                                  pageBuilder: (context, animation, secondaryAnimation) =>
-                                      HospitalDetailScreen(hospital: hospital),
-                                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                    return SlideTransition(
-                                      position: Tween<Offset>(
-                                        begin: const Offset(1.0, 0.0),
-                                        end: Offset.zero,
-                                      ).animate(animation),
-                                      child: child,
-                                    );
-                                  },
-                                  transitionDuration: const Duration(milliseconds: 400),
-                                ),
-                              );
-                            },
-                            child: HospitalCard(
-                              hospital: hospital,
-                              onTap: () {
-                                HapticFeedback.lightImpact();
-                                Navigator.push(
-                                  context,
-                                  PageRouteBuilder(
-                                    pageBuilder: (context, animation, secondaryAnimation) =>
-                                        HospitalDetailScreen(hospital: hospital),
-                                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                      return SlideTransition(
-                                        position: Tween<Offset>(
-                                          begin: const Offset(1.0, 0.0),
-                                          end: Offset.zero,
-                                        ).animate(animation),
-                                        child: child,
-                                      );
-                                    },
-                                    transitionDuration: const Duration(milliseconds: 400),
-                                  ),
-                                );
-                              },
-                              onMapTap: (selectedHospital) {
-                                HapticFeedback.lightImpact();
-                                Navigator.push(
-                                  context,
-                                  PageRouteBuilder(
-                                    pageBuilder: (context, animation, secondaryAnimation) =>
-                                        HospitalMapScreen(
-                                      selectedHospital: selectedHospital,
-                                      hospitals: model.filteredHospitals,
-                                    ),
-                                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                      return SlideTransition(
-                                        position: Tween<Offset>(
-                                          begin: const Offset(1.0, 0.0),
-                                          end: Offset.zero,
-                                        ).animate(animation),
-                                        child: child,
-                                      );
-                                    },
-                                    transitionDuration: const Duration(milliseconds: 400),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                child: HospitalCard(
+                  hospital: hospital,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            HospitalDetailScreen(hospital: hospital),
+                      ),
+                    );
+                  },
+                  onMapTap: (selectedHospital) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => HospitalMapScreen(
+                          selectedHospital: selectedHospital,
+                          hospitals: model.filteredHospitals,
                         ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               );
             },
           ),
@@ -1362,52 +910,53 @@ class _HomeScreenState extends State<HomeScreen>
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(color: AppColors.secondary.withOpacity(0.3)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: DropdownButtonFormField<String>(
         value: selectedValue,
         decoration: InputDecoration(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           border: InputBorder.none,
           labelText: title,
           labelStyle: TextStyle(
             color: AppColors.textSecondary,
-            fontSize: 13,
+            fontSize: 12,
             fontWeight: FontWeight.w500,
           ),
           floatingLabelBehavior: FloatingLabelBehavior.never,
         ),
         style: TextStyle(
           color: AppColors.textBlack,
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
         ),
         icon: Icon(
           Icons.keyboard_arrow_down,
           color: AppColors.primary,
-          size: 20,
+          size: 18,
         ),
         dropdownColor: Colors.white,
-        isExpanded: true,
         items: items.map((String item) {
           return DropdownMenuItem<String>(
             value: item,
             child: Text(
               item,
               style: TextStyle(
-                color: item == selectedValue ? AppColors.primary : AppColors.textBlack,
-                fontWeight: item == selectedValue ? FontWeight.w600 : FontWeight.w500,
+                color: item == selectedValue
+                    ? AppColors.primary
+                    : AppColors.textBlack,
+                fontWeight:
+                    item == selectedValue ? FontWeight.w600 : FontWeight.w500,
               ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
             ),
           );
         }).toList(),

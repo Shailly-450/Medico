@@ -20,10 +20,16 @@ import 'views/profile/profile_screen.dart';
 import 'viewmodels/family_members_view_model.dart';
 import 'views/prescriptions/prescriptions_screen.dart';
 import 'views/prescriptions/test_prescriptions_screen.dart';
+import 'views/workflow/medical_workflow_screen.dart';
+import 'views/workflow/workflow_demo_screen.dart';
+import 'views/ai_symptom/ai_symptom_chat_screen.dart';
+import 'core/services/ai_symptom_service.dart';
 
 void main() {
   // Initialize mock data for OrderService
   OrderService.initializeMockData();
+  // Initialize AI Symptom Service
+  AISymptomService().initialize();
   runApp(const MyApp());
 }
 
@@ -62,6 +68,9 @@ class MyApp extends StatelessWidget {
             '/orders': (context) => const OrdersScreen(),
             '/prescriptions': (context) => const PrescriptionsScreen(),
             '/test-prescriptions': (context) => const TestPrescriptionsScreen(),
+            '/workflow': (context) => const MedicalWorkflowScreen(),
+            '/workflow-demo': (context) => const WorkflowDemoScreen(),
+            '/ai-symptom-chat': (context) => const AISymptomChatScreen(),
           },
           onGenerateRoute: (settings) {
             print('Navigating to: ${settings.name}');
