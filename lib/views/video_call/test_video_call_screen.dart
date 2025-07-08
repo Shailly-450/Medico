@@ -9,17 +9,17 @@ class TestVideoCallScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Test Video Calls'),
+        title: const Text('Recent Calls'),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Video Call Demo',
+              'Recent Calls',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -28,7 +28,7 @@ class TestVideoCallScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Test the video call interface with different scenarios',
+              'Your recent video consultations and calls',
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey[600],
@@ -36,46 +36,54 @@ class TestVideoCallScreen extends StatelessWidget {
             ),
             const SizedBox(height: 32),
 
-            // Test scenarios
-            _buildTestCard(
+            // Recent calls
+            _buildRecentCallCard(
               context,
               'Dr. Sarah Johnson',
               'Cardiologist',
               'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400',
-              'Test with a cardiologist',
+              'Yesterday, 2:30 PM',
+              'Completed • 45 min',
+              true,
             ),
 
             const SizedBox(height: 16),
 
-            _buildTestCard(
+            _buildRecentCallCard(
               context,
               'Dr. Michael Chen',
               'Dermatologist',
               'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400',
-              'Test with a dermatologist',
+              'Dec 28, 10:15 AM',
+              'Completed • 25 min',
+              false,
             ),
 
             const SizedBox(height: 16),
 
-            _buildTestCard(
+            _buildRecentCallCard(
               context,
               'Dr. Emily Rodriguez',
               'Pediatrician',
               null,
-              'Test without doctor image',
+              'Dec 26, 4:45 PM',
+              'Missed call',
+              false,
             ),
 
             const SizedBox(height: 16),
 
-            _buildTestCard(
+            _buildRecentCallCard(
               context,
               'Dr. James Wilson',
               'Neurologist',
               'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=400',
-              'Test with a neurologist',
+              'Dec 24, 11:00 AM',
+              'Completed • 38 min',
+              false,
             ),
 
-            const Spacer(),
+            const SizedBox(height: 24),
 
             // Features list
             Container(
@@ -123,12 +131,14 @@ class TestVideoCallScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTestCard(
+  Widget _buildRecentCallCard(
     BuildContext context,
     String doctorName,
     String specialty,
     String? imageUrl,
-    String description,
+    String dateTime,
+    String status,
+    bool isRecent,
   ) {
     return Card(
       elevation: 2,
@@ -206,28 +216,78 @@ class TestVideoCallScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      description,
+                      dateTime,
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey[500],
                       ),
                     ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          status.contains('Missed')
+                              ? Icons.call_missed
+                              : Icons.videocam,
+                          size: 12,
+                          color: status.contains('Missed')
+                              ? Colors.red
+                              : Colors.green,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          status,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: status.contains('Missed')
+                                ? Colors.red
+                                : Colors.green,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
 
-              // Video call icon
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  Icons.video_call,
-                  color: AppColors.primary,
-                  size: 24,
-                ),
+              // Call again or info icon
+              Row(
+                children: [
+                  if (isRecent)
+                    Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: const Text(
+                        'NEW',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      status.contains('Missed')
+                          ? Icons.call_missed
+                          : Icons.video_call,
+                      color: status.contains('Missed')
+                          ? Colors.red
+                          : AppColors.primary,
+                      size: 20,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
