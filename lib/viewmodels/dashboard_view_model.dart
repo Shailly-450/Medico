@@ -254,9 +254,9 @@ class DashboardViewModel extends BaseViewModel {
       'color': Colors.blue,
     },
     {
-      'title': 'Health Tracker',
-      'icon': Icons.health_and_safety,
-      'color': Colors.green,
+      'title': 'Journey Tracker',
+      'icon': Icons.timeline,
+      'color': Colors.teal,
     },
     {
       'title': 'Medicine Reminders',

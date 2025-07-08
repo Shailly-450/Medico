@@ -31,7 +31,7 @@ class DashboardScreen extends StatelessWidget {
     return BaseView<DashboardViewModel>(
       viewModelBuilder: () => DashboardViewModel(),
       builder: (context, model, child) => Scaffold(
-        backgroundColor: Colors.grey[50],
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
           // centerTitle: true,
           title: Text(
@@ -71,50 +71,65 @@ class DashboardScreen extends StatelessWidget {
             ),
           ],
         ),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Profile Header with Welcome Message
-                _buildWelcomeHeader(context, model),
-
-                // Health Overview Cards - Most Important Info First
-                _buildHealthOverview(context, model),
-
-                // Health Tracker - Vital Signs and Metrics
-                _buildHealthTracker(context, model),
-
-                // Vitals Trends Graph
-                const SizedBox(height: 16),
-                const VitalsGraphSection(),
-
-                // Quick Actions - Easy Access to Common Tasks
-                _buildQuickActions(context, model),
-
-                // Pre-approval Summary - Important Status
-                const SizedBox(height: 16),
-                const PreApprovalSummaryCard(),
-
-                // Policy Documents - Important for Insurance
-                const SizedBox(height: 16),
-                const PolicyDocumentsCard(),
-
-                // Recent Medical History
-                _buildRecentHistory(context, model),
-
-                // Active Care Section
-                _buildActiveCare(context, model),
-
-                // Test Checkups Section
-                _buildTestCheckups(context, model),
-
-                // Smart Recommendations
-                _buildRecommendations(context, model),
-
-                // Add bottom padding to prevent overflow with bottom navigation
-                const SizedBox(height: 80),
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFFE8F5E8), // Light mint green
+                Color(0xFFF0F8F0), // Very light sage
+                Color(0xFFE6F3E6), // Soft green tint
+                Color(0xFFF5F9F5), // Almost white with green tint
               ],
+              stops: [0.0, 0.3, 0.7, 1.0],
+            ),
+          ),
+          child: SafeArea(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Profile Header with Welcome Message
+                  _buildWelcomeHeader(context, model),
+
+                  // Health Overview Cards - Most Important Info First
+                  _buildHealthOverview(context, model),
+
+                  // Health Tracker - Vital Signs and Metrics
+                  _buildHealthTracker(context, model),
+
+                  // Vitals Trends Graph
+                  const SizedBox(height: 16),
+                  const VitalsGraphSection(),
+
+                  // Quick Actions - Easy Access to Common Tasks
+                  _buildQuickActions(context, model),
+
+                  // Pre-approval Summary - Important Status
+                  const SizedBox(height: 16),
+                  const PreApprovalSummaryCard(),
+
+                  // Policy Documents - Important for Insurance
+                  const SizedBox(height: 16),
+                  const PolicyDocumentsCard(),
+
+                  // Recent Medical History
+                  _buildRecentHistory(context, model),
+
+                  // Active Care Section
+                  _buildActiveCare(context, model),
+
+                  // Test Checkups Section
+                  _buildTestCheckups(context, model),
+
+                  // Smart Recommendations
+                  _buildRecommendations(context, model),
+
+                  // Add bottom padding to prevent overflow with bottom navigation
+                  const SizedBox(height: 80),
+                ],
+              ),
             ),
           ),
         ),
@@ -125,58 +140,93 @@ class DashboardScreen extends StatelessWidget {
   Widget _buildWelcomeHeader(BuildContext context, DashboardViewModel model) {
     return Container(
       margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AppColors.primary, AppColors.accent],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+        color: Colors.white.withOpacity(0.85),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.3),
+          width: 1.5,
         ),
-        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.3),
-            spreadRadius: 1,
-            blurRadius: 10,
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
             offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: const Color(0xFF4CAF50).withOpacity(0.1),
+            blurRadius: 40,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          // Profile Avatar
           Container(
-            padding: const EdgeInsets.all(12),
+            width: 52,
+            height: 52,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
+              gradient: LinearGradient(
+                colors: [
+                  const Color(0xFF2E7D32),
+                  const Color(0xFF4CAF50),
+                  const Color(0xFF66BB6A),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF2E7D32).withOpacity(0.4),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-            child: const Icon(Icons.person, color: Colors.white, size: 32),
+            child: const Icon(Icons.person, color: Colors.white, size: 28),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 18),
+          // Welcome and Name
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  'Welcome back!',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'Welcome back, ',
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.3,
+                        ),
                       ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Abdullah Alshahrani',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                      TextSpan(
+                        text: 'Abdullah Alshahrani',
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textBlack,
+                          letterSpacing: 0.2,
+                        ),
                       ),
+                    ],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'How can we help you today?',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withOpacity(0.9),
+                        color: AppColors.textSecondary,
                       ),
                 ),
               ],
@@ -754,7 +804,7 @@ class DashboardScreen extends StatelessWidget {
               crossAxisCount: 2,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              childAspectRatio: 1.4,
+              childAspectRatio: 1.0, // Changed from 1.4 to 1.0 for taller cards
             ),
             itemCount: model.quickActions.length,
             itemBuilder: (context, index) {

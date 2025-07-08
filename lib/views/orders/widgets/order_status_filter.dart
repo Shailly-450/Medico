@@ -40,10 +40,10 @@ class OrderStatusFilter extends StatelessWidget {
     return GestureDetector(
       onTap: () => onStatusChanged(status),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primary : Colors.white,
-          borderRadius: BorderRadius.circular(25),
+          borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: isSelected ? AppColors.primary : Colors.grey[300]!,
             width: 1,

@@ -118,7 +118,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         centerTitle: true,
         title: const Text(
@@ -155,11 +155,12 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    Color(0xFFF8FAFC),
-                    Color(0xFFF1F5F9),
-                    Color(0xFFE2E8F0),
+                    Color(0xFFE8F5E8), // Light mint green
+                    Color(0xFFF0F8F0), // Very light sage
+                    Color(0xFFE6F3E6), // Soft green tint
+                    Color(0xFFF5F9F5), // Almost white with green tint
                   ],
-                  stops: [0.0, 0.5, 1.0],
+                  stops: [0.0, 0.3, 0.7, 1.0],
                 ),
               ),
               child: const Center(
@@ -188,11 +189,12 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    Color(0xFFF8FAFC),
-                    Color(0xFFF1F5F9),
-                    Color(0xFFE2E8F0),
+                    Color(0xFFE8F5E8), // Light mint green
+                    Color(0xFFF0F8F0), // Very light sage
+                    Color(0xFFE6F3E6), // Soft green tint
+                    Color(0xFFF5F9F5), // Almost white with green tint
                   ],
-                  stops: [0.0, 0.5, 1.0],
+                  stops: [0.0, 0.3, 0.7, 1.0],
                 ),
               ),
               child: FadeTransition(
@@ -205,13 +207,22 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                       Container(
                         margin: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
+                          color: Colors.white.withOpacity(0.85),
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.3),
+                            width: 1.5,
+                          ),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.08),
                               blurRadius: 20,
                               offset: const Offset(0, 4),
+                            ),
+                            BoxShadow(
+                              color: const Color(0xFF4CAF50).withOpacity(0.1),
+                              blurRadius: 40,
+                              offset: const Offset(0, 8),
                             ),
                           ],
                         ),
@@ -343,13 +354,22 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                         child: Container(
                           margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                           decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
+                            color: Colors.white.withOpacity(0.85),
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.3),
+                              width: 1.5,
+                            ),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.08),
                                 blurRadius: 20,
                                 offset: const Offset(0, 4),
+                              ),
+                              BoxShadow(
+                                color: const Color(0xFF4CAF50).withOpacity(0.1),
+                                blurRadius: 40,
+                                offset: const Offset(0, 8),
                               ),
                             ],
                           ),
@@ -491,17 +511,22 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                 child: Container(
                   margin: const EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
+                    color: Colors.white.withOpacity(0.85),
+                    borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: AppColors.primary.withOpacity(0.1),
-                      width: 1,
+                      color: Colors.white.withOpacity(0.3),
+                      width: 1.2,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
-                        blurRadius: 12,
-                        offset: const Offset(0, 2),
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
+                      ),
+                      BoxShadow(
+                        color: const Color(0xFF4CAF50).withOpacity(0.08),
+                        blurRadius: 32,
+                        offset: const Offset(0, 8),
                       ),
                     ],
                   ),

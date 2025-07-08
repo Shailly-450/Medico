@@ -7,6 +7,7 @@ import '../../health_records/health_records_screen.dart';
 import '../../medicine_reminders/medicine_reminders_screen.dart';
 import '../../test_checkups/test_checkups_screen.dart';
 import '../../prescriptions/prescriptions_screen.dart';
+import '../../journey_tracker/journey_tracker_screen.dart';
 
 class QuickActionCard extends StatelessWidget {
   final Map<String, dynamic> action;
@@ -61,6 +62,12 @@ class QuickActionCard extends StatelessWidget {
               context,
               MaterialPageRoute(
                   builder: (context) => const PrescriptionsScreen()),
+            );
+          } else if (action['title'] == 'Journey Tracker') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const JourneyTrackerScreen()),
             );
           }
         },
