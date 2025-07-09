@@ -24,7 +24,6 @@ import 'views/prescriptions/test_prescriptions_screen.dart';
 import 'views/workflow/medical_workflow_screen.dart';
 import 'views/workflow/workflow_demo_screen.dart';
 import 'views/ai_symptom/ai_symptom_chat_screen.dart';
-import 'views/invoices/invoices_screen.dart';
 import 'core/services/ai_symptom_service.dart';
 
 void main() {
@@ -45,7 +44,8 @@ class MyApp extends StatelessWidget {
         Provider<NavigationService>(create: (_) => NavigationService()),
         ChangeNotifierProvider<HomeViewModel>(create: (_) => HomeViewModel()),
         ChangeNotifierProvider<OrderViewModel>(create: (_) => OrderViewModel()),
-        ChangeNotifierProvider<InvoiceViewModel>(create: (_) => InvoiceViewModel()),
+        ChangeNotifierProvider<InvoiceViewModel>(
+            create: (_) => InvoiceViewModel()),
         ChangeNotifierProvider<FamilyMembersViewModel>(
             create: (_) => FamilyMembersViewModel()),
       ],
@@ -74,7 +74,6 @@ class MyApp extends StatelessWidget {
             '/workflow': (context) => const MedicalWorkflowScreen(),
             '/workflow-demo': (context) => const WorkflowDemoScreen(),
             '/ai-symptom-chat': (context) => const AISymptomChatScreen(),
-            '/invoices': (context) => const InvoicesScreen(),
           },
           onGenerateRoute: (settings) {
             print('Navigating to: ${settings.name}');
