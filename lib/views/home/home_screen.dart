@@ -20,6 +20,12 @@ import 'package:medico/views/home/hospital_detail_screen.dart';
 import 'find_hospitals_screen.dart';
 import 'package:medico/views/schedule/schedule_screen.dart';
 import '../appointments/all_appointments_screen.dart';
+import '../shared/widgets/video_card.dart';
+import '../shared/widgets/article_card.dart';
+import '../shared/widgets/content_list_widget.dart';
+import '../../models/video_content.dart';
+import '../../models/article_content.dart';
+import '../video/video_player_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -28,12 +34,104 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen>
-    with TickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late AnimationController _fadeController;
   late AnimationController _slideController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+
+  // Sample video data
+  final List<VideoContent> _sampleVideos = [
+    VideoContent(
+      id: '1',
+      title: 'Understanding Diabetes: A Comprehensive Guide',
+      description:
+          'Learn about the different types of diabetes, symptoms, and management strategies from leading endocrinologists.',
+      thumbnailUrl:
+          'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=200&fit=crop',
+      videoUrl:
+          'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+      duration: '12:34',
+      author: 'Dr. Sarah Johnson',
+      authorAvatarUrl:
+          'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=100&h=100&fit=crop&crop=face',
+      publishedAt: DateTime.now().subtract(const Duration(hours: 2)),
+      views: 15420,
+      likes: 892,
+      tags: ['Diabetes', 'Endocrinology', 'Health'],
+      category: 'Endocrinology',
+      isPremium: false,
+      rating: 4.8,
+    ),
+    VideoContent(
+      id: '2',
+      title: 'Cardiovascular Health: Exercise and Nutrition Tips',
+      description:
+          'Expert advice on maintaining heart health through proper exercise routines and balanced nutrition.',
+      thumbnailUrl:
+          'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=200&fit=crop',
+      videoUrl:
+          'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+      duration: '18:45',
+      author: 'Dr. Michael Chen',
+      authorAvatarUrl:
+          'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=100&h=100&fit=crop&crop=face',
+      publishedAt: DateTime.now().subtract(const Duration(days: 1)),
+      views: 8920,
+      likes: 456,
+      tags: ['Cardiology', 'Exercise', 'Nutrition'],
+      category: 'Cardiology',
+      isPremium: true,
+      rating: 4.9,
+    ),
+  ];
+
+  // Sample article data
+  final List<ArticleContent> _sampleArticles = [
+    ArticleContent(
+      id: '1',
+      title:
+          'The Future of Telemedicine: How Technology is Transforming Healthcare',
+      summary:
+          'Explore how telemedicine is revolutionizing patient care and making healthcare more accessible than ever before.',
+      content: 'Full article content would go here...',
+      imageUrl:
+          'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&h=200&fit=crop',
+      author: 'Dr. James Wilson',
+      authorAvatarUrl:
+          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
+      publishedAt: DateTime.now().subtract(const Duration(hours: 4)),
+      readTime: 8,
+      views: 5670,
+      likes: 234,
+      tags: ['Telemedicine', 'Technology', 'Healthcare'],
+      category: 'Technology',
+      isPremium: false,
+      rating: 4.6,
+      isBookmarked: false,
+    ),
+    ArticleContent(
+      id: '2',
+      title: 'Nutrition Myths Debunked: What Science Really Says',
+      summary:
+          'Separate fact from fiction with evidence-based information about common nutrition misconceptions.',
+      content: 'Full article content would go here...',
+      imageUrl:
+          'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&h=200&fit=crop',
+      author: 'Dr. Lisa Park',
+      authorAvatarUrl:
+          'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=100&h=100&fit=crop&crop=face',
+      publishedAt: DateTime.now().subtract(const Duration(days: 2)),
+      readTime: 12,
+      views: 12340,
+      likes: 567,
+      tags: ['Nutrition', 'Science', 'Health'],
+      category: 'Nutrition',
+      isPremium: true,
+      rating: 4.8,
+      isBookmarked: true,
+    ),
+  ];
 
   @override
   void initState() {
@@ -142,6 +240,11 @@ class _HomeScreenState extends State<HomeScreen>
                     // Hospitals Section
                     SliverToBoxAdapter(
                       child: _buildHospitalsSection(context, model),
+                    ),
+
+                    // Health Content Section
+                    SliverToBoxAdapter(
+                      child: _buildHealthContentSection(context),
                     ),
 
                     // Bottom padding
@@ -325,7 +428,8 @@ class _HomeScreenState extends State<HomeScreen>
             children: [
               // Location
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: const Color(0xFFE8F5E8).withOpacity(0.8),
                   borderRadius: BorderRadius.circular(16),
@@ -369,12 +473,16 @@ class _HomeScreenState extends State<HomeScreen>
                         Navigator.push(
                           context,
                           PageRouteBuilder(
-                            pageBuilder: (context, animation, secondaryAnimation) =>
-                                const NotificationScreen(),
-                            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                              return FadeTransition(opacity: animation, child: child);
+                            pageBuilder:
+                                (context, animation, secondaryAnimation) =>
+                                    const NotificationScreen(),
+                            transitionsBuilder: (context, animation,
+                                secondaryAnimation, child) {
+                              return FadeTransition(
+                                  opacity: animation, child: child);
                             },
-                            transitionDuration: const Duration(milliseconds: 300),
+                            transitionDuration:
+                                const Duration(milliseconds: 300),
                           ),
                         );
                       },
@@ -414,7 +522,8 @@ class _HomeScreenState extends State<HomeScreen>
                                 borderRadius: BorderRadius.circular(10),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFFE53935).withOpacity(0.4),
+                                    color: const Color(0xFFE53935)
+                                        .withOpacity(0.4),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
@@ -560,7 +669,8 @@ class _HomeScreenState extends State<HomeScreen>
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
                             const FindHospitalsScreen(),
-                        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
                           return SlideTransition(
                             position: Tween<Offset>(
                               begin: const Offset(1.0, 0.0),
@@ -673,7 +783,8 @@ class _HomeScreenState extends State<HomeScreen>
                   left: 16,
                   right: 16,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.95),
                       borderRadius: BorderRadius.circular(12),
@@ -792,14 +903,14 @@ class _HomeScreenState extends State<HomeScreen>
             color: Colors.white.withOpacity(0.9),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isActive 
-                  ? const Color(0xFF4CAF50) 
+              color: isActive
+                  ? const Color(0xFF4CAF50)
                   : const Color(0xFF4CAF50).withOpacity(0.2),
               width: isActive ? 2 : 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: isActive 
+                color: isActive
                     ? const Color(0xFF4CAF50).withOpacity(0.3)
                     : Colors.black.withOpacity(0.04),
                 blurRadius: isActive ? 12 : 8,
@@ -831,13 +942,15 @@ class _HomeScreenState extends State<HomeScreen>
                         ? null
                         : const Color(0xFFE8F5E8).withOpacity(0.8),
                     shape: BoxShape.circle,
-                    boxShadow: isActive ? [
-                      BoxShadow(
-                        color: const Color(0xFF4CAF50).withOpacity(0.4),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ] : null,
+                    boxShadow: isActive
+                        ? [
+                            BoxShadow(
+                              color: const Color(0xFF4CAF50).withOpacity(0.4),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ]
+                        : null,
                   ),
                   child: Icon(
                     icon,
@@ -851,7 +964,9 @@ class _HomeScreenState extends State<HomeScreen>
                   label,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: isActive ? const Color(0xFF2E7D32) : AppColors.textBlack,
+                    color: isActive
+                        ? const Color(0xFF2E7D32)
+                        : AppColors.textBlack,
                     fontSize: 12,
                     letterSpacing: 0.2,
                   ),
@@ -895,7 +1010,8 @@ class _HomeScreenState extends State<HomeScreen>
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
                             AllAppointmentsScreen(),
-                        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
                           return SlideTransition(
                             position: Tween<Offset>(
                               begin: const Offset(1.0, 0.0),
@@ -909,7 +1025,8 @@ class _HomeScreenState extends State<HomeScreen>
                     );
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
                       color: const Color(0xFFE8F5E8).withOpacity(0.8),
                       borderRadius: BorderRadius.circular(20),
@@ -950,7 +1067,10 @@ class _HomeScreenState extends State<HomeScreen>
                         child: Container(
                           width: 320,
                           margin: EdgeInsets.only(
-                            right: index == model.upcomingAppointments.length - 1 ? 0 : 20,
+                            right:
+                                index == model.upcomingAppointments.length - 1
+                                    ? 0
+                                    : 20,
                           ),
                           child: AppointmentCard(
                             appointment: model.upcomingAppointments[index],
@@ -996,7 +1116,8 @@ class _HomeScreenState extends State<HomeScreen>
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
                             const OffersScreen(),
-                        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
                           return SlideTransition(
                             position: Tween<Offset>(
                               begin: const Offset(1.0, 0.0),
@@ -1010,7 +1131,8 @@ class _HomeScreenState extends State<HomeScreen>
                     );
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
                       color: const Color(0xFFE8F5E8).withOpacity(0.8),
                       borderRadius: BorderRadius.circular(20),
@@ -1059,7 +1181,8 @@ class _HomeScreenState extends State<HomeScreen>
                               HapticFeedback.lightImpact();
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('Booking ${model.offers[index].title}...'),
+                                  content: Text(
+                                      'Booking ${model.offers[index].title}...'),
                                   duration: const Duration(seconds: 2),
                                   behavior: SnackBarBehavior.floating,
                                   backgroundColor: const Color(0xFF4CAF50),
@@ -1111,7 +1234,8 @@ class _HomeScreenState extends State<HomeScreen>
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
                             const DoctorsScreen(),
-                        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
                           return SlideTransition(
                             position: Tween<Offset>(
                               begin: const Offset(1.0, 0.0),
@@ -1125,7 +1249,8 @@ class _HomeScreenState extends State<HomeScreen>
                     );
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
                       color: const Color(0xFFE8F5E8).withOpacity(0.8),
                       borderRadius: BorderRadius.circular(20),
@@ -1176,26 +1301,36 @@ class _HomeScreenState extends State<HomeScreen>
                       },
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12),
                         decoration: BoxDecoration(
-                          color: isSelected ? const Color(0xFF4CAF50) : const Color(0xFFE8F5E8).withOpacity(0.8),
+                          color: isSelected
+                              ? const Color(0xFF4CAF50)
+                              : const Color(0xFFE8F5E8).withOpacity(0.8),
                           borderRadius: BorderRadius.circular(22),
                           border: Border.all(
-                            color: isSelected ? const Color(0xFF4CAF50) : const Color(0xFF4CAF50).withOpacity(0.3),
+                            color: isSelected
+                                ? const Color(0xFF4CAF50)
+                                : const Color(0xFF4CAF50).withOpacity(0.3),
                             width: 1.5,
                           ),
-                          boxShadow: isSelected ? [
-                            BoxShadow(
-                              color: const Color(0xFF4CAF50).withOpacity(0.4),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ] : null,
+                          boxShadow: isSelected
+                              ? [
+                                  BoxShadow(
+                                    color: const Color(0xFF4CAF50)
+                                        .withOpacity(0.4),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ]
+                              : null,
                         ),
                         child: Text(
                           specialty,
                           style: TextStyle(
-                            color: isSelected ? Colors.white : const Color(0xFF2E7D32),
+                            color: isSelected
+                                ? Colors.white
+                                : const Color(0xFF2E7D32),
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
                           ),
@@ -1234,11 +1369,13 @@ class _HomeScreenState extends State<HomeScreen>
                               HapticFeedback.lightImpact();
                               Navigator.of(context).push(
                                 PageRouteBuilder(
-                                  pageBuilder: (context, animation, secondaryAnimation) =>
+                                  pageBuilder: (context, animation,
+                                          secondaryAnimation) =>
                                       DoctorDetailScreen(
                                     doctor: model.doctors[index],
                                   ),
-                                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                  transitionsBuilder: (context, animation,
+                                      secondaryAnimation, child) {
                                     return SlideTransition(
                                       position: Tween<Offset>(
                                         begin: const Offset(1.0, 0.0),
@@ -1247,7 +1384,8 @@ class _HomeScreenState extends State<HomeScreen>
                                       child: child,
                                     );
                                   },
-                                  transitionDuration: const Duration(milliseconds: 400),
+                                  transitionDuration:
+                                      const Duration(milliseconds: 400),
                                 ),
                               );
                             },
@@ -1296,7 +1434,8 @@ class _HomeScreenState extends State<HomeScreen>
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
                             const HospitalsScreen(),
-                        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
                           return SlideTransition(
                             position: Tween<Offset>(
                               begin: const Offset(1.0, 0.0),
@@ -1310,7 +1449,8 @@ class _HomeScreenState extends State<HomeScreen>
                     );
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
                       color: const Color(0xFFE8F5E8).withOpacity(0.8),
                       borderRadius: BorderRadius.circular(20),
@@ -1399,9 +1539,11 @@ class _HomeScreenState extends State<HomeScreen>
                               Navigator.push(
                                 context,
                                 PageRouteBuilder(
-                                  pageBuilder: (context, animation, secondaryAnimation) =>
+                                  pageBuilder: (context, animation,
+                                          secondaryAnimation) =>
                                       HospitalDetailScreen(hospital: hospital),
-                                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                  transitionsBuilder: (context, animation,
+                                      secondaryAnimation, child) {
                                     return SlideTransition(
                                       position: Tween<Offset>(
                                         begin: const Offset(1.0, 0.0),
@@ -1410,7 +1552,8 @@ class _HomeScreenState extends State<HomeScreen>
                                       child: child,
                                     );
                                   },
-                                  transitionDuration: const Duration(milliseconds: 400),
+                                  transitionDuration:
+                                      const Duration(milliseconds: 400),
                                 ),
                               );
                             },
@@ -1421,9 +1564,12 @@ class _HomeScreenState extends State<HomeScreen>
                                 Navigator.push(
                                   context,
                                   PageRouteBuilder(
-                                    pageBuilder: (context, animation, secondaryAnimation) =>
-                                        HospitalDetailScreen(hospital: hospital),
-                                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                    pageBuilder: (context, animation,
+                                            secondaryAnimation) =>
+                                        HospitalDetailScreen(
+                                            hospital: hospital),
+                                    transitionsBuilder: (context, animation,
+                                        secondaryAnimation, child) {
                                       return SlideTransition(
                                         position: Tween<Offset>(
                                           begin: const Offset(1.0, 0.0),
@@ -1432,7 +1578,8 @@ class _HomeScreenState extends State<HomeScreen>
                                         child: child,
                                       );
                                     },
-                                    transitionDuration: const Duration(milliseconds: 400),
+                                    transitionDuration:
+                                        const Duration(milliseconds: 400),
                                   ),
                                 );
                               },
@@ -1441,12 +1588,14 @@ class _HomeScreenState extends State<HomeScreen>
                                 Navigator.push(
                                   context,
                                   PageRouteBuilder(
-                                    pageBuilder: (context, animation, secondaryAnimation) =>
+                                    pageBuilder: (context, animation,
+                                            secondaryAnimation) =>
                                         HospitalMapScreen(
                                       selectedHospital: selectedHospital,
                                       hospitals: model.filteredHospitals,
                                     ),
-                                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                    transitionsBuilder: (context, animation,
+                                        secondaryAnimation, child) {
                                       return SlideTransition(
                                         position: Tween<Offset>(
                                           begin: const Offset(1.0, 0.0),
@@ -1455,7 +1604,8 @@ class _HomeScreenState extends State<HomeScreen>
                                         child: child,
                                       );
                                     },
-                                    transitionDuration: const Duration(milliseconds: 400),
+                                    transitionDuration:
+                                        const Duration(milliseconds: 400),
                                   ),
                                 );
                               },
@@ -1502,7 +1652,8 @@ class _HomeScreenState extends State<HomeScreen>
       child: DropdownButtonFormField<String>(
         value: selectedValue,
         decoration: InputDecoration(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           border: InputBorder.none,
           labelText: title,
           labelStyle: TextStyle(
@@ -1530,8 +1681,11 @@ class _HomeScreenState extends State<HomeScreen>
             child: Text(
               item,
               style: TextStyle(
-                color: item == selectedValue ? const Color(0xFF2E7D32) : AppColors.textBlack,
-                fontWeight: item == selectedValue ? FontWeight.w600 : FontWeight.w500,
+                color: item == selectedValue
+                    ? const Color(0xFF2E7D32)
+                    : AppColors.textBlack,
+                fontWeight:
+                    item == selectedValue ? FontWeight.w600 : FontWeight.w500,
               ),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
@@ -1539,6 +1693,213 @@ class _HomeScreenState extends State<HomeScreen>
           );
         }).toList(),
         onChanged: onChanged,
+      ),
+    );
+  }
+
+  Widget _buildHealthContentSection(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section Header
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.85),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.3),
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.06),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+                BoxShadow(
+                  color: const Color(0xFF4CAF50).withOpacity(0.08),
+                  blurRadius: 32,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE8F5E8).withOpacity(0.8),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.play_circle_outline,
+                    color: const Color(0xFF2E7D32),
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Health Content',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textBlack,
+                        ),
+                      ),
+                      Text(
+                        'Videos and articles from medical experts',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF4CAF50).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFF4CAF50).withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    'New',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF2E7D32),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Content List
+          ContentListWidget(
+            videos: _sampleVideos,
+            articles: _sampleArticles,
+            contentType: ContentType.mixed,
+            showFilterChips: false,
+            onVideoTap: (video) => _showVideoDetail(video),
+            onArticleTap: (article) => _showArticleDetail(article),
+            onVideoPlay: (video) => _playVideo(video),
+            onVideoLike: (video) => _likeVideo(video),
+            onVideoShare: (video) => _shareVideo(video),
+            onArticleLike: (article) => _likeArticle(article),
+            onArticleShare: (article) => _shareArticle(article),
+            onArticleBookmark: (article) => _bookmarkArticle(article),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showVideoDetail(VideoContent video) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Opening video: ${video.title}'),
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: const Color(0xFF4CAF50),
+      ),
+    );
+  }
+
+  void _showArticleDetail(ArticleContent article) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Opening article: ${article.title}'),
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: const Color(0xFF4CAF50),
+      ),
+    );
+  }
+
+  void _playVideo(VideoContent video) {
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            VideoPlayerScreen(video: video),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0.0, 1.0),
+              end: Offset.zero,
+            ).animate(animation),
+            child: child,
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 300),
+      ),
+    );
+  }
+
+  void _likeVideo(VideoContent video) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Liked video: ${video.title}'),
+        duration: const Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: const Color(0xFF4CAF50),
+      ),
+    );
+  }
+
+  void _shareVideo(VideoContent video) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Sharing video: ${video.title}'),
+        duration: const Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: const Color(0xFF4CAF50),
+      ),
+    );
+  }
+
+  void _likeArticle(ArticleContent article) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Liked article: ${article.title}'),
+        duration: const Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: const Color(0xFF4CAF50),
+      ),
+    );
+  }
+
+  void _shareArticle(ArticleContent article) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Sharing article: ${article.title}'),
+        duration: const Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: const Color(0xFF4CAF50),
+      ),
+    );
+  }
+
+  void _bookmarkArticle(ArticleContent article) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Bookmarked article: ${article.title}'),
+        duration: const Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: const Color(0xFF4CAF50),
       ),
     );
   }
