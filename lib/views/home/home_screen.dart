@@ -1291,17 +1291,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE8F5E8).withOpacity(0.8),
+                      color: Colors.blueAccent.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: const Color(0xFF4CAF50).withOpacity(0.3),
+                        color: Colors.blueAccent.withOpacity(0.3),
                         width: 1,
                       ),
                     ),
                     child: Text(
                       'See All',
                       style: TextStyle(
-                        color: const Color(0xFF2E7D32),
+                        color: Colors.blueAccent,
                         fontWeight: FontWeight.w600,
                         fontSize: 15,
                       ),
@@ -1345,12 +1345,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         decoration: BoxDecoration(
                           color: isSelected
                               ? const Color(0xFF4CAF50)
-                              : const Color(0xFFE8F5E8).withOpacity(0.8),
+                              : Colors.white,
                           borderRadius: BorderRadius.circular(22),
                           border: Border.all(
                             color: isSelected
                                 ? const Color(0xFF4CAF50)
-                                : const Color(0xFF4CAF50).withOpacity(0.3),
+                                : Colors.blueAccent.withOpacity(0.3),
                             width: 1.5,
                           ),
                           boxShadow: isSelected
@@ -1369,7 +1369,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           style: TextStyle(
                             color: isSelected
                                 ? Colors.white
-                                : const Color(0xFF2E7D32),
+                                : Colors.blueAccent,
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
                           ),

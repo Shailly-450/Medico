@@ -32,45 +32,7 @@ class DashboardScreen extends StatelessWidget {
       viewModelBuilder: () => DashboardViewModel(),
       builder: (context, model, child) => Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          // centerTitle: true,
-          title: Text(
-            'Dashboard',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          actions: [
-            IconButton(
-              icon: Icon(Icons.medical_information),
-              tooltip: 'Health Records',
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const HealthRecordsScreen(),
-                  ),
-                );
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.compare_arrows),
-              tooltip: 'Compare Services',
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const ComparisonScreen()),
-                );
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.video_call),
-              tooltip: 'Test Video Calls',
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                      builder: (_) => const TestVideoCallScreen()),
-                );
-              },
-            ),
-          ],
-        ),
+        appBar: null,
         body: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -90,6 +52,8 @@ class DashboardScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Modern Custom App Bar
+                  _buildModernDashboardAppBar(context),
                   // Profile Header with Welcome Message
                   _buildWelcomeHeader(context, model),
 
@@ -133,6 +97,122 @@ class DashboardScreen extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildModernDashboardAppBar(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.85),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.3),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: const Color(0xFF4CAF50).withOpacity(0.1),
+            blurRadius: 40,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Profile Avatar
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  const Color(0xFF2E7D32),
+                  const Color(0xFF4CAF50),
+                  const Color(0xFF66BB6A),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF2E7D32).withOpacity(0.4),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: const Icon(Icons.person, color: Colors.white, size: 28),
+          ),
+          const SizedBox(width: 18),
+          // Title and Subtitle
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Dashboard',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: AppColors.textBlack,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                Text(
+                  'Your health at a glance',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Actions
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.medical_information, color: AppColors.primary),
+                tooltip: 'Health Records',
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const HealthRecordsScreen(),
+                    ),
+                  );
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.compare_arrows, color: AppColors.primary),
+                tooltip: 'Compare Services',
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const ComparisonScreen()),
+                  );
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.video_call, color: AppColors.primary),
+                tooltip: 'Test Video Calls',
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                        builder: (_) => const TestVideoCallScreen()),
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

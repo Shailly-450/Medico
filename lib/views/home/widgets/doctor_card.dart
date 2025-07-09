@@ -44,11 +44,12 @@ class DoctorCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
+                      // Online badge
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: Colors.green.withOpacity(0.4),
+                          color: Colors.blueAccent.withOpacity(0.12),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Row(
@@ -57,13 +58,13 @@ class DoctorCard extends StatelessWidget {
                             Icon(
                               Icons.circle,
                               size: 8,
-                              // color: AppColors.secondary,
+                              color: Colors.blueAccent,
                             ),
                             const SizedBox(width: 4),
                             Text(
                               'Online',
                               style: TextStyle(
-                                // color: AppColors.secondary,
+                                color: Colors.blueAccent,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -72,10 +73,11 @@ class DoctorCard extends StatelessWidget {
                         ),
                       ),
                       const Spacer(),
+                      // Price
                       Text(
                         '₹${doctor.price.toStringAsFixed(0)}',
                         style: TextStyle(
-                          color: AppColors.primary,
+                          color: Colors.deepOrange,
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
