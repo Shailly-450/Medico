@@ -23,6 +23,8 @@ import 'views/prescriptions/test_prescriptions_screen.dart';
 import 'views/workflow/medical_workflow_screen.dart';
 import 'views/workflow/workflow_demo_screen.dart';
 import 'views/ai_symptom/ai_symptom_chat_screen.dart';
+import 'views/admin/appointments/admin_appointments_panel.dart';
+import 'views/admin/appointments/admin_appointment_detail_screen.dart';
 import 'core/services/ai_symptom_service.dart';
 
 void main() {
@@ -71,6 +73,7 @@ class MyApp extends StatelessWidget {
             '/workflow': (context) => const MedicalWorkflowScreen(),
             '/workflow-demo': (context) => const WorkflowDemoScreen(),
             '/ai-symptom-chat': (context) => const AISymptomChatScreen(),
+            '/admin/appointments': (context) => const AdminAppointmentsPanel(),
           },
           onGenerateRoute: (settings) {
             print('Navigating to: ${settings.name}');
