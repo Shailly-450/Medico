@@ -404,7 +404,7 @@ class PdfService {
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
                     pw.Text('Status: ${invoice.statusDisplayName}',
-                        style: const pw.TextStyle(
+                        style: pw.TextStyle(
                             fontSize: 14, fontWeight: pw.FontWeight.bold)),
                     if (invoice.paidDate != null)
                       pw.Text('Paid: ${_formatDate(invoice.paidDate!)}',

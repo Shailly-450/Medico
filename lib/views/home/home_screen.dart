@@ -22,6 +22,8 @@ import 'package:medico/views/schedule/schedule_screen.dart';
 import '../appointments/all_appointments_screen.dart';
 
 import '../blogs/blogs_screen.dart';
+import '../shared/widgets/video_card.dart';
+import '../shared/widgets/article_card.dart';
 import '../shared/widgets/content_list_widget.dart';
 import '../../models/video_content.dart';
 import '../../models/article_content.dart';
@@ -772,7 +774,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       child: Image.asset(
                         imagePath,
                         fit: BoxFit.contain,
-                        color: Colors.white.withOpacity(0.9),
                       ),
                     ),
                   ),
@@ -882,7 +883,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             onTap: () {
                               HapticFeedback.lightImpact();
                               model.setCategory(category['name']);
-                              
+
                               // Handle blogs category specifically
                               if (category['name'] == 'Blogs') {
                                 Navigator.push(
