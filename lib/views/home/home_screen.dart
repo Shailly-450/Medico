@@ -20,6 +20,7 @@ import 'package:medico/views/home/hospital_detail_screen.dart';
 import 'find_hospitals_screen.dart';
 import 'package:medico/views/schedule/schedule_screen.dart';
 import '../appointments/all_appointments_screen.dart';
+import '../blogs/blogs_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -761,11 +762,33 @@ class _HomeScreenState extends State<HomeScreen>
                 onTap: () {
                   HapticFeedback.lightImpact();
                   model.setCategory(category['name']);
-                  Navigator.pushNamed(
-                    context,
-                    '/category',
-                    arguments: category['name'],
-                  );
+                  
+                  // Handle blogs category specifically
+                  if (category['name'] == 'Blogs') {
+                    Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            const BlogsScreen(),
+                        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                          return SlideTransition(
+                            position: Tween<Offset>(
+                              begin: const Offset(1.0, 0.0),
+                              end: Offset.zero,
+                            ).animate(animation),
+                            child: child,
+                          );
+                        },
+                        transitionDuration: const Duration(milliseconds: 400),
+                      ),
+                    );
+                  } else {
+                    Navigator.pushNamed(
+                      context,
+                      '/category',
+                      arguments: category['name'],
+                    );
+                  }
                 },
               );
             },
