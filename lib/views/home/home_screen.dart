@@ -20,16 +20,13 @@ import 'package:medico/views/home/hospital_detail_screen.dart';
 import 'find_hospitals_screen.dart';
 import 'package:medico/views/schedule/schedule_screen.dart';
 import '../appointments/all_appointments_screen.dart';
-<<<<<<< HEAD
 import '../blogs/blogs_screen.dart';
-=======
 import '../shared/widgets/video_card.dart';
 import '../shared/widgets/article_card.dart';
 import '../shared/widgets/content_list_widget.dart';
 import '../../models/video_content.dart';
 import '../../models/article_content.dart';
 import '../video/video_player_screen.dart';
->>>>>>> dabe101c972791c5cee4dd3c200c34de89f0dcba
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -876,7 +873,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 onTap: () {
                   HapticFeedback.lightImpact();
                   model.setCategory(category['name']);
-                  
+
                   // Handle blogs category specifically
                   if (category['name'] == 'Blogs') {
                     Navigator.push(
@@ -884,7 +881,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
                             const BlogsScreen(),
-                        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
                           return SlideTransition(
                             position: Tween<Offset>(
                               begin: const Offset(1.0, 0.0),

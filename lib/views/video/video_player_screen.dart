@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
+import 'package:chewie/chewie.dart';
 import '../../models/video_content.dart';
 import '../../core/theme/app_colors.dart';
 
@@ -15,7 +17,114 @@ class VideoPlayerScreen extends StatefulWidget {
 }
 
 class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
-  bool _isPlaying = false;
+  late VideoPlayerController _videoPlayerController;
+  ChewieController? _chewieController;
+  bool _isInitialized = false;
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeVideoPlayer();
+  }
+
+  void _onVideoPlayerStateChanged() {
+    if (_videoPlayerController.value.hasError) {
+      setState(() {
+        _errorMessage =
+            'Video playback error: ${_videoPlayerController.value.errorDescription}';
+      });
+    }
+  }
+
+  Future<void> _initializeVideoPlayer() async {
+    try {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+      });
+
+      debugPrint(
+          'Initializing video player with URL: ${widget.video.videoUrl}');
+
+      // Initialize video player controller
+      _videoPlayerController = VideoPlayerController.networkUrl(
+        Uri.parse(widget.video.videoUrl),
+      );
+
+      // Wait for the video to be initialized
+      await _videoPlayerController.initialize();
+
+      // Add listener for state changes
+      _videoPlayerController.addListener(_onVideoPlayerStateChanged);
+
+      debugPrint('Video player initialized successfully');
+      debugPrint('Video duration: ${_videoPlayerController.value.duration}');
+      debugPrint('Video size: ${_videoPlayerController.value.size}');
+
+      // Create Chewie controller for better UI
+      _chewieController = ChewieController(
+        videoPlayerController: _videoPlayerController,
+        autoPlay: true,
+        looping: false,
+        allowFullScreen: true,
+        allowMuting: true,
+        showControls: true,
+        placeholder: Container(
+          color: Colors.black,
+          child: Center(
+            child: Image.network(
+              widget.video.thumbnailUrl,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+            ),
+          ),
+        ),
+        materialProgressColors: ChewieProgressColors(
+          playedColor: AppColors.accent,
+          handleColor: AppColors.accent,
+          backgroundColor: Colors.grey[600]!,
+          bufferedColor: Colors.grey[400]!,
+        ),
+      );
+
+      setState(() {
+        _isInitialized = true;
+        _isLoading = false;
+      });
+    } catch (error) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Failed to load video: ${error.toString()}';
+      });
+      debugPrint('Video player initialization error: $error');
+
+      // Provide more specific error messages for common issues
+      if (error.toString().contains('SocketException')) {
+        setState(() {
+          _errorMessage =
+              'Network error: Please check your internet connection';
+        });
+      } else if (error.toString().contains('FormatException')) {
+        setState(() {
+          _errorMessage = 'Video format not supported or invalid URL';
+        });
+      } else if (error.toString().contains('HttpException')) {
+        setState(() {
+          _errorMessage = 'HTTP error: Video URL may be invalid or unavailable';
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _videoPlayerController.dispose();
+    _chewieController?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,79 +163,12 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       ),
       body: Column(
         children: [
-          // Video Player Placeholder
+          // Video Player
           Expanded(
             child: Container(
               width: double.infinity,
               color: Colors.black,
-              child: Stack(
-                children: [
-                  // Thumbnail
-                  Center(
-                    child: Image.network(
-                      widget.video.thumbnailUrl,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: double.infinity,
-                    ),
-                  ),
-                  // Play button overlay
-                  Center(
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _isPlaying = !_isPlaying;
-                        });
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(_isPlaying
-                                ? 'Video playing...'
-                                : 'Video paused'),
-                            duration: const Duration(seconds: 1),
-                            backgroundColor: AppColors.accent,
-                          ),
-                        );
-                      },
-                      child: Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.7),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          _isPlaying ? Icons.pause : Icons.play_arrow,
-                          color: Colors.white,
-                          size: 40,
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Duration badge
-                  Positioned(
-                    bottom: 16,
-                    right: 16,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.8),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        widget.video.duration,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              child: _buildVideoPlayer(),
             ),
           ),
           // Video Info
@@ -273,5 +315,105 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildVideoPlayer() {
+    if (_isLoading) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Loading video...',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_errorMessage != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              color: Colors.red,
+              size: 64,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Error loading video',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Text(
+                _errorMessage!,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 14,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _initializeVideoPlayer,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.accent,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (!_isInitialized || _chewieController == null) {
+      return Stack(
+        children: [
+          Center(
+            child: Image.network(
+              widget.video.thumbnailUrl,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+            ),
+          ),
+          Center(
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.7),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.play_arrow,
+                color: Colors.white,
+                size: 40,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Chewie(controller: _chewieController!);
   }
 }
