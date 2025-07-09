@@ -20,6 +20,7 @@ import 'package:medico/views/home/hospital_detail_screen.dart';
 import 'find_hospitals_screen.dart';
 import 'package:medico/views/schedule/schedule_screen.dart';
 import '../appointments/all_appointments_screen.dart';
+
 import '../blogs/blogs_screen.dart';
 import '../shared/widgets/video_card.dart';
 import '../shared/widgets/article_card.dart';
@@ -27,6 +28,7 @@ import '../shared/widgets/content_list_widget.dart';
 import '../../models/video_content.dart';
 import '../../models/article_content.dart';
 import '../video/video_player_screen.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -772,7 +774,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       child: Image.asset(
                         imagePath,
                         fit: BoxFit.contain,
-                        color: Colors.white.withOpacity(0.9),
                       ),
                     ),
                   ),
@@ -851,59 +852,73 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
           const SizedBox(height: 20),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 20,
-              childAspectRatio: 0.85,
-            ),
-            itemCount: model.categories.length,
-            itemBuilder: (context, index) {
-              final category = model.categories[index];
-              final isActive = model.selectedCategory == category['name'];
+          SizedBox(
+            height: 120,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              itemCount: model.categories.length,
+              itemBuilder: (context, index) {
+                final category = model.categories[index];
+                final isActive = model.selectedCategory == category['name'];
 
-              return _buildCategoryCard(
-                context,
-                icon: category['icon'],
-                label: category['name'],
-                isActive: isActive,
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  model.setCategory(category['name']);
+                return TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.0, end: 1.0),
+                  duration: Duration(milliseconds: 600 + (index * 100)),
+                  builder: (context, value, child) {
+                    return Transform.translate(
+                      offset: Offset(20 * (1 - value), 0),
+                      child: Opacity(
+                        opacity: value,
+                        child: Container(
+                          width: 100,
+                          margin: EdgeInsets.only(
+                            right: index == model.categories.length - 1 ? 0 : 16,
+                          ),
+                          child: _buildCategoryCard(
+                            context,
+                            icon: category['icon'],
+                            label: category['name'],
+                            isActive: isActive,
+                            onTap: () {
+                              HapticFeedback.lightImpact();
+                              model.setCategory(category['name']);
 
-                  // Handle blogs category specifically
-                  if (category['name'] == 'Blogs') {
-                    Navigator.push(
-                      context,
-                      PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            const BlogsScreen(),
-                        transitionsBuilder:
-                            (context, animation, secondaryAnimation, child) {
-                          return SlideTransition(
-                            position: Tween<Offset>(
-                              begin: const Offset(1.0, 0.0),
-                              end: Offset.zero,
-                            ).animate(animation),
-                            child: child,
-                          );
-                        },
-                        transitionDuration: const Duration(milliseconds: 400),
+                              // Handle blogs category specifically
+                              if (category['name'] == 'Blogs') {
+                                Navigator.push(
+                                  context,
+                                  PageRouteBuilder(
+                                    pageBuilder: (context, animation, secondaryAnimation) =>
+                                        const BlogsScreen(),
+                                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                      return SlideTransition(
+                                        position: Tween<Offset>(
+                                          begin: const Offset(1.0, 0.0),
+                                          end: Offset.zero,
+                                        ).animate(animation),
+                                        child: child,
+                                      );
+                                    },
+                                    transitionDuration: const Duration(milliseconds: 400),
+                                  ),
+                                );
+                              } else {
+                                Navigator.pushNamed(
+                                  context,
+                                  '/category',
+                                  arguments: category['name'],
+                                );
+                              }
+                            },
+                          ),
+                        ),
                       ),
                     );
-                  } else {
-                    Navigator.pushNamed(
-                      context,
-                      '/category',
-                      arguments: category['name'],
-                    );
-                  }
-                },
-              );
-            },
+                  },
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -949,8 +964,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               children: [
                 // Circular Avatar with Icon
                 Container(
-                  width: 52,
-                  height: 52,
+                  width: 48,
+                  height: 48,
                   decoration: BoxDecoration(
                     gradient: isActive
                         ? const LinearGradient(
@@ -979,10 +994,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   child: Icon(
                     icon,
                     color: isActive ? Colors.white : const Color(0xFF2E7D32),
-                    size: 26,
+                    size: 24,
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
                 // Category Name
                 Text(
                   label,
@@ -991,7 +1006,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     color: isActive
                         ? const Color(0xFF2E7D32)
                         : AppColors.textBlack,
-                    fontSize: 12,
+                    fontSize: 11,
                     letterSpacing: 0.2,
                   ),
                   textAlign: TextAlign.center,

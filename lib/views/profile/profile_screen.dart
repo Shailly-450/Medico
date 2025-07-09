@@ -10,8 +10,58 @@ import 'help_support_screen.dart';
 import 'privacy_policy_screen.dart';
 import 'prescriptions_reports_screen.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen>
+    with TickerProviderStateMixin {
+  late AnimationController _fadeController;
+  late AnimationController _slideController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    _slideController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeInOut,
+    ));
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.3),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _slideController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    _fadeController.forward();
+    _slideController.forward();
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    _slideController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,254 +69,65 @@ class ProfileScreen extends StatelessWidget {
     final familyVM = context.watch<FamilyMembersViewModel>();
     final currentProfile = familyVM.currentProfile;
     final familyCount = familyVM.members.length;
+    
     return Scaffold(
-      backgroundColor: AppColors.paleBackground,
-      appBar: AppBar(
-        title: const Text('Profile'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: false,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.only(bottom: 24),
-          child: Column(
-            children: [
-              // Profile Card
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    side: BorderSide(
-                        color: AppColors.primary.withOpacity(0.08), width: 1.5),
+      backgroundColor: Colors.transparent,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFFE8F5E8), // Light mint green
+              Color(0xFFF0F8F0), // Very light sage
+              Color(0xFFE6F3E6), // Soft green tint
+              Color(0xFFF5F9F5), // Almost white with green tint
+            ],
+            stops: [0.0, 0.3, 0.7, 1.0],
+          ),
+        ),
+        child: SafeArea(
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: SlideTransition(
+              position: _slideAnimation,
+              child: CustomScrollView(
+                physics: const BouncingScrollPhysics(),
+                slivers: [
+                  // Modern App Bar
+                  SliverToBoxAdapter(
+                    child: _buildModernAppBar(context),
                   ),
-                  elevation: 4,
-                  shadowColor: AppColors.primary.withOpacity(0.08),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 18, vertical: 24),
-                    child: Row(
-                      children: [
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 350),
-                          transitionBuilder: (child, anim) =>
-                              FadeTransition(opacity: anim, child: child),
-                          child: _ProfileAvatar(
-                            key: ValueKey(currentProfile?.id),
-                            name: currentProfile?.name,
-                            imageUrl: currentProfile?.imageUrl,
-                          ),
-                        ),
-                        const SizedBox(width: 18),
-                        Expanded(
-                          child: AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 350),
-                            transitionBuilder: (child, anim) =>
-                                FadeTransition(opacity: anim, child: child),
-                            child: Column(
-                              key: ValueKey(currentProfile?.id),
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  currentProfile?.name ?? '-',
-                                  style: textTheme.titleLarge?.copyWith(
-                                    color: AppColors.textPrimary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+
+              // Profile Card
+                  SliverToBoxAdapter(
+                    child: _buildProfileCard(context, currentProfile, familyVM),
+                  ),
+
+                  // General Section
+                  SliverToBoxAdapter(
+                    child: _buildSectionTitle('General'),
+                  ),
+                  SliverToBoxAdapter(
+                    child: _buildModernSectionCard([
+                      _buildModernProfileItem(
+                        context,
+                        icon: Icons.group,
+                        title: 'Family Members',
+                        trailing: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  currentProfile?.role ?? '-',
+                          child: Text(
+                            '$familyCount',
                                   style: textTheme.bodyMedium?.copyWith(
                                     color: AppColors.primary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                        Tooltip(
-                          message: 'Switch Profile',
-                          child: IconButton(
-                            icon: const Icon(Icons.switch_account,
-                                color: AppColors.primary),
-                            onPressed: () async {
-                              final selected =
-                                  await showModalBottomSheet<FamilyMember>(
-                                context: context,
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.vertical(
-                                      top: Radius.circular(20)),
-                                ),
-                                builder: (ctx) {
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 16, horizontal: 8),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Center(
-                                          child: Container(
-                                            width: 40,
-                                            height: 4,
-                                            margin: const EdgeInsets.only(
-                                                bottom: 12),
-                                            decoration: BoxDecoration(
-                                              color: Colors.grey[300],
-                                              borderRadius:
-                                                  BorderRadius.circular(2),
-                                            ),
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 12),
-                                          child: Text('Switch Profile',
-                                              style: textTheme.titleMedium
-                                                  ?.copyWith(
-                                                      fontWeight:
-                                                          FontWeight.bold)),
-                                        ),
-                                        const Divider(height: 20),
-                                        ...familyVM.members
-                                            .asMap()
-                                            .entries
-                                            .map((entry) {
-                                          final member = entry.value;
-                                          final isActive =
-                                              member.id == currentProfile?.id;
-                                          final isMain = entry.key == 0;
-                                          return Material(
-                                            color: isActive
-                                                ? AppColors.primary
-                                                    .withOpacity(0.08)
-                                                : Colors.transparent,
-                                            child: InkWell(
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                              onTap: () =>
-                                                  Navigator.pop(ctx, member),
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        vertical: 8,
-                                                        horizontal: 8),
-                                                child: Row(
-                                                  children: [
-                                                    _ProfileAvatar(
-                                                      name: member.name,
-                                                      imageUrl: member.imageUrl,
-                                                      radius: 22,
-                                                    ),
-                                                    const SizedBox(width: 14),
-                                                    Expanded(
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Row(
-                                                            children: [
-                                                              Text(
-                                                                member.name,
-                                                                style: textTheme
-                                                                    .bodyLarge
-                                                                    ?.copyWith(
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w600,
-                                                                  color: AppColors
-                                                                      .textPrimary,
-                                                                ),
-                                                              ),
-                                                              if (isMain)
-                                                                Container(
-                                                                  margin:
-                                                                      const EdgeInsets
-                                                                          .only(
-                                                                          left:
-                                                                              8),
-                                                                  padding: const EdgeInsets
-                                                                      .symmetric(
-                                                                      horizontal:
-                                                                          8,
-                                                                      vertical:
-                                                                          2),
-                                                                  decoration:
-                                                                      BoxDecoration(
-                                                                    color: AppColors
-                                                                        .primary
-                                                                        .withOpacity(
-                                                                            0.12),
-                                                                    borderRadius:
-                                                                        BorderRadius
-                                                                            .circular(8),
-                                                                  ),
-                                                                  child: Text(
-                                                                      'You',
-                                                                      style: textTheme.bodySmall?.copyWith(
-                                                                          color: AppColors
-                                                                              .primary,
-                                                                          fontWeight:
-                                                                              FontWeight.bold)),
-                                                                ),
-                                                            ],
-                                                          ),
-                                                          Text(
-                                                            member.role,
-                                                            style: textTheme
-                                                                .bodySmall
-                                                                ?.copyWith(
-                                                                    color: AppColors
-                                                                        .primary),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    if (isActive)
-                                                      const Icon(
-                                                          Icons.check_circle,
-                                                          color: AppColors
-                                                              .success),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          );
-                                        }),
-                                        const SizedBox(height: 12),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              );
-                              if (selected != null) {
-                                familyVM.switchProfile(selected);
-                              }
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              // General Section
-              _SectionTitle(title: 'General'),
-              _ProfileSectionCard(
-                items: [
-                  _ProfileItem(
-                    icon: Icons.group,
-                    title: 'Family Members',
-                    trailing: Text('$familyCount',
-                        style: textTheme.bodyMedium
-                            ?.copyWith(color: AppColors.primary)),
                     onTap: () {
                       Navigator.push(
                         context,
@@ -275,7 +136,8 @@ class ProfileScreen extends StatelessWidget {
                       );
                     },
                   ),
-                  _ProfileItem(
+                      _buildModernProfileItem(
+                        context,
                     icon: Icons.description,
                     title: 'Prescriptions & Reports',
                     onTap: () {
@@ -286,15 +148,28 @@ class ProfileScreen extends StatelessWidget {
                       );
                     },
                   ),
-                  _ProfileItem(
+                      _buildModernProfileItem(
+                        context,
                     icon: Icons.account_balance_wallet,
                     title: 'Payment Methods',
-                    trailing: Text('Wallet',
-                        style: textTheme.bodyMedium
-                            ?.copyWith(color: AppColors.primary)),
+                        trailing: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.accent.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            'Wallet',
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: AppColors.accent,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                     onTap: () {},
                   ),
-                  _ProfileItem(
+                      _buildModernProfileItem(
+                        context,
                     icon: Icons.verified_user,
                     title: 'Insurance',
                     onTap: () {
@@ -305,7 +180,8 @@ class ProfileScreen extends StatelessWidget {
                       );
                     },
                   ),
-                  _ProfileItem(
+                      _buildModernProfileItem(
+                        context,
                     icon: Icons.settings,
                     title: 'Settings',
                     onTap: () {
@@ -316,14 +192,17 @@ class ProfileScreen extends StatelessWidget {
                       );
                     },
                   ),
-                ],
+                    ]),
               ),
 
               // Preferences Section
-              _SectionTitle(title: 'Preferences'),
-              _ProfileSectionCard(
-                items: [
-                  _ProfileItem(
+                  SliverToBoxAdapter(
+                    child: _buildSectionTitle('Preferences'),
+                  ),
+                  SliverToBoxAdapter(
+                    child: _buildModernSectionCard([
+                      _buildModernProfileItem(
+                        context,
                     icon: Icons.support_agent,
                     title: 'Help & Support',
                     onTap: () {
@@ -334,7 +213,8 @@ class ProfileScreen extends StatelessWidget {
                       );
                     },
                   ),
-                  _ProfileItem(
+                      _buildModernProfileItem(
+                        context,
                     icon: Icons.privacy_tip,
                     title: 'Privacy & Policy',
                     onTap: () {
@@ -344,42 +224,477 @@ class ProfileScreen extends StatelessWidget {
                             builder: (_) => const PrivacyPolicyScreen()),
                       );
                     },
+                      ),
+                    ]),
+                  ),
+
+                  // Logout Button
+                  SliverToBoxAdapter(
+                    child: _buildLogoutButton(context),
+                  ),
+
+                  // Version
+                  SliverToBoxAdapter(
+                    child: _buildVersionText(context),
+                  ),
+
+                  // Bottom padding
+                  const SliverToBoxAdapter(
+                    child: SizedBox(height: 32),
                   ),
                 ],
               ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-              const SizedBox(height: 24),
+  Widget _buildModernAppBar(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.85),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.3),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: const Color(0xFF4CAF50).withOpacity(0.1),
+            blurRadius: 40,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              Icons.person,
+              color: AppColors.primary,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Profile',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  'Manage your account settings',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-              // Logout Button
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.error,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
+  Widget _buildProfileCard(BuildContext context, FamilyMember? currentProfile, FamilyMembersViewModel familyVM) {
+    final textTheme = Theme.of(context).textTheme;
+    
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.85),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.3),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: const Color(0xFF4CAF50).withOpacity(0.1),
+            blurRadius: 40,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 350),
+            transitionBuilder: (child, anim) =>
+                FadeTransition(opacity: anim, child: child),
+            child: _ModernProfileAvatar(
+              key: ValueKey(currentProfile?.id),
+              name: currentProfile?.name,
+              imageUrl: currentProfile?.imageUrl,
+            ),
+          ),
+          const SizedBox(width: 20),
+          Expanded(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 350),
+              transitionBuilder: (child, anim) =>
+                  FadeTransition(opacity: anim, child: child),
+              child: Column(
+                key: ValueKey(currentProfile?.id),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    currentProfile?.name ?? '-',
+                    style: textTheme.titleLarge?.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    child: Text(
+                      currentProfile?.role ?? '-',
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                    icon: const Icon(Icons.logout),
-                    label: const Text('Logout'),
-                    onPressed: () {},
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.primary.withOpacity(0.1),
+                  AppColors.accent.withOpacity(0.1),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+                    ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: () async {
+                  final selected = await showModalBottomSheet<FamilyMember>(
+                    context: context,
+                    backgroundColor: Colors.transparent,
+                    builder: (ctx) => _buildProfileSwitchModal(ctx, familyVM, currentProfile),
+                  );
+                  if (selected != null) {
+                    familyVM.switchProfile(selected);
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Icon(
+                    Icons.switch_account,
+                    color: AppColors.primary,
+                    size: 24,
                   ),
                 ),
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-              // Version
+  Widget _buildProfileSwitchModal(BuildContext context, FamilyMembersViewModel familyVM, FamilyMember? currentProfile) {
+    final textTheme = Theme.of(context).textTheme;
+    
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 40,
+            height: 4,
+            margin: const EdgeInsets.only(top: 12, bottom: 16),
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
               Padding(
-                padding: const EdgeInsets.only(bottom: 16, top: 4),
-                child: Text(
-                  'version 1.0.0',
-                  style: textTheme.bodySmall
-                      ?.copyWith(color: AppColors.textSecondary),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.switch_account,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
                 ),
+                const SizedBox(width: 12),
+                Text(
+                  'Switch Profile',
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+        ),
+          const Divider(height: 32),
+          Flexible(
+            child: ListView.builder(
+              shrinkWrap: true,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: familyVM.members.length,
+              itemBuilder: (context, index) {
+                final member = familyVM.members[index];
+                final isActive = member.id == currentProfile?.id;
+                final isMain = index == 0;
+                
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  decoration: BoxDecoration(
+                    color: isActive ? AppColors.primary.withOpacity(0.08) : Colors.transparent,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: () => Navigator.pop(context, member),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            _ModernProfileAvatar(
+                              name: member.name,
+                              imageUrl: member.imageUrl,
+                              radius: 24,
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        member.name,
+                                        style: textTheme.bodyLarge?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.textPrimary,
+                                        ),
+                                      ),
+                                      if (isMain) ...[
+                                        const SizedBox(width: 8),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.primary.withOpacity(0.12),
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Text(
+                                            'You',
+                                            style: textTheme.bodySmall?.copyWith(
+                                              color: AppColors.primary,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    member.role,
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (isActive)
+                              Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: AppColors.success.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  Icons.check_circle,
+                                  color: AppColors.success,
+                                  size: 20,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 24, 0, 8),
+      child: Row(
+        children: [
+          Container(
+            width: 4,
+            height: 20,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [AppColors.primary, AppColors.accent],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+        title,
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.bold,
+            ),
+      ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModernSectionCard(List<Widget> items) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.85),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.3),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 16,
+            offset: const Offset(0, 2),
+          ),
+          BoxShadow(
+            color: const Color(0xFF4CAF50).withOpacity(0.08),
+            blurRadius: 32,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          for (int i = 0; i < items.length; i++) ...[
+            if (i > 0) 
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                height: 1,
+                color: Colors.grey.withOpacity(0.1),
+              ),
+            items[i],
+          ]
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModernProfileItem(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    Widget? trailing,
+    VoidCallback? onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  icon,
+                  color: AppColors.primary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+        title,
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w500,
+            ),
+      ),
+              ),
+              if (trailing != null) ...[
+                trailing,
+                const SizedBox(width: 8),
+              ],
+              Icon(
+                Icons.arrow_forward_ios,
+                color: AppColors.textSecondary,
+                size: 16,
               ),
             ],
           ),
@@ -387,83 +702,93 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
   }
-}
 
-class _SectionTitle extends StatelessWidget {
-  final String title;
-  const _SectionTitle({required this.title});
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 0, 4),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.bold,
-            ),
-      ),
-    );
-  }
-}
-
-class _ProfileSectionCard extends StatelessWidget {
-  final List<_ProfileItem> items;
-  const _ProfileSectionCard({required this.items});
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 1,
-      child: Column(
-        children: [
-          for (int i = 0; i < items.length; i++) ...[
-            if (i > 0) const Divider(height: 1, indent: 16, endIndent: 16),
-            items[i],
-          ]
+  Widget _buildLogoutButton(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.error.withOpacity(0.9),
+            AppColors.error,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.error.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
         ],
       ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {},
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.logout,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Logout',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
-}
 
-class _ProfileItem extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final Widget? trailing;
-  final VoidCallback? onTap;
-  const _ProfileItem({
-    required this.icon,
-    required this.title,
-    this.trailing,
-    this.onTap,
-  });
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(icon, color: AppColors.primary),
-      title: Text(
-        title,
-        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: AppColors.textPrimary,
+  Widget _buildVersionText(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16, top: 8),
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.6),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            'version 1.0.0',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textSecondary,
               fontWeight: FontWeight.w500,
             ),
+          ),
+        ),
       ),
-      trailing: trailing,
-      onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     );
   }
 }
 
-class _ProfileAvatar extends StatelessWidget {
+class _ModernProfileAvatar extends StatelessWidget {
   final String? name;
   final String? imageUrl;
   final double radius;
-  const _ProfileAvatar({Key? key, this.name, this.imageUrl, this.radius = 32})
-      : super(key: key);
+  
+  const _ModernProfileAvatar({
+    Key? key,
+    this.name,
+    this.imageUrl,
+    this.radius = 40,
+  }) : super(key: key);
 
   String getInitials() {
     if (name == null || name!.trim().isEmpty) return '';
@@ -475,22 +800,54 @@ class _ProfileAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (imageUrl != null && imageUrl!.isNotEmpty) {
-      return CircleAvatar(
+      return Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withOpacity(0.2),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: CircleAvatar(
         radius: radius,
         backgroundImage: NetworkImage(imageUrl!),
         backgroundColor: AppColors.primary.withOpacity(0.1),
-        child: Container(),
+        ),
       );
     }
-    return CircleAvatar(
+    
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          colors: [
+            AppColors.primary.withOpacity(0.15),
+            AppColors.accent.withOpacity(0.15),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.2),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: CircleAvatar(
       radius: radius,
-      backgroundColor: AppColors.primary.withOpacity(0.15),
+        backgroundColor: Colors.transparent,
       child: Text(
         getInitials(),
         style: TextStyle(
           color: AppColors.primary,
           fontWeight: FontWeight.bold,
-          fontSize: radius * 0.7,
+            fontSize: radius * 0.6,
+          ),
         ),
       ),
     );

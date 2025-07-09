@@ -73,6 +73,8 @@ class QuickActionCard extends StatelessWidget {
             );
           } else if (action['title'] == 'Medical Workflow') {
             Navigator.pushNamed(context, '/workflow-demo');
+          } else if (action['title'] == 'Invoices') {
+            Navigator.pushNamed(context, '/invoices');
           }
         },
         child: Column(
