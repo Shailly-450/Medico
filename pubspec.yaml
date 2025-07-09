@@ -62,14 +62,12 @@ dependencies:
   uuid: ^4.3.3
   flutter_markdown: ^0.7.4+1
   auto_size_text: ^3.0.0
-<<<<<<< HEAD
   timeago: ^3.6.1
-=======
+
   
   # Video player dependencies
   video_player: ^2.8.2
   chewie: ^1.7.4
->>>>>>> dabe101c972791c5cee4dd3c200c34de89f0dcba
 
 dev_dependencies:
   flutter_test:

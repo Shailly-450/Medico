@@ -34,6 +34,13 @@ class _OrdersScreenState extends State<OrdersScreen> {
         ),
         actions: [
           IconButton(
+            icon: const Icon(Icons.receipt),
+            tooltip: 'Invoices',
+            onPressed: () {
+              Navigator.pushNamed(context, '/invoices');
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.add, ),
             onPressed: () {
               Navigator.push(

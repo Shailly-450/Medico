@@ -289,6 +289,11 @@ class DashboardViewModel extends BaseViewModel {
       'icon': Icons.folder,
       'color': Colors.indigo,
     },
+    {
+      'title': 'Invoices',
+      'icon': Icons.receipt,
+      'color': Colors.green,
+    },
   ];
 
   @override

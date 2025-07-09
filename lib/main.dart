@@ -16,6 +16,7 @@ import 'views/appointments/appointment_calendar_screen.dart';
 import 'views/orders/orders_screen.dart';
 import 'viewmodels/home_view_model.dart';
 import 'viewmodels/order_view_model.dart';
+import 'viewmodels/invoice_view_model.dart';
 import 'views/profile/profile_screen.dart';
 import 'viewmodels/family_members_view_model.dart';
 import 'views/prescriptions/prescriptions_screen.dart';
@@ -23,6 +24,7 @@ import 'views/prescriptions/test_prescriptions_screen.dart';
 import 'views/workflow/medical_workflow_screen.dart';
 import 'views/workflow/workflow_demo_screen.dart';
 import 'views/ai_symptom/ai_symptom_chat_screen.dart';
+import 'views/invoices/invoices_screen.dart';
 import 'core/services/ai_symptom_service.dart';
 
 void main() {
@@ -43,6 +45,7 @@ class MyApp extends StatelessWidget {
         Provider<NavigationService>(create: (_) => NavigationService()),
         ChangeNotifierProvider<HomeViewModel>(create: (_) => HomeViewModel()),
         ChangeNotifierProvider<OrderViewModel>(create: (_) => OrderViewModel()),
+        ChangeNotifierProvider<InvoiceViewModel>(create: (_) => InvoiceViewModel()),
         ChangeNotifierProvider<FamilyMembersViewModel>(
             create: (_) => FamilyMembersViewModel()),
       ],
@@ -71,6 +74,7 @@ class MyApp extends StatelessWidget {
             '/workflow': (context) => const MedicalWorkflowScreen(),
             '/workflow-demo': (context) => const WorkflowDemoScreen(),
             '/ai-symptom-chat': (context) => const AISymptomChatScreen(),
+            '/invoices': (context) => const InvoicesScreen(),
           },
           onGenerateRoute: (settings) {
             print('Navigating to: ${settings.name}');
