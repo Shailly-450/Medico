@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../admin/appointments/admin_appointments_panel.dart';
 import '../doctor/prescriptions/doctor_prescriptions_panel.dart';
+import 'package:medico/views/home/home_screen.dart';
+import 'package:medico/views/doctor/patients/patient_list_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -37,9 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => DoctorPrescriptionsPanel(
-            doctorName: _capitalizeName(doctorName),
-          ),
+          builder: (context) => const PatientListScreen(),
         ),
       );
       return;
