@@ -18,11 +18,20 @@ class _NotificationScreenState extends State<NotificationScreen> {
       viewModelBuilder: () => NotificationViewModel(),
       onModelReady: (model) => model.init(),
       builder: (context, model, child) => Scaffold(
-        backgroundColor: Colors.grey[50],
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: Text(
+          title: const Text(
             'Notifications',
+            style: TextStyle(
+              color: Color(0xFF2E7D32), // Dark green color for title
+              fontWeight: FontWeight.bold,
+            ),
           ),
+          backgroundColor:
+              const Color(0xFFE8F5E8), // Light mint green from gradient
+          elevation: 0,
+          iconTheme: const IconThemeData(
+              color: Color(0xFF2E7D32)), // Dark green for back button
           actions: [
             if (model.unreadCount > 0)
               TextButton(
@@ -30,14 +39,29 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 child: Text(
                   'Mark all read',
                   style: TextStyle(
-                    color: AppColors.primary,
+                    color: const Color(0xFF2E7D32),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
           ],
         ),
-        body: _buildNotificationsTab(context, model),
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFFE8F5E8), // Light mint green
+                Color(0xFFF0F8F0), // Very light sage
+                Color(0xFFE6F3E6), // Soft green tint
+                Color(0xFFF5F9F5), // Almost white with green tint
+              ],
+              stops: [0.0, 0.3, 0.7, 1.0],
+            ),
+          ),
+          child: _buildNotificationsTab(context, model),
+        ),
       ),
     );
   }
@@ -47,21 +71,22 @@ class _NotificationScreenState extends State<NotificationScreen> {
     print(
         'Building notifications tab with ${model.notifications.length} notifications');
     if (model.notifications.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               Icons.notifications_none,
               size: 64,
-              color: AppColors.textSecondary,
+              color: const Color(0xFF2E7D32).withOpacity(0.5),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
               'No notifications yet',
               style: TextStyle(
                 fontSize: 18,
-                color: AppColors.textSecondary,
+                color: const Color(0xFF2E7D32).withOpacity(0.7),
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
@@ -76,12 +101,16 @@ class _NotificationScreenState extends State<NotificationScreen> {
         final notification = model.notifications[index];
         return Dismissible(
           key: Key(notification.id),
-          direction: DismissDirection.endToStart, // Right to left swipe
+          direction: DismissDirection.endToStart,
           background: Container(
             margin: const EdgeInsets.only(bottom: 12),
             decoration: BoxDecoration(
-              color: Colors.red,
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.red.withOpacity(0.9),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Colors.red.withOpacity(0.2),
+                width: 1,
+              ),
             ),
             alignment: Alignment.centerRight,
             padding: const EdgeInsets.only(right: 20),
