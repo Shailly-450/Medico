@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/services/auth_service.dart';
 import '../admin/appointments/admin_appointments_panel.dart';
-import '../doctor/doctor_dashboard_screen.dart';
+import '../doctor/prescriptions/doctor_prescriptions_panel.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -15,92 +14,44 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
-  bool _isLoading = false;
 
-  Future<void> _handleLogin() async {
+  void _handleLogin() {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
-    if (email.isEmpty || password.isEmpty) {
-      _showErrorSnackBar('Please enter both email and password');
+    // Admin login
+    if (email.toLowerCase() == 'admin@medico.com' && password == 'admin123') {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const AdminAppointmentsPanel(),
+        ),
+      );
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final result = await AuthService.login(email, password);
-      
-      if (result['success'] == true) {
-        final role = result['role'] as UserRole;
-        
-        switch (role) {
-          case UserRole.admin:
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const AdminAppointmentsPanel(),
-              ),
-            );
-            break;
-          case UserRole.doctor:
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const DoctorDashboardScreen(),
-              ),
-            );
-            break;
-          case UserRole.patient:
-            Navigator.pushReplacementNamed(context, '/home');
-            break;
-        }
-      } else {
-        _showErrorSnackBar(result['message'] ?? 'Login failed');
-      }
-    } catch (e) {
-      _showErrorSnackBar('Login failed: ${e.toString()}');
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+    // Doctor login (any email ending with @docto.com)
+    if (email.toLowerCase().endsWith('@docto.com') && password == 'doc123') {
+      final doctorName =
+          email.split('@').first.replaceAll('.', ' ').split('_').first;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DoctorPrescriptionsPanel(
+            doctorName: _capitalizeName(doctorName),
+          ),
+        ),
+      );
+      return;
     }
+
+    // Regular user login
+    Navigator.pushNamed(context, '/home');
   }
 
-  void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
-    );
-  }
-
-  Widget _buildCredentialRow(String role, String email, String password) {
-    return Row(
-      children: [
-        Text(
-          role,
-          style: TextStyle(
-            color: Colors.blue[600],
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            '$email / $password',
-            style: TextStyle(
-              color: Colors.blue[600],
-              fontSize: 10,
-            ),
-          ),
-        ),
-      ],
-    );
+  String _capitalizeName(String name) {
+    if (name.isEmpty) return name;
+    return name[0].toUpperCase() + name.substring(1);
   }
 
   @override
@@ -215,7 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: double.infinity,
                   height: 52,
                   child: ElevatedButton(
-                    onPressed: _isLoading ? null : _handleLogin,
+                    onPressed: _handleLogin,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
@@ -225,20 +176,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       textStyle: const TextStyle(
                           fontWeight: FontWeight.bold, fontSize: 18),
                     ),
-                    child: _isLoading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : const Text('Login'),
+                    child: const Text('Login'),
                   ),
                 ),
                 const SizedBox(height: 16),
-                // Login credentials hint
+                // Admin login hint
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
@@ -252,11 +194,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.info_outline,
+                          Icon(Icons.admin_panel_settings,
                               color: Colors.blue[700], size: 16),
                           const SizedBox(width: 8),
                           Text(
-                            'Test Credentials',
+                            'Admin Access',
                             style: TextStyle(
                               color: Colors.blue[700],
                               fontWeight: FontWeight.bold,
@@ -265,16 +207,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
-                      _buildCredentialRow('👨‍⚕️ Doctor', 'dr.sarah@medico.com', 'doctor123'),
                       const SizedBox(height: 4),
-                      _buildCredentialRow('👨‍⚕️ Doctor', 'dr.mike@medico.com', 'doctor456'),
-                      const SizedBox(height: 4),
-                      _buildCredentialRow('👨‍⚕️ Doctor', 'dr.emma@medico.com', 'doctor789'),
-                      const SizedBox(height: 4),
-                      _buildCredentialRow('👨‍💼 Admin', 'admin@medico.com', 'admin123'),
-                      const SizedBox(height: 4),
-                      _buildCredentialRow('👤 Patient', 'patient@medico.com', 'patient123'),
+                      Text(
+                        'Email: admin@medico.com\nPassword: admin123',
+                        style: TextStyle(
+                          color: Colors.blue[600],
+                          fontSize: 11,
+                        ),
+                      ),
                     ],
                   ),
                 ),
