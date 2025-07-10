@@ -10,6 +10,7 @@ import 'help_support_screen.dart';
 import 'privacy_policy_screen.dart';
 import 'prescriptions_reports_screen.dart';
 import 'consent_management_screen.dart';
+import 'personal_data_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -235,6 +236,18 @@ class _ProfileScreenState extends State<ProfileScreen>
                         context,
                         MaterialPageRoute(
                             builder: (_) => const ConsentManagementScreen()),
+                      );
+                    },
+                      ),
+                      _buildModernProfileItem(
+                        context,
+                    icon: Icons.data_usage,
+                    title: 'Personal Data',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const PersonalDataScreen()),
                       );
                     },
                       ),
