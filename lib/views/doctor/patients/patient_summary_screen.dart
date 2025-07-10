@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medico/views/doctor/prescriptions/doctor_prescriptions_panel.dart';
 import '../../../models/patient_record.dart';
 import '../../../core/theme/app_colors.dart';
 
@@ -522,6 +523,19 @@ class PatientSummaryScreen extends StatelessWidget {
             const SizedBox(height: 32),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) =>
+                  DoctorPrescriptionsPanel(doctorName: 'Dr. Smith'),
+            ),
+          );
+        },
+        icon: const Icon(Icons.upload_file),
+        label: const Text('Upload Prescription'),
+        backgroundColor: AppColors.primary,
       ),
     );
   }
