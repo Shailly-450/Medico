@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../admin/appointments/admin_appointments_panel.dart';
+import '../doctor/prescriptions/doctor_prescriptions_panel.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -18,19 +19,39 @@ class _LoginScreenState extends State<LoginScreen> {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
-    // Check if it's admin login
+    // Admin login
     if (email.toLowerCase() == 'admin@medico.com' && password == 'admin123') {
-      // Navigate to admin panel
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => const AdminAppointmentsPanel(),
         ),
       );
-    } else {
-      // Regular user login - navigate to home
-      Navigator.pushNamed(context, '/home');
+      return;
     }
+
+    // Doctor login (any email ending with @docto.com)
+    if (email.toLowerCase().endsWith('@docto.com') && password == 'doc123') {
+      final doctorName =
+          email.split('@').first.replaceAll('.', ' ').split('_').first;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DoctorPrescriptionsPanel(
+            doctorName: _capitalizeName(doctorName),
+          ),
+        ),
+      );
+      return;
+    }
+
+    // Regular user login
+    Navigator.pushNamed(context, '/home');
+  }
+
+  String _capitalizeName(String name) {
+    if (name.isEmpty) return name;
+    return name[0].toUpperCase() + name.substring(1);
   }
 
   @override
