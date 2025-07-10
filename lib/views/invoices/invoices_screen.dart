@@ -6,6 +6,7 @@ import '../../models/invoice.dart';
 import 'widgets/invoice_card.dart';
 import 'widgets/invoice_filter_chips.dart';
 import 'invoice_detail_screen.dart';
+import 'create_invoice_demo_screen.dart';
 
 class InvoicesScreen extends StatefulWidget {
   const InvoicesScreen({Key? key}) : super(key: key);
@@ -175,28 +176,58 @@ class _InvoicesScreenState extends State<InvoicesScreen>
               ],
             ),
           ),
-          IconButton(
-            onPressed: () {
-              // TODO: Add new invoice functionality
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Add invoice feature coming soon!')),
-              );
-            },
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+          Row(
+            children: [
+              IconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CreateInvoiceDemoScreen(),
+                    ),
+                  );
+                },
+                icon: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.orange,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.orange.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
-                ],
+                  child: const Icon(Icons.science, color: Colors.white),
+                ),
               ),
-              child: const Icon(Icons.add, color: Colors.white),
-            ),
+              const SizedBox(width: 8),
+              IconButton(
+                onPressed: () {
+                  // TODO: Add new invoice functionality
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Add invoice feature coming soon!')),
+                  );
+                },
+                icon: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(Icons.add, color: Colors.white),
+                ),
+              ),
+            ],
           ),
         ],
       ),

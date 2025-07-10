@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/invoice.dart';
 import '../models/order.dart';
 import '../models/rx_order.dart';
+import '../models/appointment.dart';
 import '../core/services/pdf_service.dart';
 import 'dart:io';
 import '../core/viewmodels/base_view_model.dart';
@@ -234,6 +235,47 @@ class InvoiceViewModel extends BaseViewModel {
         isTaxDeductible: false, // Wellness services are typically not tax deductible
         isClaimable: false, // Wellness services are typically not claimable
       ),
+      // Add appointment-linked invoice example
+      Invoice(
+        id: 'inv_005',
+        invoiceNumber: 'INV-APT-2024-001',
+        patientId: 'patient_001',
+        patientName: 'John Doe',
+        patientEmail: 'john.doe@email.com',
+        patientPhone: '+91 98765 43210',
+        patientAddress: '123 Main Street, Mumbai, Maharashtra 400001',
+        providerId: 'hospital_003',
+        providerName: 'Cardiology Specialists',
+        providerAddress: '456 Heart Street, Mumbai, Maharashtra 400006',
+        providerPhone: '+91 22 9999 0000',
+        providerEmail: 'billing@cardiology.com',
+        providerTaxId: 'TAX999000111',
+        type: InvoiceType.consultation,
+        status: InvoiceStatus.sent,
+        issueDate: DateTime.now().subtract(const Duration(days: 3)),
+        dueDate: DateTime.now().add(const Duration(days: 27)),
+        items: [
+          InvoiceItem(
+            id: 'item_008',
+            description: 'Cardiology Consultation (Video Call)',
+            quantity: 1,
+            unitPrice: 2500.0,
+            totalPrice: 2500.0,
+            notes: 'Appointment on 2024-01-15 at 10:00 AM',
+          ),
+        ],
+        subtotal: 2500.0,
+        tax: 450.0,
+        discount: 0.0,
+        total: 2950.0,
+        currency: 'INR',
+        notes: 'Consultation with Dr. Sarah Johnson',
+        terms: 'Payment due within 30 days of invoice date',
+        paymentInstructions: 'Pay online or at clinic counter',
+        appointmentId: 'appt_001', // Linked to appointment
+        isTaxDeductible: true,
+        isClaimable: true,
+      ),
     ];
   }
 
@@ -248,6 +290,36 @@ class InvoiceViewModel extends BaseViewModel {
   // Create invoice from prescription order
   Invoice createInvoiceFromRxOrder(RxOrder order, String patientName, String patientEmail, String patientPhone) {
     final invoice = Invoice.fromRxOrder(order, patientName, patientEmail, patientPhone);
+    _invoices.add(invoice);
+    notifyListeners();
+    return invoice;
+  }
+
+  // Create invoice from appointment
+  Invoice createInvoiceFromAppointment(Appointment appointment, String patientName, String patientEmail, String patientPhone, {
+    String? providerId,
+    String? providerName,
+    String? providerAddress,
+    String? providerPhone,
+    String? providerEmail,
+    double consultationFee = 1500.0,
+    double tax = 270.0,
+    double discount = 0.0,
+  }) {
+    final invoice = Invoice.fromAppointment(
+      appointment, 
+      patientName, 
+      patientEmail, 
+      patientPhone,
+      providerId: providerId,
+      providerName: providerName,
+      providerAddress: providerAddress,
+      providerPhone: providerPhone,
+      providerEmail: providerEmail,
+      consultationFee: consultationFee,
+      tax: tax,
+      discount: discount,
+    );
     _invoices.add(invoice);
     notifyListeners();
     return invoice;
@@ -358,6 +430,21 @@ class InvoiceViewModel extends BaseViewModel {
   // Get invoices by type
   List<Invoice> getInvoicesByType(InvoiceType type) {
     return _invoices.where((inv) => inv.type == type).toList();
+  }
+
+  // Get invoices by order ID
+  List<Invoice> getInvoicesByOrderId(String orderId) {
+    return _invoices.where((inv) => inv.orderId == orderId).toList();
+  }
+
+  // Get invoices by prescription order ID
+  List<Invoice> getInvoicesByRxOrderId(String rxOrderId) {
+    return _invoices.where((inv) => inv.rxOrderId == rxOrderId).toList();
+  }
+
+  // Get invoices by appointment ID
+  List<Invoice> getInvoicesByAppointmentId(String appointmentId) {
+    return _invoices.where((inv) => inv.appointmentId == appointmentId).toList();
   }
 
   // Search invoices

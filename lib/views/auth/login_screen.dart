@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/services/auth_service.dart';
 import '../admin/appointments/admin_appointments_panel.dart';
+import '../doctor/doctor_dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -13,24 +15,92 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _isLoading = false;
 
-  void _handleLogin() {
+  Future<void> _handleLogin() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
-    // Check if it's admin login
-    if (email.toLowerCase() == 'admin@medico.com' && password == 'admin123') {
-      // Navigate to admin panel
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const AdminAppointmentsPanel(),
-        ),
-      );
-    } else {
-      // Regular user login - navigate to home
-      Navigator.pushNamed(context, '/home');
+    if (email.isEmpty || password.isEmpty) {
+      _showErrorSnackBar('Please enter both email and password');
+      return;
     }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final result = await AuthService.login(email, password);
+      
+      if (result['success'] == true) {
+        final role = result['role'] as UserRole;
+        
+        switch (role) {
+          case UserRole.admin:
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const AdminAppointmentsPanel(),
+              ),
+            );
+            break;
+          case UserRole.doctor:
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const DoctorDashboardScreen(),
+              ),
+            );
+            break;
+          case UserRole.patient:
+            Navigator.pushReplacementNamed(context, '/home');
+            break;
+        }
+      } else {
+        _showErrorSnackBar(result['message'] ?? 'Login failed');
+      }
+    } catch (e) {
+      _showErrorSnackBar('Login failed: ${e.toString()}');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+
+  Widget _buildCredentialRow(String role, String email, String password) {
+    return Row(
+      children: [
+        Text(
+          role,
+          style: TextStyle(
+            color: Colors.blue[600],
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            '$email / $password',
+            style: TextStyle(
+              color: Colors.blue[600],
+              fontSize: 10,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -145,7 +215,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: double.infinity,
                   height: 52,
                   child: ElevatedButton(
-                    onPressed: _handleLogin,
+                    onPressed: _isLoading ? null : _handleLogin,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
@@ -155,11 +225,20 @@ class _LoginScreenState extends State<LoginScreen> {
                       textStyle: const TextStyle(
                           fontWeight: FontWeight.bold, fontSize: 18),
                     ),
-                    child: const Text('Login'),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text('Login'),
                   ),
                 ),
                 const SizedBox(height: 16),
-                // Admin login hint
+                // Login credentials hint
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
@@ -173,11 +252,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.admin_panel_settings,
+                          Icon(Icons.info_outline,
                               color: Colors.blue[700], size: 16),
                           const SizedBox(width: 8),
                           Text(
-                            'Admin Access',
+                            'Test Credentials',
                             style: TextStyle(
                               color: Colors.blue[700],
                               fontWeight: FontWeight.bold,
@@ -186,14 +265,16 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ],
                       ),
+                      const SizedBox(height: 8),
+                      _buildCredentialRow('👨‍⚕️ Doctor', 'dr.sarah@medico.com', 'doctor123'),
                       const SizedBox(height: 4),
-                      Text(
-                        'Email: admin@medico.com\nPassword: admin123',
-                        style: TextStyle(
-                          color: Colors.blue[600],
-                          fontSize: 11,
-                        ),
-                      ),
+                      _buildCredentialRow('👨‍⚕️ Doctor', 'dr.mike@medico.com', 'doctor456'),
+                      const SizedBox(height: 4),
+                      _buildCredentialRow('👨‍⚕️ Doctor', 'dr.emma@medico.com', 'doctor789'),
+                      const SizedBox(height: 4),
+                      _buildCredentialRow('👨‍💼 Admin', 'admin@medico.com', 'admin123'),
+                      const SizedBox(height: 4),
+                      _buildCredentialRow('👤 Patient', 'patient@medico.com', 'patient123'),
                     ],
                   ),
                 ),
