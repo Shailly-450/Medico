@@ -248,6 +248,34 @@ class InvoiceCard extends StatelessWidget {
                 const SizedBox(height: 16),
               ],
 
+              // Linked entity indicators
+              if (invoice.orderId != null || invoice.rxOrderId != null || invoice.appointmentId != null) ...[
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[50],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.blue[200]!),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.link, color: Colors.blue[700], size: 16),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _getLinkedEntityText(),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Colors.blue[700],
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+
               // Action buttons
               Row(
                 children: [
@@ -289,6 +317,28 @@ class InvoiceCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _getLinkedEntityText() {
+    final linkedEntities = <String>[];
+    
+    if (invoice.orderId != null) {
+      linkedEntities.add('Order');
+    }
+    if (invoice.rxOrderId != null) {
+      linkedEntities.add('Prescription');
+    }
+    if (invoice.appointmentId != null) {
+      linkedEntities.add('Appointment');
+    }
+    
+    if (linkedEntities.length == 1) {
+      return 'Linked to ${linkedEntities.first}';
+    } else if (linkedEntities.length == 2) {
+      return 'Linked to ${linkedEntities.first} & ${linkedEntities.last}';
+    } else {
+      return 'Linked to ${linkedEntities.take(linkedEntities.length - 1).join(', ')} & ${linkedEntities.last}';
+    }
   }
 
   Widget _buildStatusChip(BuildContext context) {

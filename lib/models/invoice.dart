@@ -1,5 +1,6 @@
 import 'order.dart';
 import 'rx_order.dart';
+import 'appointment.dart';
 
 enum InvoiceStatus {
   draft,
@@ -49,6 +50,7 @@ class Invoice {
   final String? paymentInstructions;
   final String? orderId; // Reference to related order
   final String? rxOrderId; // Reference to related prescription order
+  final String? appointmentId; // Reference to related appointment
   final Map<String, dynamic>? metadata;
   final bool isTaxDeductible; // Flag for tax deduction eligibility
   final bool isClaimable; // Flag for insurance/reimbursement claim eligibility
@@ -83,6 +85,7 @@ class Invoice {
     this.paymentInstructions,
     this.orderId,
     this.rxOrderId,
+    this.appointmentId,
     this.metadata,
     this.isTaxDeductible = true, // Default to true for medical expenses
     this.isClaimable = true, // Default to true for medical expenses
@@ -128,6 +131,7 @@ class Invoice {
       paymentInstructions: json['paymentInstructions'],
       orderId: json['orderId'],
       rxOrderId: json['rxOrderId'],
+      appointmentId: json['appointmentId'],
       metadata: json['metadata'],
       isTaxDeductible: json['isTaxDeductible'] ?? true,
       isClaimable: json['isClaimable'] ?? true,
@@ -165,6 +169,7 @@ class Invoice {
       'paymentInstructions': paymentInstructions,
       'orderId': orderId,
       'rxOrderId': rxOrderId,
+      'appointmentId': appointmentId,
       'metadata': metadata,
       'isTaxDeductible': isTaxDeductible,
       'isClaimable': isClaimable,
@@ -289,6 +294,57 @@ class Invoice {
       rxOrderId: order.id,
       isTaxDeductible: true, // Prescription medicines are typically tax deductible
       isClaimable: true, // Prescription medicines are typically claimable
+    );
+  }
+
+  // Create invoice from appointment
+  factory Invoice.fromAppointment(Appointment appointment, String patientName, String patientEmail, String patientPhone, {
+    String? providerId,
+    String? providerName,
+    String? providerAddress,
+    String? providerPhone,
+    String? providerEmail,
+    double consultationFee = 1500.0,
+    double tax = 270.0,
+    double discount = 0.0,
+  }) {
+    final total = consultationFee + tax - discount;
+    
+    return Invoice(
+      id: 'inv_appt_${appointment.id}',
+      invoiceNumber: 'INV-APT-${DateTime.now().year}-${appointment.id.substring(appointment.id.length - 6)}',
+      patientId: 'patient_${appointment.id}', // You might want to get this from user context
+      patientName: patientName,
+      patientEmail: patientEmail,
+      patientPhone: patientPhone,
+      providerId: providerId ?? 'provider_${appointment.id}',
+      providerName: providerName ?? 'Medical Center',
+      providerAddress: providerAddress,
+      providerPhone: providerPhone,
+      providerEmail: providerEmail,
+      type: InvoiceType.consultation,
+      status: InvoiceStatus.sent,
+      issueDate: DateTime.now(),
+      dueDate: DateTime.now().add(const Duration(days: 30)),
+      items: [
+        InvoiceItem(
+          id: 'item_appt_${appointment.id}',
+          description: '${appointment.specialty} Consultation${appointment.isVideoCall ? ' (Video Call)' : ''}',
+          quantity: 1,
+          unitPrice: consultationFee,
+          totalPrice: consultationFee,
+          notes: 'Appointment on ${appointment.date} at ${appointment.time}',
+        ),
+      ],
+      subtotal: consultationFee,
+      tax: tax,
+      discount: discount,
+      total: total,
+      currency: 'INR',
+      notes: 'Consultation with Dr. ${appointment.doctorName}',
+      appointmentId: appointment.id,
+      isTaxDeductible: true, // Medical consultations are typically tax deductible
+      isClaimable: true, // Medical consultations are typically claimable
     );
   }
 }

@@ -19,12 +19,15 @@ import 'viewmodels/order_view_model.dart';
 import 'viewmodels/invoice_view_model.dart';
 import 'views/profile/profile_screen.dart';
 import 'viewmodels/family_members_view_model.dart';
+import 'viewmodels/consent_view_model.dart';
 import 'views/prescriptions/prescriptions_screen.dart';
 import 'views/prescriptions/test_prescriptions_screen.dart';
 import 'views/workflow/medical_workflow_screen.dart';
 import 'views/workflow/workflow_demo_screen.dart';
 import 'views/ai_symptom/ai_symptom_chat_screen.dart';
 import 'core/services/ai_symptom_service.dart';
+import 'views/invoices/invoices_screen.dart';
+import 'views/doctor/doctor_dashboard_screen.dart';
 
 void main() {
   // Initialize mock data for OrderService
@@ -48,6 +51,8 @@ class MyApp extends StatelessWidget {
             create: (_) => InvoiceViewModel()),
         ChangeNotifierProvider<FamilyMembersViewModel>(
             create: (_) => FamilyMembersViewModel()),
+        ChangeNotifierProvider<ConsentViewModel>(
+            create: (_) => ConsentViewModel()),
       ],
       child: Builder(
         builder: (context) => MaterialApp(
@@ -74,6 +79,8 @@ class MyApp extends StatelessWidget {
             '/workflow': (context) => const MedicalWorkflowScreen(),
             '/workflow-demo': (context) => const WorkflowDemoScreen(),
             '/ai-symptom-chat': (context) => const AISymptomChatScreen(),
+            '/invoices': (context) => const InvoicesScreen(),
+            '/doctor-dashboard': (context) => const DoctorDashboardScreen(),
           },
           onGenerateRoute: (settings) {
             print('Navigating to: ${settings.name}');

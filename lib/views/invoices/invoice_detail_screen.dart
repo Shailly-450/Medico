@@ -64,6 +64,12 @@ class InvoiceDetailScreen extends StatelessWidget {
               _buildInfoSection(context),
               const SizedBox(height: 16),
 
+              // Linked entity information
+              if (invoice.orderId != null || invoice.rxOrderId != null || invoice.appointmentId != null) ...[
+                _buildLinkedEntitySection(context),
+                const SizedBox(height: 16),
+              ],
+
               // Invoice items
               _buildItemsSection(context),
               const SizedBox(height: 16),
@@ -705,6 +711,92 @@ class InvoiceDetailScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildLinkedEntitySection(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.link, color: AppColors.primary, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                'Linked Information',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textBlack,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (invoice.orderId != null) ...[
+            _buildLinkedItem(context, 'Order ID', invoice.orderId!, Icons.shopping_cart),
+            const SizedBox(height: 8),
+          ],
+          if (invoice.rxOrderId != null) ...[
+            _buildLinkedItem(context, 'Prescription Order ID', invoice.rxOrderId!, Icons.medication),
+            const SizedBox(height: 8),
+          ],
+          if (invoice.appointmentId != null) ...[
+            _buildLinkedItem(context, 'Appointment ID', invoice.appointmentId!, Icons.calendar_today),
+            const SizedBox(height: 8),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLinkedItem(BuildContext context, String label, String id, IconData icon) {
+    return Row(
+      children: [
+        Icon(icon, color: AppColors.primary, size: 16),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+              ),
+              Text(
+                id,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textBlack,
+                    ),
+              ),
+            ],
+          ),
+        ),
+        IconButton(
+          onPressed: () {
+            // TODO: Navigate to the linked entity detail screen
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('View $label details coming soon!')),
+            );
+          },
+          icon: Icon(Icons.arrow_forward_ios, color: AppColors.primary, size: 16),
+        ),
+      ],
     );
   }
 
