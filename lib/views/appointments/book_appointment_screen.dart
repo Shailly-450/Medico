@@ -84,125 +84,135 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
         elevation: 0.5,
       ),
       backgroundColor: Colors.grey[50],
-      body: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Select Doctor',
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _dummyDoctors.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 2),
-              itemBuilder: (context, index) {
-                final doc = _dummyDoctors[index];
-                return GestureDetector(
-                  onTap: () => setState(() => _selectedDoctorIndex = index),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: _selectedDoctorIndex == index
-                            ? AppColors.primary
-                            : Colors.transparent,
-                        width: 2,
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Select Doctor',
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium
+                          ?.copyWith(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: _dummyDoctors.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 2),
+                    itemBuilder: (context, index) {
+                      final doc = _dummyDoctors[index];
+                      return GestureDetector(
+                        onTap: () => setState(() => _selectedDoctorIndex = index),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: _selectedDoctorIndex == index
+                                  ? AppColors.primary
+                                  : Colors.transparent,
+                              width: 2,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: DoctorCard(
+                            doctor: Doctor(
+                              id: index.toString(),
+                              name: doc['name'],
+                              specialty: doc['specialty'],
+                              imageUrl: doc['imageUrl'],
+                              hospital: doc['hospital'],
+                              price: doc['price'],
+                              rating: doc['rating'],
+                              reviews: doc['reviews'],
+                              isOnline: true,
+                              isAvailable: true,
+                              experience: 10,
+                              education: 'MBBS, MD',
+                              languages: ['English'],
+                              specializations: [doc['specialty']],
+                              about:
+                                  'Experienced doctor with excellent patient care.',
+                              availability: {'Monday': '9:00 AM - 5:00 PM'},
+                              awards: [],
+                              consultationFee: '₹${doc['price'].toInt()}',
+                              acceptsInsurance: true,
+                              insuranceProviders: ['Max Bupa'],
+                              location: 'City Center',
+                              distance: 2.0,
+                              isVerified: true,
+                              phoneNumber: '+1 555-000-0000',
+                              email: 'doctor@hospital.com',
+                              symptoms: [],
+                              videoCall: true,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  Text('Select Date',
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium
+                          ?.copyWith(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: _pickDate,
+                          icon: const Icon(Icons.calendar_today),
+                          label: Text(_selectedDate == null
+                              ? 'Choose Date'
+                              : '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.primary,
+                            side: BorderSide(color: AppColors.primary),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                          ),
+                        ),
                       ),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: DoctorCard(
-                      doctor: Doctor(
-                        id: index.toString(),
-                        name: doc['name'],
-                        specialty: doc['specialty'],
-                        imageUrl: doc['imageUrl'],
-                        hospital: doc['hospital'],
-                        price: doc['price'],
-                        rating: doc['rating'],
-                        reviews: doc['reviews'],
-                        isOnline: true,
-                        isAvailable: true,
-                        experience: 10,
-                        education: 'MBBS, MD',
-                        languages: ['English'],
-                        specializations: [doc['specialty']],
-                        about:
-                            'Experienced doctor with excellent patient care.',
-                        availability: {'Monday': '9:00 AM - 5:00 PM'},
-                        awards: [],
-                        consultationFee: '₹${doc['price'].toInt()}',
-                        acceptsInsurance: true,
-                        insuranceProviders: ['Max Bupa'],
-                        location: 'City Center',
-                        distance: 2.0,
-                        isVerified: true,
-                        phoneNumber: '+1 555-000-0000',
-                        email: 'doctor@hospital.com',
-                        symptoms: [],
-                        videoCall: true,
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text('Select Time',
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium
+                          ?.copyWith(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: _pickTime,
+                          icon: const Icon(Icons.access_time),
+                          label: Text(_selectedTime == null
+                              ? 'Choose Time'
+                              : _selectedTime!.format(context)),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.primary,
+                            side: BorderSide(color: AppColors.primary),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                );
-              },
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
-            Text('Select Date',
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: _pickDate,
-                    icon: const Icon(Icons.calendar_today),
-                    label: Text(_selectedDate == null
-                        ? 'Choose Date'
-                        : '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                      side: BorderSide(color: AppColors.primary),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Text('Select Time',
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: _pickTime,
-                    icon: const Icon(Icons.access_time),
-                    label: Text(_selectedTime == null
-                        ? 'Choose Time'
-                        : _selectedTime!.format(context)),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                      side: BorderSide(color: AppColors.primary),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const Spacer(),
-            SizedBox(
+          ),
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: SizedBox(
               width: double.infinity,
               height: 52,
               child: ElevatedButton(
@@ -240,8 +250,8 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                 child: const Text('Confirm Appointment'),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -236,6 +236,8 @@ class _StageReorderDialogState extends State<StageReorderDialog> {
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         _buildStatusChip(stage.status),

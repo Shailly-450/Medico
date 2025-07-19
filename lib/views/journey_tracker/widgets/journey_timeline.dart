@@ -275,40 +275,55 @@ class JourneyTimeline extends StatelessWidget {
   }
 
   Widget _buildDateInfo(JourneyStage stage) {
-    return Row(
+    return Wrap(
+      spacing: 8,
+      runSpacing: 4,
       children: [
         if (stage.startDate != null) ...[
-          Icon(
-            Icons.schedule,
-            size: 14,
-            color: AppColors.textSecondary,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.schedule,
+                size: 14,
+                color: AppColors.textSecondary,
+              ),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  'Started: ${_formatDate(stage.startDate!)}',
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 4),
-          Text(
-            'Started: ${_formatDate(stage.startDate!)}',
-            style: TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 12,
-            ),
-          ),
-        ],
-        if (stage.startDate != null && stage.completedDate != null) ...[
-          const SizedBox(width: 16),
         ],
         if (stage.completedDate != null) ...[
-          Icon(
-            Icons.check_circle,
-            size: 14,
-            color: AppColors.success,
-          ),
-          const SizedBox(width: 4),
-          Text(
-            'Completed: ${_formatDate(stage.completedDate!)}',
-            style: TextStyle(
-              color: AppColors.success,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.check_circle,
+                size: 14,
+                color: AppColors.success,
+              ),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  'Completed: ${_formatDate(stage.completedDate!)}',
+                  style: TextStyle(
+                    color: AppColors.success,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
         ],
       ],

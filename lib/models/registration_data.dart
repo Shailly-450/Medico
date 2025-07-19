@@ -1,17 +1,19 @@
 class RegistrationData {
-  String phoneNumber;
+  String email;
   String otp;
+  String userId;
   String firstName;
   String lastName;
-  String email;
+  String phone;
   String password;
 
   RegistrationData({
-    this.phoneNumber = '',
+    this.email = '',
     this.otp = '',
+    this.userId = '',
     this.firstName = '',
     this.lastName = '',
-    this.email = '',
+    this.phone = '',
     this.password = '',
   });
 } 

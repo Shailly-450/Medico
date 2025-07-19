@@ -5,6 +5,7 @@ import '../models/doctor.dart';
 import '../models/hospital.dart';
 import '../models/offer_package.dart';
 import '../core/services/pre_approval_service.dart';
+import '../core/services/hospital_service.dart';
 import 'notification_view_model.dart';
 
 class HomeViewModel extends BaseViewModel {
@@ -30,9 +31,9 @@ class HomeViewModel extends BaseViewModel {
       id: '1',
       title: 'Health Checkup Package',
       description:
-          'Complete body checkup with blood tests, ECG, and consultation',
+      'Complete body checkup with blood tests, ECG, and consultation',
       imageUrl:
-          'https://img.freepik.com/free-photo/medical-stethoscope-laptop-keyboard_23-2147862719.jpg',
+      'https://img.freepik.com/free-photo/medical-stethoscope-laptop-keyboard_23-2147862719.jpg',
       originalPrice: 299.99,
       discountedPrice: 199.99,
       discountPercentage: 33,
@@ -45,7 +46,7 @@ class HomeViewModel extends BaseViewModel {
       title: 'Dental Care Special',
       description: 'Complete dental checkup with cleaning and consultation',
       imageUrl:
-          'https://img.freepik.com/free-photo/medical-equipment-dentistry_23-2148847898.jpg',
+      'https://img.freepik.com/free-photo/medical-equipment-dentistry_23-2148847898.jpg',
       originalPrice: 149.99,
       discountedPrice: 99.99,
       discountPercentage: 33,
@@ -58,7 +59,7 @@ class HomeViewModel extends BaseViewModel {
       title: 'Eye Care Bundle',
       description: 'Complete eye examination with prescription glasses',
       imageUrl:
-          'https://img.freepik.com/free-photo/medical-equipment-dentistry_23-2148847898.jpg',
+      'https://img.freepik.com/free-photo/medical-equipment-dentistry_23-2148847898.jpg',
       originalPrice: 199.99,
       discountedPrice: 149.99,
       discountPercentage: 25,
@@ -73,7 +74,7 @@ class HomeViewModel extends BaseViewModel {
       id: '2001',
       doctorName: "Dr. Sarah Johnson",
       doctorImage:
-          "https://img.freepik.com/free-photo/woman-doctor-wearing-lab-coat-with-stethoscope-isolated_1303-29791.jpg",
+      "https://img.freepik.com/free-photo/woman-doctor-wearing-lab-coat-with-stethoscope-isolated_1303-29791.jpg",
       specialty: "Cardiologist",
       isVideoCall: true,
       date: "Jun 30, 2025",
@@ -84,7 +85,7 @@ class HomeViewModel extends BaseViewModel {
       id: '2002',
       doctorName: "Dr. Michael Chen",
       doctorImage:
-          "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
+      "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
       specialty: "Dentist",
       isVideoCall: false,
       date: "Jul 01, 2025",
@@ -95,7 +96,7 @@ class HomeViewModel extends BaseViewModel {
       id: '2003',
       doctorName: "Dr. Emily Brown",
       doctorImage:
-          "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
+      "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
       specialty: "Pediatrician",
       isVideoCall: true,
       date: "Jul 03, 2025",
@@ -175,7 +176,7 @@ class HomeViewModel extends BaseViewModel {
     if (selectedHospitalSpecialty != 'All') {
       filtered = filtered
           .where((hospital) =>
-              hospital.specialties.contains(selectedHospitalSpecialty))
+          hospital.specialties.contains(selectedHospitalSpecialty))
           .toList();
     }
 
@@ -187,7 +188,7 @@ class HomeViewModel extends BaseViewModel {
       id: '1',
       name: "Dr. Sarah Johnson",
       imageUrl:
-          "https://img.freepik.com/free-photo/woman-doctor-wearing-lab-coat-with-stethoscope-isolated_1303-29791.jpg",
+      "https://img.freepik.com/free-photo/woman-doctor-wearing-lab-coat-with-stethoscope-isolated_1303-29791.jpg",
       specialty: "Cardiologist",
       hospital: "Mount Sinai Hospital",
       rating: 4.8,
@@ -204,7 +205,7 @@ class HomeViewModel extends BaseViewModel {
         'Preventive Cardiology'
       ],
       about:
-          'Dr. Sarah Johnson is a board-certified cardiologist with over 15 years of experience.',
+      'Dr. Sarah Johnson is a board-certified cardiologist with over 15 years of experience.',
       availability: {
         'Monday': '9:00 AM - 5:00 PM',
         'Tuesday': '9:00 AM - 5:00 PM',
@@ -230,7 +231,7 @@ class HomeViewModel extends BaseViewModel {
       id: '2',
       name: "Dr. Michael Chen",
       imageUrl:
-          "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
+      "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
       specialty: "Dentist",
       hospital: "NYU Langone",
       rating: 4.7,
@@ -247,7 +248,7 @@ class HomeViewModel extends BaseViewModel {
         'Root Canal Treatment'
       ],
       about:
-          'Dr. Michael Chen is a skilled dentist with expertise in orthodontics.',
+      'Dr. Michael Chen is a skilled dentist with expertise in orthodontics.',
       availability: {
         'Monday': '10:00 AM - 6:00 PM',
         'Tuesday': '10:00 AM - 6:00 PM',
@@ -273,7 +274,7 @@ class HomeViewModel extends BaseViewModel {
       id: '3',
       name: "Dr. Emily Brown",
       imageUrl:
-          "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
+      "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
       specialty: "Pediatrician",
       hospital: "Columbia Presbyterian",
       rating: 4.9,
@@ -290,7 +291,7 @@ class HomeViewModel extends BaseViewModel {
         'Vaccination'
       ],
       about:
-          'Dr. Emily Brown is a compassionate pediatrician with 18 years of experience.',
+      'Dr. Emily Brown is a compassionate pediatrician with 18 years of experience.',
       availability: {
         'Monday': '8:00 AM - 4:00 PM',
         'Tuesday': '8:00 AM - 4:00 PM',
@@ -314,261 +315,89 @@ class HomeViewModel extends BaseViewModel {
     ),
   ];
 
-  List<Hospital> hospitals = [
-    Hospital(
-      id: '1',
-      name: 'Mount Sinai Hospital',
-      type: 'General Hospital',
-      location: '1468 Madison Ave, New York, NY 10029',
-      rating: 4.8,
-      distance: 0.8,
-      availableDoctors: 45,
-      isOpen: true,
-      imageUrl:
-          'https://img.freepik.com/free-photo/modern-hospital-building_1417-1205.jpg',
-      specialties: ['Cardiology', 'Emergency Medicine', 'Surgery', 'Neurology'],
-      description: 'A leading hospital in New York with 24/7 emergency care.',
-      latitude: 40.7909,
-      longitude: -73.9497,
-      consultationFee: 150.0,
-      emergencyFee: 500.0,
-      costCategory: 'High',
-    ),
-    Hospital(
-      id: '2',
-      name: 'NYU Langone Health',
-      type: 'Academic Medical Center',
-      location: '550 1st Ave, New York, NY 10016',
-      rating: 4.7,
-      distance: 1.2,
-      availableDoctors: 38,
-      isOpen: true,
-      imageUrl:
-          'https://img.freepik.com/free-photo/hospital-building_1417-1206.jpg',
-      specialties: ['Orthopedics', 'Dental Care', 'Dermatology', 'Pediatrics'],
-      description: 'Comprehensive care and advanced medical research.',
-      latitude: 40.7411,
-      longitude: -73.9747,
-      consultationFee: 180.0,
-      emergencyFee: 600.0,
-      costCategory: 'Premium',
-    ),
-    Hospital(
-      id: '3',
-      name: 'Columbia Presbyterian Hospital',
-      type: 'University Hospital',
-      location: '622 W 168th St, New York, NY 10032',
-      rating: 4.9,
-      distance: 2.5,
-      availableDoctors: 52,
-      isOpen: false,
-      imageUrl:
-          'https://img.freepik.com/free-photo/hospital-entrance_1417-1207.jpg',
-      specialties: ['Pediatrics', 'Cardiology', 'Oncology', 'Surgery'],
-      description: 'Renowned for pediatric and cardiac care.',
-      latitude: 40.8419,
-      longitude: -73.9397,
-      consultationFee: 120.0,
-      emergencyFee: 450.0,
-      costCategory: 'Medium',
-    ),
-    Hospital(
-      id: '4',
-      name: 'Manhattan Eye & Ear Clinic',
-      type: 'Specialty Clinic',
-      location: '210 E 64th St, New York, NY 10065',
-      rating: 4.6,
-      distance: 1.8,
-      availableDoctors: 12,
-      isOpen: true,
-      imageUrl:
-          'https://img.freepik.com/free-photo/modern-medical-clinic_23-2148864987.jpg',
-      specialties: ['Ophthalmology', 'Otolaryngology', 'Plastic Surgery'],
-      description: 'Specialized care for eye and ear conditions.',
-      consultationFee: 200.0,
-      emergencyFee: 800.0,
-      costCategory: 'Premium',
-    ),
-    Hospital(
-      id: '5',
-      name: 'NYC Emergency Medical Center',
-      type: 'Emergency Center',
-      location: '462 1st Ave, New York, NY 10016',
-      rating: 4.5,
-      distance: 0.5,
-      availableDoctors: 25,
-      isOpen: true,
-      imageUrl:
-          'https://img.freepik.com/free-photo/emergency-room-hospital_23-2148864988.jpg',
-      specialties: ['Emergency Medicine', 'Trauma Care', 'Critical Care'],
-      description: '24/7 emergency medical services and trauma care.',
-      consultationFee: 80.0,
-      emergencyFee: 300.0,
-      costCategory: 'Low',
-    ),
-    Hospital(
-      id: '6',
-      name: 'Weill Cornell Medical Center',
-      type: 'Academic Medical Center',
-      location: '525 E 68th St, New York, NY 10065',
-      rating: 4.8,
-      distance: 2.1,
-      availableDoctors: 41,
-      isOpen: true,
-      imageUrl:
-          'https://img.freepik.com/free-photo/modern-hospital-building_1417-1205.jpg',
-      specialties: ['Internal Medicine', 'Surgery', 'Radiology', 'Pathology'],
-      description: 'Academic medical center with cutting-edge research.',
-      consultationFee: 160.0,
-      emergencyFee: 550.0,
-      costCategory: 'High',
-    ),
-    // Indian Hospitals
-    Hospital(
-      id: '7',
-      name: 'Apollo Hospitals',
-      type: 'General Hospital',
-      location: 'Greams Road, Chennai, Tamil Nadu 600006',
-      rating: 4.9,
-      distance: 3.2,
-      availableDoctors: 65,
-      isOpen: true,
-      imageUrl:
-          'https://img.freepik.com/free-photo/modern-hospital-building_1417-1205.jpg',
-      specialties: [
-        'Cardiology',
-        'Oncology',
-        'Neurology',
-        'Transplant Surgery'
-      ],
-      description:
-          'One of India\'s leading healthcare institutions with world-class facilities.',
-      latitude: 13.0827,
-      longitude: 80.2707,
-      consultationFee: 1200.0,
-      emergencyFee: 8000.0,
-      costCategory: 'Premium',
-    ),
-    Hospital(
-      id: '8',
-      name: 'Fortis Hospital',
-      type: 'Multi-Specialty Hospital',
-      location: 'Bannerghatta Road, Bangalore, Karnataka 560076',
-      rating: 4.7,
-      distance: 2.8,
-      availableDoctors: 48,
-      isOpen: true,
-      imageUrl:
-          'https://img.freepik.com/free-photo/hospital-building_1417-1206.jpg',
-      specialties: [
-        'Cardiology',
-        'Orthopedics',
-        'Neurology',
-        'Emergency Medicine'
-      ],
-      description:
-          'Advanced multi-specialty hospital with cutting-edge medical technology.',
-      latitude: 12.9716,
-      longitude: 77.5946,
-      consultationFee: 1000.0,
-      emergencyFee: 6000.0,
-      costCategory: 'High',
-    ),
-    Hospital(
-      id: '9',
-      name: 'AIIMS Delhi',
-      type: 'Government Hospital',
-      location: 'Sri Aurobindo Marg, New Delhi, Delhi 110029',
-      rating: 4.8,
-      distance: 1.5,
-      availableDoctors: 85,
-      isOpen: true,
-      imageUrl:
-          'https://img.freepik.com/free-photo/hospital-entrance_1417-1207.jpg',
-      specialties: [
-        'All Specialties',
-        'Research',
-        'Medical Education',
-        'Public Health'
-      ],
-      description:
-          'Premier medical institute and government hospital with comprehensive care.',
-      latitude: 28.5671,
-      longitude: 77.2090,
-      consultationFee: 50.0,
-      emergencyFee: 500.0,
-      costCategory: 'Low',
-    ),
-    Hospital(
-      id: '10',
-      name: 'Kokilaben Dhirubhai Ambani Hospital',
-      type: 'Multi-Specialty Hospital',
-      location: 'Four Bungalows, Andheri West, Mumbai, Maharashtra 400053',
-      rating: 4.6,
-      distance: 4.1,
-      availableDoctors: 52,
-      isOpen: true,
-      imageUrl:
-          'https://img.freepik.com/free-photo/modern-medical-clinic_23-2148864987.jpg',
-      specialties: [
-        'Cardiology',
-        'Cancer Care',
-        'Neurology',
-        'Robotic Surgery'
-      ],
-      description:
-          'State-of-the-art hospital with advanced robotic surgery facilities.',
-      latitude: 19.0760,
-      longitude: 72.8777,
-      consultationFee: 1500.0,
-      emergencyFee: 10000.0,
-      costCategory: 'Premium',
-    ),
-    Hospital(
-      id: '11',
-      name: 'Manipal Hospital',
-      type: 'Academic Medical Center',
-      location: 'Old Airport Road, Bangalore, Karnataka 560017',
-      rating: 4.5,
-      distance: 3.7,
-      availableDoctors: 38,
-      isOpen: true,
-      imageUrl:
-          'https://img.freepik.com/free-photo/emergency-room-hospital_23-2148864988.jpg',
-      specialties: ['Cardiology', 'Neurology', 'Orthopedics', 'Pediatrics'],
-      description: 'Academic medical center with research and education focus.',
-      latitude: 12.9716,
-      longitude: 77.5946,
-      consultationFee: 800.0,
-      emergencyFee: 4000.0,
-      costCategory: 'Medium',
-    ),
-    Hospital(
-      id: '12',
-      name: 'Sankara Eye Hospital',
-      type: 'Specialty Clinic',
-      location: 'Whitefield, Bangalore, Karnataka 560066',
-      rating: 4.4,
-      distance: 5.2,
-      availableDoctors: 15,
-      isOpen: true,
-      imageUrl:
-          'https://img.freepik.com/free-photo/modern-hospital-building_1417-1205.jpg',
-      specialties: [
-        'Ophthalmology',
-        'Eye Surgery',
-        'Retina Care',
-        'Cornea Transplant'
-      ],
-      description:
-          'Specialized eye care hospital with advanced ophthalmic treatments.',
-      latitude: 12.9716,
-      longitude: 77.5946,
-      consultationFee: 600.0,
-      emergencyFee: 3000.0,
-      costCategory: 'Medium',
-    ),
-  ];
+  List<Hospital> hospitals = [];
+  bool _hospitalsLoaded = false;
+  String? _hospitalsError;
+
+  // API Integration Methods
+  Future<void> loadHospitals() async {
+    if (_hospitalsLoaded) return;
+
+    setBusy(true);
+    _hospitalsError = null;
+
+    try {
+      final result = await HospitalService.getHospitals(
+        page: 1,
+        limit: 20,
+        sortBy: 'rating',
+        sortOrder: 'desc',
+      );
+
+      if (result['success'] == true) {
+        final hospitalsData = result['data'] as List<dynamic>;
+        hospitals = hospitalsData
+            .map((data) => HospitalService.convertToHospitalModel(data))
+            .toList();
+        _hospitalsLoaded = true;
+        print('✅ Loaded ${hospitals.length} hospitals from API');
+      } else {
+        _hospitalsError = result['message'] ?? 'Failed to load hospitals';
+        print('❌ Failed to load hospitals: ${result['message']}');
+        hospitals = []; // Clear hospitals on error
+      }
+    } catch (e) {
+      _hospitalsError = 'Error loading hospitals: ${e.toString()}';
+      print('❌ Exception loading hospitals: $e');
+      hospitals = []; // Clear hospitals on error
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  Future<void> searchNearbyHospitals({
+    required double latitude,
+    required double longitude,
+    double maxDistance = 10000,
+  }) async {
+    setBusy(true);
+    _hospitalsError = null;
+
+    try {
+      final result = await HospitalService.searchNearbyHospitals(
+        latitude: latitude,
+        longitude: longitude,
+        maxDistance: maxDistance,
+      );
+
+      if (result['success'] == true) {
+        final hospitalsData = result['data'] as List<dynamic>;
+        hospitals = hospitalsData
+            .map((data) => HospitalService.convertToHospitalModel(data))
+            .toList();
+        _hospitalsLoaded = true;
+        print('✅ Found ${hospitals.length} nearby hospitals');
+      } else {
+        _hospitalsError =
+            result['message'] ?? 'Failed to search nearby hospitals';
+        print('❌ Failed to search nearby hospitals: ${result['message']}');
+        hospitals = []; // Clear hospitals on error
+      }
+    } catch (e) {
+      _hospitalsError = 'Error searching nearby hospitals: ${e.toString()}';
+      print('❌ Exception searching nearby hospitals: $e');
+      hospitals = []; // Clear hospitals on error
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  Future<void> refreshHospitals() async {
+    _hospitalsLoaded = false;
+    await loadHospitals();
+  }
+
+
 
   void setSpecialty(String specialty) {
     selectedSpecialty = specialty;
@@ -593,5 +422,12 @@ class HomeViewModel extends BaseViewModel {
   void setHospitalSpecialty(String specialty) {
     selectedHospitalSpecialty = specialty;
     notifyListeners();
+  }
+
+  @override
+  void init() {
+    super.init();
+    // Load hospitals from API when view model is initialized
+    loadHospitals();
   }
 }

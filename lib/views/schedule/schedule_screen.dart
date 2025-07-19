@@ -174,7 +174,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                     Text(
                       'Loading your schedule...',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 12,
                         color: AppColors.textSecondary,
                         fontWeight: FontWeight.w500,
                       ),
@@ -205,7 +205,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                     children: [
                       // Calendar
                       Container(
-                        margin: const EdgeInsets.all(16),
+                        margin: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.85),
                           borderRadius: BorderRadius.circular(24),
@@ -396,7 +396,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                                       child: const Icon(
                                         Icons.event,
                                         color: AppColors.primary,
-                                        size: 20,
+                                        size: 18,
                                       ),
                                     ),
                                     const SizedBox(width: 12),
@@ -406,7 +406,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                                             ? 'Appointments for ${_formatDate(_selectedDay!)}'
                                             : 'Select a date',
                                         style: const TextStyle(
-                                          fontSize: 18,
+                                          fontSize: 14,
                                           fontWeight: FontWeight.bold,
                                           color: AppColors.textBlack,
                                           letterSpacing: 0.3,
@@ -468,7 +468,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
               ),
               child: const Icon(
                 Icons.event_busy,
-                size: 48,
+                size: 40,
                 color: AppColors.primary,
               ),
             ),

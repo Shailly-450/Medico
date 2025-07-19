@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/services/auth_service.dart';
 import '../admin/appointments/admin_appointments_panel.dart';
-import '../doctor/prescriptions/doctor_prescriptions_panel.dart';
 import 'package:medico/views/home/home_screen.dart';
 import 'package:medico/views/doctor/patients/patient_list_screen.dart';
+import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -16,43 +17,83 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _isLoading = false;
 
-  void _handleLogin() {
+  @override
+  void initState() {
+    super.initState();
+    // Initialize auth service
+    AuthService.initialize();
+  }
+
+  void _handleLogin() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
-    // Admin login
-    if (email.toLowerCase() == 'admin@medico.com' && password == 'admin123') {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const AdminAppointmentsPanel(),
-        ),
-      );
+    if (email.isEmpty || password.isEmpty) {
+      _showSnackBar('Please enter both email and password');
       return;
     }
 
-    // Doctor login (any email ending with @docto.com)
-    if (email.toLowerCase().endsWith('@docto.com') && password == 'doc123') {
-      final doctorName =
-          email.split('@').first.replaceAll('.', ' ').split('_').first;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const PatientListScreen(),
-        ),
-      );
-      return;
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final result = await AuthService.login(email, password);
+      
+      if (result['success'] == true) {
+        _showSnackBar('Login successful!');
+        
+        // Navigate based on user role
+        final role = result['role'];
+        if (mounted) {
+          if (role == UserRole.admin) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const AdminAppointmentsPanel(),
+              ),
+            );
+          } else if (role == UserRole.doctor) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const PatientListScreen(),
+              ),
+            );
+          } else {
+            // Patient or default
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const HomeScreen(),
+              ),
+            );
+          }
+        }
+      } else {
+        _showSnackBar(result['message'] ?? 'Login failed');
+      }
+    } catch (e) {
+      _showSnackBar('Login error: ${e.toString()}');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
-
-    // Regular user login
-    Navigator.pushNamed(context, '/home');
   }
 
-  String _capitalizeName(String name) {
-    if (name.isEmpty) return name;
-    return name[0].toUpperCase() + name.substring(1);
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: message.contains('successful') ? Colors.green : Colors.red,
+      ),
+    );
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -101,8 +142,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
+                  enabled: !_isLoading,
                   decoration: InputDecoration(
-                    hintText: 'e.g. admin@medico.com',
+                    hintText: 'e.g. test@medico.com',
                     filled: true,
                     fillColor: Colors.grey[100],
                     border: OutlineInputBorder(
@@ -123,6 +165,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
+                  enabled: !_isLoading,
                   decoration: InputDecoration(
                     hintText: 'Password',
                     filled: true,
@@ -137,7 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       icon: Icon(_obscurePassword
                           ? Icons.visibility_off
                           : Icons.visibility),
-                      onPressed: () {
+                      onPressed: _isLoading ? null : () {
                         setState(() {
                           _obscurePassword = !_obscurePassword;
                         });
@@ -150,7 +193,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                      onPressed: () {},
+                      onPressed: _isLoading ? null : () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ForgotPasswordScreen(),
+                          ),
+                        );
+                      },
                       child: Text(
                         'Forgot Password?',
                         style: TextStyle(
@@ -166,7 +216,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: double.infinity,
                   height: 52,
                   child: ElevatedButton(
-                    onPressed: _handleLogin,
+                    onPressed: _isLoading ? null : _handleLogin,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
@@ -176,11 +226,20 @@ class _LoginScreenState extends State<LoginScreen> {
                       textStyle: const TextStyle(
                           fontWeight: FontWeight.bold, fontSize: 18),
                     ),
-                    child: const Text('Login'),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : const Text('Login'),
                   ),
                 ),
                 const SizedBox(height: 16),
-                // Admin login hint
+                // Test credentials hint
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
@@ -194,25 +253,25 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.admin_panel_settings,
+                          Icon(Icons.info_outline,
                               color: Colors.blue[700], size: 16),
                           const SizedBox(width: 8),
                           Text(
-                            'Admin Access',
+                            'Test Credentials',
                             style: TextStyle(
                               color: Colors.blue[700],
                               fontWeight: FontWeight.bold,
-                              fontSize: 12,
+                              fontSize: 14,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 8),
                       Text(
-                        'Email: admin@medico.com\nPassword: admin123',
+                        'Email: test@medico.com\nPassword: test123',
                         style: TextStyle(
                           color: Colors.blue[600],
-                          fontSize: 11,
+                          fontSize: 12,
                         ),
                       ),
                     ],

@@ -1,125 +1,103 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'api_service.dart';
+import '../config.dart';
 
 enum UserRole { patient, doctor, admin }
 
 class AuthService {
-  static const String baseUrl = 'https://api.medico.com';
+  static const String baseUrl = AppConfig.apiBaseUrl;
   static const Duration timeout = Duration(seconds: 10);
-
-  // Mock doctor credentials (in real app, this would come from backend)
-  static final Map<String, Map<String, dynamic>> _mockDoctors = {
-    'dr.sarah@medico.com': {
-      'password': 'doctor123',
-      'id': 'doc_001',
-      'name': 'Dr. Sarah Johnson',
-      'specialty': 'Cardiologist',
-      'hospital': 'Mount Sinai Hospital',
-      'role': UserRole.doctor,
-    },
-    'dr.mike@medico.com': {
-      'password': 'doctor456',
-      'id': 'doc_002',
-      'name': 'Dr. Mike Chen',
-      'specialty': 'Dermatologist',
-      'hospital': 'City General Hospital',
-      'role': UserRole.doctor,
-    },
-    'dr.emma@medico.com': {
-      'password': 'doctor789',
-      'id': 'doc_003',
-      'name': 'Dr. Emma Wilson',
-      'specialty': 'Pediatrician',
-      'hospital': 'Children\'s Medical Center',
-      'role': UserRole.doctor,
-    },
-  };
-
-  // Mock admin credentials
-  static final Map<String, Map<String, dynamic>> _mockAdmins = {
-    'admin@medico.com': {
-      'password': 'admin123',
-      'id': 'admin_001',
-      'name': 'System Administrator',
-      'role': UserRole.admin,
-    },
-  };
-
-  // Mock patient credentials
-  static final Map<String, Map<String, dynamic>> _mockPatients = {
-    'patient@medico.com': {
-      'password': 'patient123',
-      'id': 'pat_001',
-      'name': 'John Doe',
-      'role': UserRole.patient,
-    },
-  };
 
   static UserRole? _currentUserRole;
   static String? _currentUserId;
   static String? _currentUserName;
+  static String? _accessToken;
+  static String? _refreshToken;
 
   // Getters for current user info
   static UserRole? get currentUserRole => _currentUserRole;
   static String? get currentUserId => _currentUserId;
   static String? get currentUserName => _currentUserName;
-  static bool get isLoggedIn => _currentUserId != null;
+  static bool get isLoggedIn => _accessToken != null;
+  static String? get accessToken => _accessToken;
 
-  // Login method
+  // Initialize tokens from storage
+  static Future<void> initialize() async {
+    final prefs = await SharedPreferences.getInstance();
+    _accessToken = prefs.getString('accessToken');
+    _refreshToken = prefs.getString('refreshToken');
+    
+    // If we have a token, try to get user profile
+    if (_accessToken != null) {
+      await getProfile();
+    }
+  }
+
+  // Save tokens to storage
+  static Future<void> _saveTokens(String accessToken, String refreshToken) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('accessToken', accessToken);
+    await prefs.setString('refreshToken', refreshToken);
+    _accessToken = accessToken;
+    _refreshToken = refreshToken;
+  }
+
+  // Clear tokens
+  static Future<void> clearTokens() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('accessToken');
+    await prefs.remove('refreshToken');
+    _accessToken = null;
+    _refreshToken = null;
+    _currentUserRole = null;
+    _currentUserId = null;
+    _currentUserName = null;
+  }
+
+  // Login method using real API
   static Future<Map<String, dynamic>> login(String email, String password) async {
     try {
-      // Simulate API call delay
-      await Future.delayed(const Duration(milliseconds: 1000));
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/login'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+        }),
+      ).timeout(timeout);
 
-      final normalizedEmail = email.toLowerCase().trim();
-
-      // Check admin credentials
-      if (_mockAdmins.containsKey(normalizedEmail)) {
-        final admin = _mockAdmins[normalizedEmail]!;
-        if (admin['password'] == password) {
-          _setCurrentUser(admin['id'], admin['name'], admin['role']);
-          return {
-            'success': true,
-            'message': 'Admin login successful',
-            'role': UserRole.admin,
-            'user': admin,
-          };
-        }
+      final data = jsonDecode(response.body);
+      
+      if (data['success'] == true) {
+        // Save tokens
+        await _saveTokens(
+          data['data']['token'], 
+          data['data']['refreshToken'] ?? 'dummy-refresh-token'
+        );
+        
+        // Set user info
+        final user = data['data']['user'];
+        _currentUserId = user['id'];
+        _currentUserName = user['profile']['name'];
+        _currentUserRole = _parseUserRole(user['role']);
+        
+        return {
+          'success': true,
+          'message': 'Login successful',
+          'role': _currentUserRole,
+          'user': user,
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Login failed',
+        };
       }
-
-      // Check doctor credentials
-      if (_mockDoctors.containsKey(normalizedEmail)) {
-        final doctor = _mockDoctors[normalizedEmail]!;
-        if (doctor['password'] == password) {
-          _setCurrentUser(doctor['id'], doctor['name'], doctor['role']);
-          return {
-            'success': true,
-            'message': 'Doctor login successful',
-            'role': UserRole.doctor,
-            'user': doctor,
-          };
-        }
-      }
-
-      // Check patient credentials
-      if (_mockPatients.containsKey(normalizedEmail)) {
-        final patient = _mockPatients[normalizedEmail]!;
-        if (patient['password'] == password) {
-          _setCurrentUser(patient['id'], patient['name'], patient['role']);
-          return {
-            'success': true,
-            'message': 'Patient login successful',
-            'role': UserRole.patient,
-            'user': patient,
-          };
-        }
-      }
-
-      // Invalid credentials
-      return {
-        'success': false,
-        'message': 'Invalid email or password',
-      };
     } catch (e) {
       return {
         'success': false,
@@ -128,30 +106,91 @@ class AuthService {
     }
   }
 
-  // Logout method
-  static void logout() {
-    _currentUserRole = null;
-    _currentUserId = null;
-    _currentUserName = null;
-  }
+  // Get user profile
+  static Future<Map<String, dynamic>> getProfile() async {
+    try {
+      if (_accessToken == null) {
+        return {
+          'success': false,
+          'message': 'Not authenticated',
+        };
+      }
 
-  // Helper method to set current user
-  static void _setCurrentUser(String id, String name, UserRole role) {
-    _currentUserId = id;
-    _currentUserName = name;
-    _currentUserRole = role;
-  }
+      final response = await http.get(
+        Uri.parse('$baseUrl/auth/me'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $_accessToken',
+        },
+      ).timeout(timeout);
 
-  // Get available doctor credentials for testing
-  static List<Map<String, String>> getAvailableDoctorCredentials() {
-    return _mockDoctors.entries.map((entry) {
+      final data = jsonDecode(response.body);
+      
+      if (data['success'] == true) {
+        final user = data['data'];
+        _currentUserId = user['_id'];
+        _currentUserName = user['profile']['name'];
+        _currentUserRole = _parseUserRole(user['role']);
+        
+        return {
+          'success': true,
+          'message': 'Profile retrieved successfully',
+          'user': user,
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Failed to get profile',
+        };
+      }
+    } catch (e) {
       return {
-        'email': entry.key,
-        'password': entry.value['password'] as String,
-        'name': entry.value['name'] as String,
-        'specialty': entry.value['specialty'] as String,
+        'success': false,
+        'message': 'Profile retrieval failed: ${e.toString()}',
       };
-    }).toList();
+    }
+  }
+
+  // Logout method
+  static Future<Map<String, dynamic>> logout() async {
+    try {
+      if (_accessToken != null) {
+        await http.post(
+          Uri.parse('$baseUrl/auth/logout'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': 'Bearer $_accessToken',
+          },
+        ).timeout(timeout);
+      }
+      
+      await clearTokens();
+      return {
+        'success': true,
+        'message': 'Logout successful',
+      };
+    } catch (e) {
+      await clearTokens();
+      return {
+        'success': false,
+        'message': 'Logout failed: ${e.toString()}',
+      };
+    }
+  }
+
+  // Helper method to parse user role
+  static UserRole _parseUserRole(String role) {
+    switch (role.toLowerCase()) {
+      case 'doctor':
+        return UserRole.doctor;
+      case 'admin':
+        return UserRole.admin;
+      case 'patient':
+      default:
+        return UserRole.patient;
+    }
   }
 
   // Check if user is doctor
@@ -162,4 +201,62 @@ class AuthService {
   
   // Check if user is patient
   static bool get isPatient => _currentUserRole == UserRole.patient;
+
+  // Forgot password method
+  static Future<Map<String, dynamic>> forgotPassword(String email, String newPassword) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/forgot-password'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({
+          'email': email,
+          'newPassword': newPassword,
+        }),
+      ).timeout(timeout);
+
+      final data = jsonDecode(response.body);
+      
+      return {
+        'success': data['success'] ?? false,
+        'message': data['message'] ?? 'Failed to reset password',
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to reset password: ${e.toString()}',
+      };
+    }
+  }
+
+  // Reset password method
+  static Future<Map<String, dynamic>> resetPassword(String token, String password) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/reset-password'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({
+          'token': token,
+          'password': password,
+        }),
+      ).timeout(timeout);
+
+      final data = jsonDecode(response.body);
+      
+      return {
+        'success': data['success'] ?? false,
+        'message': data['message'] ?? 'Failed to reset password',
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to reset password: ${e.toString()}',
+      };
+    }
+  }
 } 

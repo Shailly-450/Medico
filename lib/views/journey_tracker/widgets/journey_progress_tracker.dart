@@ -47,27 +47,33 @@ class JourneyProgressTracker extends StatelessWidget {
                   size: 24,
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  'Progress Overview',
-                  style: TextStyle(
-                    color: AppColors.textBlack,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
+                Expanded(
+                  child: Text(
+                    'Progress Overview',
+                    style: TextStyle(
+                      color: AppColors.textBlack,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const Spacer(),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: _getOverallStatusColor(journey.overallStatus),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    _getOverallStatusLabel(journey.overallStatus),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: _getOverallStatusColor(journey.overallStatus),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      _getOverallStatusLabel(journey.overallStatus),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 11,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ),
@@ -347,40 +353,55 @@ class JourneyProgressTracker extends StatelessWidget {
   }
 
   Widget _buildStageDates(JourneyStage stage) {
-    return Row(
+    return Wrap(
+      spacing: 4,
+      runSpacing: 2,
       children: [
         if (stage.startDate != null) ...[
-          Icon(
-            Icons.schedule,
-            size: 12,
-            color: AppColors.textSecondary,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.schedule,
+                size: 12,
+                color: AppColors.textSecondary,
+              ),
+              const SizedBox(width: 2),
+              Flexible(
+                child: Text(
+                  'Started: ${_formatDate(stage.startDate!)}',
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 10,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 2),
-          Text(
-            'Started: ${_formatDate(stage.startDate!)}',
-            style: TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 10,
-            ),
-          ),
-        ],
-        if (stage.startDate != null && stage.completedDate != null) ...[
-          const SizedBox(width: 8),
         ],
         if (stage.completedDate != null) ...[
-          Icon(
-            Icons.check_circle,
-            size: 12,
-            color: AppColors.success,
-          ),
-          const SizedBox(width: 2),
-          Text(
-            'Completed: ${_formatDate(stage.completedDate!)}',
-            style: TextStyle(
-              color: AppColors.success,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.check_circle,
+                size: 12,
+                color: AppColors.success,
+              ),
+              const SizedBox(width: 2),
+              Flexible(
+                child: Text(
+                  'Completed: ${_formatDate(stage.completedDate!)}',
+                  style: TextStyle(
+                    color: AppColors.success,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
         ],
       ],

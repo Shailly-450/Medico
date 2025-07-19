@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import '../../core/views/base_view.dart';
 import '../../viewmodels/home_view_model.dart';
 import '../../core/theme/app_colors.dart';
-import 'widgets/category_card.dart';
 import 'widgets/appointment_card.dart';
 import 'widgets/doctor_card.dart';
 import 'widgets/offer_card.dart';

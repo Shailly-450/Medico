@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:medico/views/home/home_screen.dart';
+import 'package:medico/views/registration/steps/create_account_step.dart';
+import 'package:medico/views/registration/steps/otp_verification_step.dart';
 import 'package:provider/provider.dart';
 import 'core/services/navigation_service.dart';
 import 'core/services/order_service.dart';
 import 'core/theme/app_theme.dart';
 import 'models/hospital.dart';
+import 'models/registration_data.dart';
 import 'views/auth/login_screen.dart';
-import 'views/registration/registration_screen.dart';
+
 import 'views/schedule/schedule_screen.dart';
 import 'views/search/search_screen.dart';
 import 'views/dashboard/dashboard_screen.dart';
@@ -65,7 +68,26 @@ class MyApp extends StatelessWidget {
           routes: {
             '/welcome': (context) => const WelcomeScreen(),
             '/login': (context) => const LoginScreen(),
-            '/registration': (context) => const RegistrationScreen(),
+            '/registration': (context) {
+              final registrationData = RegistrationData();
+              return CreateAccountStep(
+                registrationData: registrationData,
+                onContinue: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => OtpVerificationStep(
+                        registrationData: registrationData,
+                        onContinue: () {
+                          // Navigate to home or next screen after OTP verification
+                          Navigator.pushReplacementNamed(context, '/home');
+                        },
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
             '/home': (context) => const MainNavigationShell(),
             '/dashboard': (context) => const DashboardScreen(),
             '/schedule': (context) => const ScheduleScreen(),
