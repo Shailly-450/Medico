@@ -380,7 +380,9 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         specialty: "Psychiatrist",
         isVideoCall: true,
         date: "2025-04-18",
-        time: "4:30 PM", appointmentType: 'Diagnosis',
+        time: "4:30 PM",
+        appointmentType: "consultation",
+        preApprovalStatus: 'notRequired',
       ),
       Appointment(
         id: '4028',
@@ -390,7 +392,9 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         specialty: "Urologist",
         isVideoCall: false,
         date: "2025-04-22",
-        time: "11:30 AM", appointmentType: 'Diagnosis',
+        time: "11:30 AM",
+        appointmentType: "consultation",
+        preApprovalStatus: 'notRequired',
       ),
       Appointment(
         id: '4029',
@@ -400,7 +404,9 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         specialty: "Endocrinologist",
         isVideoCall: true,
         date: "2025-04-25",
-        time: "2:45 PM", appointmentType: 'Diagnosis',
+        time: "2:45 PM",
+        appointmentType: "consultation",
+        preApprovalStatus: 'notRequired',
       ),
       Appointment(
         id: '4030',

@@ -23,6 +23,7 @@ import 'viewmodels/invoice_view_model.dart';
 import 'views/profile/profile_screen.dart';
 import 'viewmodels/family_members_view_model.dart';
 import 'viewmodels/consent_view_model.dart';
+import 'viewmodels/appointment_view_model.dart';
 import 'views/prescriptions/prescriptions_screen.dart';
 import 'views/prescriptions/test_prescriptions_screen.dart';
 import 'views/workflow/medical_workflow_screen.dart';
@@ -56,6 +57,8 @@ class MyApp extends StatelessWidget {
             create: (_) => FamilyMembersViewModel()),
         ChangeNotifierProvider<ConsentViewModel>(
             create: (_) => ConsentViewModel()),
+        ChangeNotifierProvider<AppointmentViewModel>(
+            create: (_) => AppointmentViewModel()),
       ],
       child: Builder(
         builder: (context) => MaterialApp(
@@ -177,7 +180,7 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
         bottomNavigationBar: NavigationBar(
           selectedIndex: _selectedIndex,
           backgroundColor: Colors.white,
-          indicatorColor: AppTheme.theme.colorScheme.secondary.withOpacity(0.2),
+          indicatorColor: AppTheme.theme.colorScheme.secondary.withValues(alpha: 0.2),
           onDestinationSelected: _onItemTapped,
           destinations: const [
             NavigationDestination(

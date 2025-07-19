@@ -64,12 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
             );
           } else {
             // Patient or default
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const HomeScreen(),
-              ),
-            );
+            Navigator.pushReplacementNamed(context, '/home');
           }
         }
       } else {
