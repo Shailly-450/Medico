@@ -4,6 +4,8 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../home/widgets/appointment_card.dart';
 import '../../core/services/pre_approval_service.dart';
+import '../../viewmodels/appointment_view_model.dart';
+import 'package:provider/provider.dart';
 
 class _CustomTabIndicator extends Decoration {
   final double indicatorHeight;
@@ -59,14 +61,16 @@ class AllAppointmentsScreen extends StatefulWidget {
 class _AllAppointmentsScreenState extends State<AllAppointmentsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  List<Appointment> allAppointments = [];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    // TODO: Replace with real data source
-    allAppointments = _dummyAppointments();
+    // Initialize appointment view model
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final viewModel = Provider.of<AppointmentViewModel>(context, listen: false);
+      viewModel.initialize();
+    });
   }
 
   @override
@@ -76,14 +80,16 @@ class _AllAppointmentsScreenState extends State<AllAppointmentsScreen>
   }
 
   List<Appointment> _filterAppointments(String status) {
-    final now = DateTime.now();
-    if (status == 'Upcoming') {
-      return allAppointments.where((a) => _parseDate(a.date, a.time).isAfter(now) && a.preApprovalStatus != PreApprovalStatus.rejected).toList();
-    } else if (status == 'Completed') {
-      return allAppointments.where((a) => _parseDate(a.date, a.time).isBefore(now) && a.preApprovalStatus != PreApprovalStatus.rejected).toList();
-    } else {
-      // Canceled (dummy: rejected pre-approval)
-      return allAppointments.where((a) => a.preApprovalStatus == PreApprovalStatus.rejected).toList();
+    final viewModel = Provider.of<AppointmentViewModel>(context, listen: false);
+    switch (status) {
+      case 'Upcoming':
+        return viewModel.upcomingAppointments;
+      case 'Completed':
+        return viewModel.completedAppointments;
+      case 'Canceled':
+        return viewModel.cancelledAppointments;
+      default:
+        return viewModel.appointments;
     }
   }
 
@@ -150,12 +156,20 @@ class _AllAppointmentsScreenState extends State<AllAppointmentsScreen>
   }
 
   Widget _buildAppointmentList(String status) {
-    final filtered = _filterAppointments(status);
-    if (filtered.isEmpty) {
-      return Center(
-        child: Text('No $status appointments'),
-      );
-    }
+    return Consumer<AppointmentViewModel>(
+      builder: (context, viewModel, child) {
+        if (viewModel.isLoading) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        final filtered = _filterAppointments(status);
+        if (filtered.isEmpty) {
+          return Center(
+            child: Text('No $status appointments'),
+          );
+        }
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: filtered.length,
@@ -372,6 +386,7 @@ class _AllAppointmentsScreenState extends State<AllAppointmentsScreen>
       },
     );
   }
+}
 
   Widget _buildActionButton(String text, Color bg, Color fg, VoidCallback onTap) {
     return ElevatedButton(
@@ -395,39 +410,5 @@ class _AllAppointmentsScreenState extends State<AllAppointmentsScreen>
     );
   }
 
-  List<Appointment> _dummyAppointments() {
-    // TODO: Replace with real data source
-    return [
-      Appointment(
-        id: '1',
-        doctorName: 'Dr. Doctor Name',
-        doctorImage: 'https://randomuser.me/api/portraits/men/11.jpg',
-        specialty: 'Therapist',
-        isVideoCall: false,
-        date: '2024-10-05',
-        time: '21:00',
-        preApprovalStatus: PreApprovalStatus.approved,
-      ),
-      Appointment(
-        id: '2',
-        doctorName: 'Dr. Doctor Name',
-        doctorImage: 'https://randomuser.me/api/portraits/men/11.jpg',
-        specialty: 'Therapist',
-        isVideoCall: false,
-        date: '2024-10-05',
-        time: '21:00',
-        preApprovalStatus: PreApprovalStatus.approved,
-      ),
-      Appointment(
-        id: '3',
-        doctorName: 'Dr. Doctor Name',
-        doctorImage: 'https://randomuser.me/api/portraits/men/11.jpg',
-        specialty: 'Therapist',
-        isVideoCall: false,
-        date: '2024-10-05',
-        time: '21:00',
-        preApprovalStatus: PreApprovalStatus.rejected,
-      ),
-    ];
-  }
+  // Remove dummy data method - now using real API data
 } 

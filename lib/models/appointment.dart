@@ -2,41 +2,75 @@ import '../core/services/pre_approval_service.dart';
 
 class Appointment {
   final String id;
+  final String? patientId;
+  final String? doctorId;
+  final String? hospitalId;
   final String doctorName;
   final String doctorImage;
   final String specialty;
   final bool isVideoCall;
   final String date;
   final String time;
-  final PreApprovalStatus preApprovalStatus;
+  final String appointmentType;
+  final String? reason;
+  final List<String>? symptoms;
+  final String? insuranceProvider;
+  final String? insuranceNumber;
+  final String? preferredTimeSlot;
+  final String status;
+  final String preApprovalStatus;
+  final String? notes;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   Appointment({
     required this.id,
+    this.patientId,
+    this.doctorId,
+    this.hospitalId,
     required this.doctorName,
     required this.doctorImage,
     required this.specialty,
     required this.isVideoCall,
     required this.date,
     required this.time,
-    this.preApprovalStatus = PreApprovalStatus.notRequired,
+    required this.appointmentType,
+    this.reason,
+    this.symptoms,
+    this.insuranceProvider,
+    this.insuranceNumber,
+    this.preferredTimeSlot,
+    this.status = 'scheduled',
+    this.preApprovalStatus = 'notRequired',
+    this.notes,
+    this.createdAt,
+    this.updatedAt,
   });
 
   // Factory constructor to create Appointment from JSON
   factory Appointment.fromJson(Map<String, dynamic> json) {
     return Appointment(
-      id: json['id'] as String,
-      doctorName: json['doctorName'] as String,
-      doctorImage: json['doctorImage'] as String,
-      specialty: json['specialty'] as String,
-      isVideoCall: json['isVideoCall'] as bool,
-      date: json['date'] as String,
-      time: json['time'] as String,
-      preApprovalStatus: PreApprovalStatus.values.firstWhere(
-        (e) =>
-            e.toString() ==
-            'PreApprovalStatus.${json['preApprovalStatus'] ?? 'notRequired'}',
-        orElse: () => PreApprovalStatus.notRequired,
-      ),
+      id: json['_id'] ?? json['id'] ?? '',
+      patientId: json['patientId']?['_id'] ?? json['patientId'],
+      doctorId: json['doctorId']?['_id'] ?? json['doctorId'],
+      hospitalId: json['hospitalId']?['_id'] ?? json['hospitalId'],
+      doctorName: json['doctorId']?['profile']?['name'] ?? json['doctorName'] ?? 'Unknown Doctor',
+      doctorImage: json['doctorImage'] ?? 'https://randomuser.me/api/portraits/men/1.jpg',
+      specialty: json['specialty'] ?? 'General',
+      isVideoCall: json['isVideoCall'] ?? false,
+      date: json['date'] != null ? DateTime.parse(json['date']).toIso8601String().split('T')[0] : '',
+      time: json['time'] ?? '10:00',
+      appointmentType: json['appointmentType'] ?? 'consultation',
+      reason: json['reason'],
+      symptoms: json['symptoms'] != null ? List<String>.from(json['symptoms']) : null,
+      insuranceProvider: json['insuranceProvider'],
+      insuranceNumber: json['insuranceNumber'],
+      preferredTimeSlot: json['preferredTimeSlot'],
+      status: json['status'] ?? 'scheduled',
+      preApprovalStatus: json['preApprovalStatus'] ?? 'notRequired',
+      notes: json['notes'],
+      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
+      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
     );
   }
 
@@ -44,13 +78,26 @@ class Appointment {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'patientId': patientId,
+      'doctorId': doctorId,
+      'hospitalId': hospitalId,
       'doctorName': doctorName,
       'doctorImage': doctorImage,
       'specialty': specialty,
       'isVideoCall': isVideoCall,
       'date': date,
       'time': time,
-      'preApprovalStatus': preApprovalStatus.toString().split('.').last,
+      'appointmentType': appointmentType,
+      'reason': reason,
+      'symptoms': symptoms,
+      'insuranceProvider': insuranceProvider,
+      'insuranceNumber': insuranceNumber,
+      'preferredTimeSlot': preferredTimeSlot,
+      'status': status,
+      'preApprovalStatus': preApprovalStatus,
+      'notes': notes,
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
     };
   }
 }
