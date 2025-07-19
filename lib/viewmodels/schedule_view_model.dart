@@ -46,10 +46,11 @@ class ScheduleViewModel extends BaseViewModel {
         date:
             '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}',
         time: '09:00 AM',
+        appointmentType: "consultation",
         preApprovalStatus:
             _preApprovalService.isPreApprovalRequired('Cardiologist')
-                ? PreApprovalStatus.pending
-                : PreApprovalStatus.notRequired,
+                ? 'pending'
+                : 'notRequired',
       ),
       Appointment(
         id: '3002',
@@ -60,10 +61,11 @@ class ScheduleViewModel extends BaseViewModel {
         date:
             '${tomorrow.year}-${tomorrow.month.toString().padLeft(2, '0')}-${tomorrow.day.toString().padLeft(2, '0')}',
         time: '10:00 AM',
+        appointmentType: "consultation",
         preApprovalStatus:
             _preApprovalService.isPreApprovalRequired('Dermatologist')
-                ? PreApprovalStatus.pending
-                : PreApprovalStatus.notRequired,
+                ? 'pending'
+                : 'notRequired',
       ),
       Appointment(
         id: '3003',
@@ -74,10 +76,11 @@ class ScheduleViewModel extends BaseViewModel {
         date:
             '${dayAfterTomorrow.year}-${dayAfterTomorrow.month.toString().padLeft(2, '0')}-${dayAfterTomorrow.day.toString().padLeft(2, '0')}',
         time: '02:00 PM',
+        appointmentType: "consultation",
         preApprovalStatus:
             _preApprovalService.isPreApprovalRequired('Pediatrician')
-                ? PreApprovalStatus.pending
-                : PreApprovalStatus.notRequired,
+                ? 'pending'
+                : 'notRequired',
       ),
       // July 2nd appointments
       Appointment(
@@ -89,10 +92,11 @@ class ScheduleViewModel extends BaseViewModel {
         date:
             '${july2.year}-${july2.month.toString().padLeft(2, '0')}-${july2.day.toString().padLeft(2, '0')}',
         time: '11:00 AM',
+        appointmentType: "consultation",
         preApprovalStatus:
             _preApprovalService.isPreApprovalRequired('Neurologist')
-                ? PreApprovalStatus.approved
-                : PreApprovalStatus.notRequired,
+                ? 'approved'
+                : 'notRequired',
       ),
       Appointment(
         id: '3005',
@@ -103,10 +107,11 @@ class ScheduleViewModel extends BaseViewModel {
         date:
             '${july2.year}-${july2.month.toString().padLeft(2, '0')}-${july2.day.toString().padLeft(2, '0')}',
         time: '03:30 PM',
+        appointmentType: "consultation",
         preApprovalStatus:
             _preApprovalService.isPreApprovalRequired('Orthopedic')
-                ? PreApprovalStatus.rejected
-                : PreApprovalStatus.notRequired,
+                ? 'rejected'
+                : 'notRequired',
       ),
       // July 4th appointments
       Appointment(
@@ -118,10 +123,11 @@ class ScheduleViewModel extends BaseViewModel {
         date:
             '${july4.year}-${july4.month.toString().padLeft(2, '0')}-${july4.day.toString().padLeft(2, '0')}',
         time: '09:30 AM',
+        appointmentType: "consultation",
         preApprovalStatus:
             _preApprovalService.isPreApprovalRequired('General Physician')
-                ? PreApprovalStatus.pending
-                : PreApprovalStatus.notRequired,
+                ? 'pending'
+                : 'notRequired',
       ),
       Appointment(
         id: '3007',
@@ -132,9 +138,10 @@ class ScheduleViewModel extends BaseViewModel {
         date:
             '${july4.year}-${july4.month.toString().padLeft(2, '0')}-${july4.day.toString().padLeft(2, '0')}',
         time: '02:00 PM',
+        appointmentType: "consultation",
         preApprovalStatus: _preApprovalService.isPreApprovalRequired('Dentist')
-            ? PreApprovalStatus.pending
-            : PreApprovalStatus.notRequired,
+            ? 'pending'
+            : 'notRequired',
       ),
       Appointment(
         id: '3008',
@@ -145,10 +152,11 @@ class ScheduleViewModel extends BaseViewModel {
         date:
             '${july4.year}-${july4.month.toString().padLeft(2, '0')}-${july4.day.toString().padLeft(2, '0')}',
         time: '04:15 PM',
+        appointmentType: "consultation",
         preApprovalStatus:
             _preApprovalService.isPreApprovalRequired('Psychiatrist')
-                ? PreApprovalStatus.pending
-                : PreApprovalStatus.notRequired,
+                ? 'pending'
+                : 'notRequired',
       ),
       // August 8th appointments
       Appointment(
@@ -160,10 +168,11 @@ class ScheduleViewModel extends BaseViewModel {
         date:
             '${august8.year}-${august8.month.toString().padLeft(2, '0')}-${august8.day.toString().padLeft(2, '0')}',
         time: '10:00 AM',
+        appointmentType: "consultation",
         preApprovalStatus:
             _preApprovalService.isPreApprovalRequired('Gynecologist')
-                ? PreApprovalStatus.pending
-                : PreApprovalStatus.notRequired,
+                ? 'pending'
+                : 'notRequired',
       ),
       Appointment(
         id: '3010',
@@ -174,10 +183,11 @@ class ScheduleViewModel extends BaseViewModel {
         date:
             '${august8.year}-${august8.month.toString().padLeft(2, '0')}-${august8.day.toString().padLeft(2, '0')}',
         time: '01:45 PM',
+        appointmentType: "consultation",
         preApprovalStatus:
             _preApprovalService.isPreApprovalRequired('Urologist')
-                ? PreApprovalStatus.pending
-                : PreApprovalStatus.notRequired,
+                ? 'pending'
+                : 'notRequired',
       ),
       Appointment(
         id: '3011',
@@ -188,10 +198,11 @@ class ScheduleViewModel extends BaseViewModel {
         date:
             '${august8.year}-${august8.month.toString().padLeft(2, '0')}-${august8.day.toString().padLeft(2, '0')}',
         time: '03:00 PM',
+        appointmentType: "consultation",
         preApprovalStatus:
             _preApprovalService.isPreApprovalRequired('Ophthalmologist')
-                ? PreApprovalStatus.pending
-                : PreApprovalStatus.notRequired,
+                ? 'pending'
+                : 'notRequired',
       ),
     ];
 
@@ -210,7 +221,8 @@ class ScheduleViewModel extends BaseViewModel {
         date:
             '${today.subtract(const Duration(days: 1)).year}-${today.subtract(const Duration(days: 1)).month.toString().padLeft(2, '0')}-${today.subtract(const Duration(days: 1)).day.toString().padLeft(2, '0')}',
         time: '02:00 PM',
-        preApprovalStatus: PreApprovalStatus.approved,
+        appointmentType: "consultation",
+        preApprovalStatus: 'approved',
       ),
     ];
     setBusy(false);
@@ -245,9 +257,10 @@ class ScheduleViewModel extends BaseViewModel {
           '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}',
       time:
           '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}',
+      appointmentType: "consultation",
       preApprovalStatus: _preApprovalService.isPreApprovalRequired('General')
-          ? PreApprovalStatus.pending
-          : PreApprovalStatus.notRequired,
+          ? 'pending'
+          : 'notRequired',
     );
     _appointments.add(newAppointment);
     notifyListeners();

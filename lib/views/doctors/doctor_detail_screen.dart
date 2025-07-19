@@ -43,9 +43,20 @@ class _DoctorDetailScreenState extends State<DoctorDetailScreen>
       viewModelBuilder: () => DoctorsViewModel(),
       onModelReady: (model) => model.init(),
       builder: (context, model, child) => Scaffold(
-        backgroundColor: Colors.grey[50],
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: Text(widget.doctor.name),
+          title: Text(
+            widget.doctor.name,
+            style: const TextStyle(
+              color: Color(0xFF2E7D32), // Dark green color for title
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          backgroundColor:
+              const Color(0xFFE8F5E8), // Light mint green from gradient
+          elevation: 0,
+          iconTheme: const IconThemeData(
+              color: Color(0xFF2E7D32)), // Dark green for back button
           bottom: TabBar(
             controller: _tabController,
             tabs: const [
@@ -53,18 +64,34 @@ class _DoctorDetailScreenState extends State<DoctorDetailScreen>
               Tab(text: 'Reviews'),
               Tab(text: 'Book'),
             ],
-            labelColor: Colors.white,
-            unselectedLabelColor: Colors.grey,
-            indicatorColor: Colors.white,
+            labelColor: Color(0xFF2E7D32), // Dark green for selected tab
+            unselectedLabelColor:
+                Color(0xFF81C784), // Lighter green for unselected tabs
+            indicatorColor: Color(0xFF2E7D32), // Dark green for indicator
           ),
         ),
-        body: TabBarView(
-          controller: _tabController,
-          children: [
-            _buildOverviewTab(context, model),
-            _buildReviewsTab(context, model),
-            _buildBookingTab(context, model),
-          ],
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFFE8F5E8), // Light mint green
+                Color(0xFFF0F8F0), // Very light sage
+                Color(0xFFE6F3E6), // Soft green tint
+                Color(0xFFF5F9F5), // Almost white with green tint
+              ],
+              stops: [0.0, 0.3, 0.7, 1.0],
+            ),
+          ),
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              _buildOverviewTab(context, model),
+              _buildReviewsTab(context, model),
+              _buildBookingTab(context, model),
+            ],
+          ),
         ),
       ),
     );
@@ -78,9 +105,15 @@ class _DoctorDetailScreenState extends State<DoctorDetailScreen>
         children: [
           // Doctor Profile Card
           Card(
-            elevation: 2,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            elevation: 1,
+            color: Colors.white.withOpacity(0.9),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: const Color(0xFF2E7D32).withOpacity(0.1),
+                width: 1,
+              ),
+            ),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -88,32 +121,42 @@ class _DoctorDetailScreenState extends State<DoctorDetailScreen>
                   // Doctor Image and Basic Info
                   Row(
                     children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          width: 100,
-                          height: 100,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                            borderRadius: BorderRadius.circular(12),
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: const Color(0xFF2E7D32).withOpacity(0.1),
+                            width: 1,
                           ),
-                          child: widget.doctor.imageUrl.isNotEmpty
-                              ? Image.network(
-                                  widget.doctor.imageUrl,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Icon(
-                                      Icons.person,
-                                      size: 50,
-                                      color: AppColors.primary,
-                                    );
-                                  },
-                                )
-                              : Icon(
-                                  Icons.person,
-                                  size: 50,
-                                  color: AppColors.primary,
-                                ),
+                          color: Colors.white,
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE8F5E8),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: widget.doctor.imageUrl.isNotEmpty
+                                ? Image.network(
+                                    widget.doctor.imageUrl,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Icon(
+                                        Icons.person,
+                                        size: 50,
+                                        color: const Color(0xFF2E7D32),
+                                      );
+                                    },
+                                  )
+                                : Icon(
+                                    Icons.person,
+                                    size: 50,
+                                    color: const Color(0xFF2E7D32),
+                                  ),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -138,22 +181,28 @@ class _DoctorDetailScreenState extends State<DoctorDetailScreen>
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 8, vertical: 4),
                                     decoration: BoxDecoration(
-                                      color: Colors.green,
+                                      color: const Color(0xFF2E7D32)
+                                          .withOpacity(0.1),
                                       borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: const Color(0xFF2E7D32)
+                                            .withOpacity(0.2),
+                                        width: 1,
+                                      ),
                                     ),
-                                    child: const Row(
+                                    child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Icon(
                                           Icons.verified,
-                                          color: Colors.white,
+                                          color: const Color(0xFF2E7D32),
                                           size: 14,
                                         ),
-                                        SizedBox(width: 4),
+                                        const SizedBox(width: 4),
                                         Text(
                                           'Verified',
                                           style: TextStyle(
-                                            color: Colors.white,
+                                            color: const Color(0xFF2E7D32),
                                             fontSize: 10,
                                             fontWeight: FontWeight.bold,
                                           ),
@@ -824,28 +873,37 @@ class _DoctorDetailScreenState extends State<DoctorDetailScreen>
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[200]!),
+        color: Colors.white.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: const Color(0xFF2E7D32).withOpacity(0.1),
+          width: 1,
+        ),
       ),
       child: Column(
         children: [
-          Icon(icon, color: AppColors.primary, size: 20),
+          Icon(
+            icon,
+            color: const Color(0xFF2E7D32),
+            size: 24,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
           const SizedBox(height: 4),
           Text(
             value,
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
+              color: Color(0xFF2E7D32),
             ),
-          ),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 10,
-              color: Colors.grey[600],
-            ),
-            textAlign: TextAlign.center,
           ),
         ],
       ),

@@ -39,10 +39,11 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: true,
         date: "2025-01-15",
         time: "10:00 AM",
+        appointmentType: "consultation",
         preApprovalStatus:
             _preApprovalService.isPreApprovalRequired("Cardiologist")
-                ? PreApprovalStatus.pending
-                : PreApprovalStatus.notRequired,
+                ? 'pending'
+                : 'notRequired',
       ),
       Appointment(
         id: '4002',
@@ -53,7 +54,8 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: false,
         date: "2025-01-15",
         time: "2:30 PM",
-        preApprovalStatus: PreApprovalStatus.notRequired,
+        appointmentType: "consultation",
+        preApprovalStatus: 'notRequired',
       ),
       Appointment(
         id: '4003',
@@ -64,7 +66,8 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: true,
         date: "2025-01-20",
         time: "4:00 PM",
-        preApprovalStatus: PreApprovalStatus.notRequired,
+        appointmentType: "consultation",
+        preApprovalStatus: 'notRequired',
       ),
       Appointment(
         id: '4004',
@@ -75,7 +78,8 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: false,
         date: "2025-01-22",
         time: "11:00 AM",
-        preApprovalStatus: PreApprovalStatus.notRequired,
+        appointmentType: "consultation",
+        preApprovalStatus: 'notRequired',
       ),
       Appointment(
         id: '4005',
@@ -86,7 +90,8 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: true,
         date: "2025-01-25",
         time: "3:00 PM",
-        preApprovalStatus: PreApprovalStatus.notRequired,
+        appointmentType: "consultation",
+        preApprovalStatus: 'notRequired',
       ),
 
       // February 2025 Appointments
@@ -99,10 +104,11 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: false,
         date: "2025-02-03",
         time: "9:00 AM",
+        appointmentType: "consultation",
         preApprovalStatus:
             _preApprovalService.isPreApprovalRequired("Orthopedic")
-                ? PreApprovalStatus.pending
-                : PreApprovalStatus.notRequired,
+                ? 'pending'
+                : 'notRequired',
       ),
       Appointment(
         id: '4007',
@@ -113,7 +119,8 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: true,
         date: "2025-02-05",
         time: "1:30 PM",
-        preApprovalStatus: PreApprovalStatus.notRequired,
+        appointmentType: "consultation",
+        preApprovalStatus: 'notRequired',
       ),
       Appointment(
         id: '4008',
@@ -124,10 +131,11 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: false,
         date: "2025-02-08",
         time: "3:45 PM",
+        appointmentType: "consultation",
         preApprovalStatus:
             _preApprovalService.isPreApprovalRequired("Neurologist")
-                ? PreApprovalStatus.approved
-                : PreApprovalStatus.notRequired,
+                ? 'approved'
+                : 'notRequired',
       ),
       Appointment(
         id: '4009',
@@ -138,10 +146,11 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: true,
         date: "2025-02-12",
         time: "11:15 AM",
+        appointmentType: "consultation",
         preApprovalStatus:
             _preApprovalService.isPreApprovalRequired("Psychiatrist")
-                ? PreApprovalStatus.rejected
-                : PreApprovalStatus.notRequired,
+                ? 'rejected'
+                : 'notRequired',
       ),
       Appointment(
         id: '4010',
@@ -152,7 +161,8 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: false,
         date: "2025-02-15",
         time: "2:00 PM",
-        preApprovalStatus: PreApprovalStatus.notRequired,
+        appointmentType: "consultation",
+        preApprovalStatus: 'notRequired',
       ),
       Appointment(
         id: '4011',
@@ -163,7 +173,8 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: true,
         date: "2025-02-18",
         time: "10:30 AM",
-        preApprovalStatus: PreApprovalStatus.notRequired,
+        appointmentType: "consultation",
+        preApprovalStatus: 'notRequired',
       ),
       Appointment(
         id: '4012',
@@ -174,7 +185,8 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: false,
         date: "2025-02-22",
         time: "4:15 PM",
-        preApprovalStatus: PreApprovalStatus.notRequired,
+        appointmentType: "consultation",
+        preApprovalStatus: 'notRequired',
       ),
 
       // March 2025 Appointments
@@ -187,7 +199,8 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: true,
         date: "2025-03-01",
         time: "9:30 AM",
-        preApprovalStatus: PreApprovalStatus.notRequired,
+        appointmentType: "consultation",
+        preApprovalStatus: 'notRequired',
       ),
       Appointment(
         id: '4014',
@@ -198,7 +211,8 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: false,
         date: "2025-03-05",
         time: "1:00 PM",
-        preApprovalStatus: PreApprovalStatus.notRequired,
+        appointmentType: "consultation",
+        preApprovalStatus: 'notRequired',
       ),
       Appointment(
         id: '4015',
@@ -209,7 +223,8 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: true,
         date: "2025-03-08",
         time: "3:30 PM",
-        preApprovalStatus: PreApprovalStatus.notRequired,
+        appointmentType: "consultation",
+        preApprovalStatus: 'notRequired',
       ),
       Appointment(
         id: '4016',
@@ -220,7 +235,8 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: false,
         date: "2025-03-12",
         time: "11:45 AM",
-        preApprovalStatus: PreApprovalStatus.notRequired,
+        appointmentType: "consultation",
+        preApprovalStatus: 'notRequired',
       ),
       Appointment(
         id: '4017',
@@ -231,7 +247,8 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: true,
         date: "2025-03-15",
         time: "2:30 PM",
-        preApprovalStatus: PreApprovalStatus.notRequired,
+        appointmentType: "consultation",
+        preApprovalStatus: 'notRequired',
       ),
       Appointment(
         id: '4018',
@@ -242,7 +259,8 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: false,
         date: "2025-03-18",
         time: "10:15 AM",
-        preApprovalStatus: PreApprovalStatus.notRequired,
+        appointmentType: "consultation",
+        preApprovalStatus: 'notRequired',
       ),
       Appointment(
         id: '4019',
@@ -253,7 +271,8 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: true,
         date: "2025-03-20",
         time: "4:45 PM",
-        preApprovalStatus: PreApprovalStatus.notRequired,
+        appointmentType: "consultation",
+        preApprovalStatus: 'notRequired',
       ),
       Appointment(
         id: '4020',
@@ -264,10 +283,11 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: false,
         date: "2025-03-22",
         time: "1:15 PM",
+        appointmentType: "consultation",
         preApprovalStatus:
             _preApprovalService.isPreApprovalRequired("Cardiologist")
-                ? PreApprovalStatus.pending
-                : PreApprovalStatus.notRequired,
+                ? 'pending'
+                : 'notRequired',
       ),
       Appointment(
         id: '4021',
@@ -278,10 +298,11 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: true,
         date: "2025-03-25",
         time: "3:00 PM",
+        appointmentType: "consultation",
         preApprovalStatus:
             _preApprovalService.isPreApprovalRequired("Neurologist")
-                ? PreApprovalStatus.pending
-                : PreApprovalStatus.notRequired,
+                ? 'pending'
+                : 'notRequired',
       ),
 
       // April 2025 Appointments
@@ -294,10 +315,11 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: false,
         date: "2025-04-02",
         time: "10:30 AM",
+        appointmentType: "consultation",
         preApprovalStatus:
             _preApprovalService.isPreApprovalRequired("Orthopedic")
-                ? PreApprovalStatus.pending
-                : PreApprovalStatus.notRequired,
+                ? 'pending'
+                : 'notRequired',
       ),
       Appointment(
         id: '4023',
@@ -308,10 +330,11 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: true,
         date: "2025-04-05",
         time: "2:45 PM",
+        appointmentType: "consultation",
         preApprovalStatus:
             _preApprovalService.isPreApprovalRequired("Psychiatrist")
-                ? PreApprovalStatus.pending
-                : PreApprovalStatus.notRequired,
+                ? 'pending'
+                : 'notRequired',
       ),
       Appointment(
         id: '4024',
@@ -322,6 +345,8 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: false,
         date: "2025-04-08",
         time: "3:30 PM",
+        appointmentType: "consultation",
+        preApprovalStatus: 'notRequired',
       ),
       Appointment(
         id: '4025',
@@ -332,6 +357,8 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: true,
         date: "2025-04-12",
         time: "10:45 AM",
+        appointmentType: "consultation",
+        preApprovalStatus: 'notRequired',
       ),
       Appointment(
         id: '4026',
@@ -342,6 +369,8 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         isVideoCall: false,
         date: "2025-04-15",
         time: "1:20 PM",
+        appointmentType: "consultation",
+        preApprovalStatus: 'notRequired',
       ),
       Appointment(
         id: '4027',
@@ -351,7 +380,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         specialty: "Psychiatrist",
         isVideoCall: true,
         date: "2025-04-18",
-        time: "4:30 PM",
+        time: "4:30 PM", appointmentType: 'Diagnosis',
       ),
       Appointment(
         id: '4028',
@@ -361,7 +390,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         specialty: "Urologist",
         isVideoCall: false,
         date: "2025-04-22",
-        time: "11:30 AM",
+        time: "11:30 AM", appointmentType: 'Diagnosis',
       ),
       Appointment(
         id: '4029',
@@ -371,7 +400,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         specialty: "Endocrinologist",
         isVideoCall: true,
         date: "2025-04-25",
-        time: "2:45 PM",
+        time: "2:45 PM", appointmentType: 'Diagnosis',
       ),
       Appointment(
         id: '4030',
@@ -381,7 +410,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         specialty: "Pulmonologist",
         isVideoCall: false,
         date: "2025-04-28",
-        time: "9:15 AM",
+        time: "9:15 AM", appointmentType: 'Diagnosis',
       ),
 
       // May 2025 Appointments
@@ -393,7 +422,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         specialty: "Ophthalmologist",
         isVideoCall: true,
         date: "2025-05-03",
-        time: "3:00 PM",
+        time: "3:00 PM", appointmentType: 'Diagnosis',
       ),
       Appointment(
         id: '4032',
@@ -403,7 +432,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         specialty: "Gastroenterologist",
         isVideoCall: false,
         date: "2025-05-06",
-        time: "10:30 AM",
+        time: "10:30 AM", appointmentType: 'Diagnosis',
       ),
       Appointment(
         id: '4033',
@@ -413,7 +442,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         specialty: "Rheumatologist",
         isVideoCall: true,
         date: "2025-05-10",
-        time: "1:45 PM",
+        time: "1:45 PM", appointmentType: 'Diagnosis',
       ),
       Appointment(
         id: '4034',
@@ -423,7 +452,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         specialty: "Hematologist",
         isVideoCall: false,
         date: "2025-05-13",
-        time: "4:15 PM",
+        time: "4:15 PM", appointmentType: 'Diagnosis',
       ),
       Appointment(
         id: '4035',
@@ -433,7 +462,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         specialty: "Oncologist",
         isVideoCall: true,
         date: "2025-05-16",
-        time: "11:00 AM",
+        time: "11:00 AM", appointmentType: 'Consultation',
       ),
       Appointment(
         id: '4036',
@@ -443,7 +472,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         specialty: "Nephrologist",
         isVideoCall: false,
         date: "2025-05-20",
-        time: "2:30 PM",
+        time: "2:30 PM", appointmentType: '',
       ),
       Appointment(
         id: '4037',
@@ -453,7 +482,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         specialty: "Dermatologist",
         isVideoCall: true,
         date: "2025-05-23",
-        time: "9:45 AM",
+        time: "9:45 AM", appointmentType: 'Diagnosis',
       ),
       Appointment(
         id: '4038',
@@ -463,7 +492,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         specialty: "Cardiologist",
         isVideoCall: false,
         date: "2025-05-27",
-        time: "3:30 PM",
+        time: "3:30 PM", appointmentType: 'consultation',
       ),
       Appointment(
         id: '4039',
@@ -473,7 +502,7 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         specialty: "Pediatrician",
         isVideoCall: true,
         date: "2025-05-30",
-        time: "10:15 AM",
+        time: "10:15 AM", appointmentType: 'Diagnosis',
       ),
     ];
 

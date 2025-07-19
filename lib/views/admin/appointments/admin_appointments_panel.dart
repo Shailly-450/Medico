@@ -37,28 +37,18 @@ class _AdminAppointmentsPanelState extends State<AdminAppointmentsPanel> {
           isVideoCall: appointment.isVideoCall,
           date: appointment.date,
           time: appointment.time,
-          preApprovalStatus: _preApprovalStatusFromString(statusKey),
+          appointmentType: appointment.appointmentType,
+          preApprovalStatus: statusKey,
         );
       }
     });
   }
 
-  PreApprovalStatus _preApprovalStatusFromString(String status) {
+  Color _statusColor(String status) {
     switch (status) {
       case 'approved':
-        return PreApprovalStatus.approved;
-      case 'rejected':
-        return PreApprovalStatus.rejected;
-      default:
-        return PreApprovalStatus.pending;
-    }
-  }
-
-  Color _statusColor(PreApprovalStatus status) {
-    switch (status) {
-      case PreApprovalStatus.approved:
         return Colors.green;
-      case PreApprovalStatus.rejected:
+      case 'rejected':
         return Colors.red;
       default:
         return AppColors.accent;
@@ -179,11 +169,7 @@ class _AdminAppointmentsPanelState extends State<AdminAppointmentsPanel> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
-                      _statusMap[appointment.preApprovalStatus
-                              .toString()
-                              .split('.')
-                              .last] ??
-                          'Pending',
+                      _statusMap[appointment.preApprovalStatus] ?? 'Pending',
                       style: TextStyle(
                         color: _statusColor(appointment.preApprovalStatus),
                         fontSize: 12,
@@ -197,8 +183,7 @@ class _AdminAppointmentsPanelState extends State<AdminAppointmentsPanel> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  if (appointment.preApprovalStatus ==
-                      PreApprovalStatus.pending)
+                  if (appointment.preApprovalStatus == 'pending')
                     _buildActionButton(
                       label: 'Approve',
                       icon: Icons.check_circle,
@@ -206,11 +191,9 @@ class _AdminAppointmentsPanelState extends State<AdminAppointmentsPanel> {
                       onTap: () =>
                           _updateAppointmentStatus(appointment, 'approved'),
                     ),
-                  if (appointment.preApprovalStatus ==
-                      PreApprovalStatus.pending)
+                  if (appointment.preApprovalStatus == 'pending')
                     const SizedBox(width: 8),
-                  if (appointment.preApprovalStatus ==
-                      PreApprovalStatus.pending)
+                  if (appointment.preApprovalStatus == 'pending')
                     _buildActionButton(
                       label: 'Reject',
                       icon: Icons.cancel,
@@ -218,8 +201,7 @@ class _AdminAppointmentsPanelState extends State<AdminAppointmentsPanel> {
                       onTap: () =>
                           _updateAppointmentStatus(appointment, 'rejected'),
                     ),
-                  if (appointment.preApprovalStatus ==
-                      PreApprovalStatus.approved)
+                  if (appointment.preApprovalStatus == 'approved')
                     const SizedBox.shrink(),
                 ],
               ),
@@ -262,7 +244,8 @@ class _AdminAppointmentsPanelState extends State<AdminAppointmentsPanel> {
         isVideoCall: false,
         date: '2024-07-09',
         time: '09:30 AM',
-        preApprovalStatus: PreApprovalStatus.pending,
+        appointmentType: 'consultation',
+        preApprovalStatus: 'pending',
       ),
       Appointment(
         id: '2',
@@ -272,7 +255,8 @@ class _AdminAppointmentsPanelState extends State<AdminAppointmentsPanel> {
         isVideoCall: true,
         date: '2024-07-10',
         time: '02:00 PM',
-        preApprovalStatus: PreApprovalStatus.approved,
+        appointmentType: 'consultation',
+        preApprovalStatus: 'approved',
       ),
       Appointment(
         id: '3',
@@ -282,7 +266,8 @@ class _AdminAppointmentsPanelState extends State<AdminAppointmentsPanel> {
         isVideoCall: false,
         date: '2024-07-08',
         time: '11:00 AM',
-        preApprovalStatus: PreApprovalStatus.approved,
+        appointmentType: 'consultation',
+        preApprovalStatus: 'approved',
       ),
       Appointment(
         id: '4',
@@ -292,7 +277,8 @@ class _AdminAppointmentsPanelState extends State<AdminAppointmentsPanel> {
         isVideoCall: true,
         date: '2024-07-07',
         time: '04:15 PM',
-        preApprovalStatus: PreApprovalStatus.rejected,
+        appointmentType: 'consultation',
+        preApprovalStatus: 'rejected',
       ),
     ];
   }

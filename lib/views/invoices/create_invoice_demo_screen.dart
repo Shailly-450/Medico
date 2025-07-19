@@ -495,7 +495,7 @@ class _CreateInvoiceDemoScreenState extends State<CreateInvoiceDemoScreen> {
       specialty: 'Cardiology',
       isVideoCall: true,
       date: '2024-01-15',
-      time: '10:00 AM',
+      time: '10:00 AM', appointmentType: 'scheduled',
     );
 
     final invoice = model.createInvoiceFromAppointment(

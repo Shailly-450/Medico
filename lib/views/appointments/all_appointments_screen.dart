@@ -46,7 +46,8 @@ class _CustomTabIndicatorPainter extends BoxPainter {
     final double left = offset.dx + horizontalPadding;
     final double top = offset.dy + configuration.size!.height - indicatorHeight;
     final Rect rect = Rect.fromLTWH(left, top, width, indicatorHeight);
-    final RRect rRect = RRect.fromRectAndRadius(rect, const Radius.circular(12));
+    final RRect rRect =
+        RRect.fromRectAndRadius(rect, const Radius.circular(12));
     canvas.drawRRect(rRect, paint);
   }
 }
@@ -119,7 +120,8 @@ class _AllAppointmentsScreenState extends State<AllAppointmentsScreen>
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final tabPadding = screenWidth / 3; // 1/3 of screen for each tab, so 1/9 padding on each side
+    final tabPadding = screenWidth /
+        3; // 1/3 of screen for each tab, so 1/9 padding on each side
     return Scaffold(
       appBar: AppBar(
         title: const Text('Schedule'),
@@ -151,7 +153,6 @@ class _AllAppointmentsScreenState extends State<AllAppointmentsScreen>
           _buildAppointmentList('Canceled'),
         ],
       ),
-
     );
   }
 
@@ -222,7 +223,8 @@ class _AllAppointmentsScreenState extends State<AllAppointmentsScreen>
                         CircleAvatar(
                           radius: 32,
                           backgroundColor: AppColors.secondary.withOpacity(0.1),
-                          backgroundImage: NetworkImage(appointment.doctorImage),
+                          backgroundImage:
+                              NetworkImage(appointment.doctorImage),
                           child: appointment.doctorImage.isEmpty
                               ? Icon(
                                   Icons.person,
@@ -260,10 +262,12 @@ class _AllAppointmentsScreenState extends State<AllAppointmentsScreen>
                                       vertical: 6,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: AppColors.secondary.withOpacity(0.15),
+                                      color:
+                                          AppColors.secondary.withOpacity(0.15),
                                       borderRadius: BorderRadius.circular(20),
                                       border: Border.all(
-                                        color: AppColors.secondary.withOpacity(0.3),
+                                        color: AppColors.secondary
+                                            .withOpacity(0.3),
                                         width: 1,
                                       ),
                                     ),
@@ -346,10 +350,15 @@ class _AllAppointmentsScreenState extends State<AllAppointmentsScreen>
                             onPressed: () {
                               // TODO: Cancel logic
                             },
-                            icon: const Icon(Icons.close, color: AppColors.error),
-                            label: const Text('Cancel', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
+                            icon:
+                                const Icon(Icons.close, color: AppColors.error),
+                            label: const Text('Cancel',
+                                style: TextStyle(
+                                    color: AppColors.error,
+                                    fontWeight: FontWeight.bold)),
                             style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: AppColors.error, width: 1.5),
+                              side: const BorderSide(
+                                  color: AppColors.error, width: 1.5),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
@@ -363,8 +372,10 @@ class _AllAppointmentsScreenState extends State<AllAppointmentsScreen>
                             onPressed: () {
                               // TODO: Reschedule logic
                             },
-                            icon: const Icon(Icons.calendar_month, color: Colors.white),
-                            label: const Text('Reschedule', style: TextStyle(fontWeight: FontWeight.bold)),
+                            icon: const Icon(Icons.calendar_month,
+                                color: Colors.white),
+                            label: const Text('Reschedule',
+                                style: TextStyle(fontWeight: FontWeight.bold)),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,
                               foregroundColor: Colors.white,
@@ -385,10 +396,12 @@ class _AllAppointmentsScreenState extends State<AllAppointmentsScreen>
         );
       },
     );
-  }
+      },
+    );
 }
 
-  Widget _buildActionButton(String text, Color bg, Color fg, VoidCallback onTap) {
+  Widget _buildActionButton(
+      String text, Color bg, Color fg, VoidCallback onTap) {
     return ElevatedButton(
       onPressed: onTap,
       style: ElevatedButton.styleFrom(
@@ -410,5 +423,5 @@ class _AllAppointmentsScreenState extends State<AllAppointmentsScreen>
     );
   }
 
-  // Remove dummy data method - now using real API data
-} 
+    // Remove dummy data method - now using real API data
+  }

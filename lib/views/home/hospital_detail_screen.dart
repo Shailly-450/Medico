@@ -369,8 +369,20 @@ class _HospitalDetailScreenState extends State<HospitalDetailScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: Text(widget.hospital.name),
+        title: Text(
+          widget.hospital.name,
+          style: const TextStyle(
+            color: Color(0xFF2E7D32), // Dark green color for title
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor:
+            const Color(0xFFE8F5E8), // Light mint green from gradient
+        elevation: 0,
+        iconTheme: const IconThemeData(
+            color: Color(0xFF2E7D32)), // Dark green for back button
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
@@ -379,20 +391,35 @@ class _HospitalDetailScreenState extends State<HospitalDetailScreen>
             Tab(text: 'Reviews'),
             Tab(text: 'Services'),
           ],
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.grey,
-          indicatorColor: Colors.white,
+          labelColor: Color(0xFF2E7D32), // Dark green for selected tab
+          unselectedLabelColor:
+              Color(0xFF81C784), // Lighter green for unselected tabs
+          indicatorColor: Color(0xFF2E7D32), // Dark green for indicator
         ),
       ),
-      backgroundColor: Colors.grey[50],
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildOverviewTab(),
-          _buildStatisticsTab(),
-          _buildReviewsTab(),
-          _buildServicesTab(),
-        ],
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFFE8F5E8), // Light mint green
+              Color(0xFFF0F8F0), // Very light sage
+              Color(0xFFE6F3E6), // Soft green tint
+              Color(0xFFF5F9F5), // Almost white with green tint
+            ],
+            stops: [0.0, 0.3, 0.7, 1.0],
+          ),
+        ),
+        child: TabBarView(
+          controller: _tabController,
+          children: [
+            _buildOverviewTab(),
+            _buildStatisticsTab(),
+            _buildReviewsTab(),
+            _buildServicesTab(),
+          ],
+        ),
       ),
     );
   }

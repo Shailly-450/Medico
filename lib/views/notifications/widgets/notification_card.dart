@@ -52,9 +52,14 @@ class _NotificationCardState extends State<NotificationCard>
           scale: _scaleAnimation.value,
           child: Card(
             margin: const EdgeInsets.only(bottom: 12),
-            elevation: 2,
+            elevation: 1,
+            color: Colors.white.withOpacity(0.9),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: const Color(0xFF2E7D32).withOpacity(0.1),
+                width: 1,
+              ),
             ),
             child: InkWell(
               onTap: () {
@@ -63,36 +68,43 @@ class _NotificationCardState extends State<NotificationCard>
                   widget.onTap?.call();
                 });
               },
-              borderRadius: BorderRadius.circular(12),
-              splashColor: AppColors.primary.withOpacity(0.1),
-              highlightColor: AppColors.secondary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(16),
+              splashColor: const Color(0xFF2E7D32).withOpacity(0.1),
+              highlightColor: const Color(0xFF81C784).withOpacity(0.1),
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   color: widget.notification.isRead
-                      ? Colors.white
-                      : AppColors.secondary.withOpacity(0.1),
+                      ? Colors.white.withOpacity(0.9)
+                      : const Color(0xFFE8F5E8).withOpacity(0.9),
                   border: widget.notification.isRead
                       ? null
                       : Border.all(
-                          color: AppColors.primary.withOpacity(0.3), width: 1),
+                          color: const Color(0xFF2E7D32).withOpacity(0.2),
+                          width: 1,
+                        ),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Icon
                     Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: _getIconColor(widget.notification.type)
                             .withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: _getIconColor(widget.notification.type)
+                              .withOpacity(0.2),
+                          width: 1,
+                        ),
                       ),
                       child: Icon(
                         _getIcon(widget.notification.type),
                         color: _getIconColor(widget.notification.type),
-                        size: 20,
+                        size: 22,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -114,7 +126,7 @@ class _NotificationCardState extends State<NotificationCard>
                                         fontWeight: widget.notification.isRead
                                             ? FontWeight.w500
                                             : FontWeight.bold,
-                                        color: AppColors.textBlack,
+                                        color: const Color(0xFF2E7D32),
                                       ),
                                 ),
                               ),
@@ -122,8 +134,8 @@ class _NotificationCardState extends State<NotificationCard>
                                 Container(
                                   width: 8,
                                   height: 8,
-                                  decoration: const BoxDecoration(
-                                    color: AppColors.accent,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF2E7D32),
                                     shape: BoxShape.circle,
                                   ),
                                 ),
@@ -136,7 +148,8 @@ class _NotificationCardState extends State<NotificationCard>
                                 .textTheme
                                 .bodyMedium
                                 ?.copyWith(
-                                  color: AppColors.textSecondary,
+                                  color:
+                                      const Color(0xFF2E7D32).withOpacity(0.7),
                                 ),
                           ),
                           const SizedBox(height: 8),
@@ -148,7 +161,8 @@ class _NotificationCardState extends State<NotificationCard>
                                     .textTheme
                                     .bodySmall
                                     ?.copyWith(
-                                      color: AppColors.textSecondary,
+                                      color: const Color(0xFF2E7D32)
+                                          .withOpacity(0.6),
                                     ),
                               ),
                               const Spacer(),
@@ -159,8 +173,9 @@ class _NotificationCardState extends State<NotificationCard>
                                       .textTheme
                                       .bodySmall
                                       ?.copyWith(
-                                        color: AppColors.primary,
+                                        color: const Color(0xFF2E7D32),
                                         fontStyle: FontStyle.italic,
+                                        fontWeight: FontWeight.w500,
                                       ),
                                 ),
                             ],
@@ -194,13 +209,13 @@ class _NotificationCardState extends State<NotificationCard>
   Color _getIconColor(NotificationType type) {
     switch (type) {
       case NotificationType.appointment:
-        return AppColors.primary;
+        return const Color(0xFF2E7D32); // Dark green
       case NotificationType.offer:
-        return Colors.orange;
+        return const Color(0xFF1B5E20); // Darker green
       case NotificationType.reminder:
-        return AppColors.accent;
+        return const Color(0xFF43A047); // Medium green
       case NotificationType.general:
-        return Colors.blue;
+        return const Color(0xFF66BB6A); // Light green
     }
   }
 

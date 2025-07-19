@@ -79,7 +79,8 @@ class HomeViewModel extends BaseViewModel {
       isVideoCall: true,
       date: "Jun 30, 2025",
       time: "10:00 AM",
-      preApprovalStatus: PreApprovalStatus.pending,
+      appointmentType: "consultation",
+      preApprovalStatus: "pending",
     ),
     Appointment(
       id: '2002',
@@ -90,7 +91,8 @@ class HomeViewModel extends BaseViewModel {
       isVideoCall: false,
       date: "Jul 01, 2025",
       time: "2:30 PM",
-      preApprovalStatus: PreApprovalStatus.notRequired,
+      appointmentType: "consultation",
+      preApprovalStatus: "notRequired",
     ),
     Appointment(
       id: '2003',
@@ -101,7 +103,8 @@ class HomeViewModel extends BaseViewModel {
       isVideoCall: true,
       date: "Jul 03, 2025",
       time: "4:00 PM",
-      preApprovalStatus: PreApprovalStatus.notRequired,
+      appointmentType: "consultation",
+      preApprovalStatus: "notRequired",
     ),
   ];
 

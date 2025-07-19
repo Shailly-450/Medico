@@ -86,7 +86,8 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
         isVideoCall: false,
         date: '2024-07-09',
         time: '09:30 AM',
-        preApprovalStatus: PreApprovalStatus.pending,
+        appointmentType: 'consultation',
+        preApprovalStatus: 'pending',
       ),
       Appointment(
         id: '2',
@@ -96,7 +97,8 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
         isVideoCall: true,
         date: '2024-07-10',
         time: '02:00 PM',
-        preApprovalStatus: PreApprovalStatus.approved,
+        appointmentType: 'consultation',
+        preApprovalStatus: 'approved',
       ),
       Appointment(
         id: '3',
@@ -106,7 +108,8 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
         isVideoCall: false,
         date: '2024-07-08',
         time: '11:00 AM',
-        preApprovalStatus: PreApprovalStatus.approved,
+        appointmentType: 'consultation',
+        preApprovalStatus: 'approved',
       ),
     ];
   }
@@ -237,7 +240,7 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
         Expanded(
           child: _buildStatCard(
             title: 'Pending Reviews',
-            value: '${_appointments.where((a) => a.preApprovalStatus == PreApprovalStatus.pending).length}',
+            value: '${_appointments.where((a) => a.preApprovalStatus == 'pending').length}',
             icon: Icons.pending_actions,
             color: Colors.orange,
           ),
@@ -402,7 +405,7 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: _getStatusColor(appointment.preApprovalStatus).withOpacity(0.15),
+                color: _getStatusColor(appointment.preApprovalStatus).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -528,26 +531,26 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
     );
   }
 
-  Color _getStatusColor(PreApprovalStatus status) {
+  Color _getStatusColor(String status) {
     switch (status) {
-      case PreApprovalStatus.approved:
+      case 'approved':
         return Colors.green;
-      case PreApprovalStatus.rejected:
+      case 'rejected':
         return Colors.red;
-      case PreApprovalStatus.pending:
+      case 'pending':
         return Colors.orange;
       default:
         return Colors.grey;
     }
   }
 
-  String _getStatusText(PreApprovalStatus status) {
+  String _getStatusText(String status) {
     switch (status) {
-      case PreApprovalStatus.approved:
+      case 'approved':
         return 'Approved';
-      case PreApprovalStatus.rejected:
+      case 'rejected':
         return 'Rejected';
-      case PreApprovalStatus.pending:
+      case 'pending':
         return 'Pending';
       default:
         return 'Unknown';

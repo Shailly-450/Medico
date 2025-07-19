@@ -128,14 +128,14 @@ class _AdminAppointmentDetailScreenState
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: statusColor.withOpacity(0.3)),
+        border: Border.all(color: statusColor.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.1),
+              color: statusColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
@@ -167,7 +167,7 @@ class _AdminAppointmentDetailScreenState
               ],
             ),
           ),
-          if (widget.appointment.preApprovalStatus == PreApprovalStatus.pending)
+          if (widget.appointment.preApprovalStatus == 'pending')
             _buildStatusActionButtons(),
         ],
       ),
@@ -179,7 +179,7 @@ class _AdminAppointmentDetailScreenState
       mainAxisSize: MainAxisSize.min,
       children: [
         ElevatedButton(
-          onPressed: () => _updateStatus(PreApprovalStatus.approved),
+          onPressed: () => _updateStatus('approved'),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.green,
             foregroundColor: Colors.white,
@@ -189,7 +189,7 @@ class _AdminAppointmentDetailScreenState
         ),
         const SizedBox(width: 8),
         ElevatedButton(
-          onPressed: () => _updateStatus(PreApprovalStatus.rejected),
+          onPressed: () => _updateStatus('rejected'),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.red,
             foregroundColor: Colors.white,
@@ -595,46 +595,46 @@ class _AdminAppointmentDetailScreenState
     );
   }
 
-  Color _getStatusColor(PreApprovalStatus status) {
+  Color _getStatusColor(String status) {
     switch (status) {
-      case PreApprovalStatus.approved:
+      case 'approved':
         return Colors.green;
-      case PreApprovalStatus.rejected:
+      case 'rejected':
         return Colors.red;
-      case PreApprovalStatus.pending:
+      case 'pending':
         return AppColors.accent;
       default:
         return Colors.grey;
     }
   }
 
-  String _getStatusText(PreApprovalStatus status) {
+  String _getStatusText(String status) {
     switch (status) {
-      case PreApprovalStatus.approved:
+      case 'approved':
         return 'Approved';
-      case PreApprovalStatus.rejected:
+      case 'rejected':
         return 'Rejected';
-      case PreApprovalStatus.pending:
+      case 'pending':
         return 'Pending';
       default:
         return 'Not Required';
     }
   }
 
-  IconData _getStatusIcon(PreApprovalStatus status) {
+  IconData _getStatusIcon(String status) {
     switch (status) {
-      case PreApprovalStatus.approved:
+      case 'approved':
         return Icons.check_circle;
-      case PreApprovalStatus.rejected:
+      case 'rejected':
         return Icons.cancel;
-      case PreApprovalStatus.pending:
+      case 'pending':
         return Icons.schedule;
       default:
         return Icons.info;
     }
   }
 
-  void _updateStatus(PreApprovalStatus newStatus) {
+  void _updateStatus(String newStatus) {
     // In real app, this would update the backend
     // For now, just show success message
     ScaffoldMessenger.of(context).showSnackBar(

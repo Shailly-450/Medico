@@ -28,15 +28,15 @@ class PreApprovalService {
   }
 
   // Mock pre-approval check
-  Future<PreApprovalStatus> checkPreApprovalStatus(String appointmentId) async {
+  Future<String> checkPreApprovalStatus(String appointmentId) async {
     // Simulate API call delay
     await Future.delayed(const Duration(seconds: 1));
 
     // Mock logic: appointments with even IDs are approved, odd are pending
     if (int.tryParse(appointmentId)?.isEven ?? false) {
-      return PreApprovalStatus.approved;
+      return 'approved';
     } else {
-      return PreApprovalStatus.pending;
+      return 'pending';
     }
   }
 

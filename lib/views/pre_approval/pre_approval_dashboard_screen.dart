@@ -72,9 +72,9 @@ class _PreApprovalDashboardScreenState extends State<PreApprovalDashboardScreen>
             child: TabBarView(
               controller: _tabController,
               children: [
-                _buildPreApprovalList(PreApprovalStatus.pending),
-                _buildPreApprovalList(PreApprovalStatus.approved),
-                _buildPreApprovalList(PreApprovalStatus.rejected),
+                        _buildPreApprovalList('pending'),
+        _buildPreApprovalList('approved'),
+        _buildPreApprovalList('rejected'),
               ],
             ),
           ),
@@ -154,7 +154,7 @@ class _PreApprovalDashboardScreenState extends State<PreApprovalDashboardScreen>
     );
   }
 
-  Widget _buildPreApprovalList(PreApprovalStatus status) {
+  Widget _buildPreApprovalList(String status) {
     // In a real app, this would fetch from a service
     final appointments = _getDummyAppointments()
         .where((a) => a.preApprovalStatus == status)
@@ -181,7 +181,7 @@ class _PreApprovalDashboardScreenState extends State<PreApprovalDashboardScreen>
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: statusColor.withOpacity(0.3),
+          color: statusColor.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -222,7 +222,7 @@ class _PreApprovalDashboardScreenState extends State<PreApprovalDashboardScreen>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
+                    color: statusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -265,7 +265,7 @@ class _PreApprovalDashboardScreenState extends State<PreApprovalDashboardScreen>
                 fontSize: 13,
               ),
             ),
-            if (appointment.preApprovalStatus == PreApprovalStatus.rejected)
+            if (appointment.preApprovalStatus == 'rejected')
               Padding(
                 padding: const EdgeInsets.only(top: 16),
                 child: SizedBox(
@@ -334,29 +334,33 @@ class _PreApprovalDashboardScreenState extends State<PreApprovalDashboardScreen>
     );
   }
 
-  Color _getStatusColor(PreApprovalStatus status) {
+  Color _getStatusColor(String status) {
     switch (status) {
-      case PreApprovalStatus.approved:
+      case 'approved':
         return Colors.green;
-      case PreApprovalStatus.pending:
+      case 'pending':
         return Colors.orange;
-      case PreApprovalStatus.rejected:
+      case 'rejected':
         return Colors.red;
-      case PreApprovalStatus.notRequired:
+      case 'notRequired':
         return AppColors.primary;
+      default:
+        return Colors.grey;
     }
   }
 
-  String _getStatusText(PreApprovalStatus status) {
+  String _getStatusText(String status) {
     switch (status) {
-      case PreApprovalStatus.approved:
+      case 'approved':
         return 'Approved';
-      case PreApprovalStatus.pending:
+      case 'pending':
         return 'Pending';
-      case PreApprovalStatus.rejected:
+      case 'rejected':
         return 'Rejected';
-      case PreApprovalStatus.notRequired:
+      case 'notRequired':
         return 'Not Required';
+      default:
+        return 'Unknown';
     }
   }
 
@@ -371,7 +375,8 @@ class _PreApprovalDashboardScreenState extends State<PreApprovalDashboardScreen>
         isVideoCall: true,
         date: "2024-03-20",
         time: "10:00 AM",
-        preApprovalStatus: PreApprovalStatus.pending,
+        appointmentType: "consultation",
+        preApprovalStatus: "pending",
       ),
       Appointment(
         id: '5002',
@@ -382,7 +387,8 @@ class _PreApprovalDashboardScreenState extends State<PreApprovalDashboardScreen>
         isVideoCall: false,
         date: "2024-03-22",
         time: "2:30 PM",
-        preApprovalStatus: PreApprovalStatus.approved,
+        appointmentType: "consultation",
+        preApprovalStatus: "approved",
       ),
       Appointment(
         id: '5003',
@@ -393,7 +399,8 @@ class _PreApprovalDashboardScreenState extends State<PreApprovalDashboardScreen>
         isVideoCall: true,
         date: "2024-03-25",
         time: "11:15 AM",
-        preApprovalStatus: PreApprovalStatus.rejected,
+        appointmentType: "consultation",
+        preApprovalStatus: "rejected",
       ),
       // Add more dummy appointments as needed
     ];
