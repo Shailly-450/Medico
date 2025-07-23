@@ -49,20 +49,59 @@ class Appointment {
 
   // Factory constructor to create Appointment from JSON
   factory Appointment.fromJson(Map<String, dynamic> json) {
+    final doctor = json['doctorId'];
+    String doctorName = 'Unknown Doctor';
+    String doctorImage = 'https://randomuser.me/api/portraits/men/1.jpg';
+    String? doctorId;
+    if (doctor is Map) {
+      doctorId = doctor['_id'];
+      doctorName = doctor['name'] ?? doctor['fullName'] ?? doctor['email'] ?? 'Unknown Doctor';
+      final img = doctor['image'] ?? doctor['profileImage'];
+      if (img != null && img is String && img.isNotEmpty) {
+        doctorImage = img;
+      }
+    } else if (doctor is String) {
+      doctorId = doctor;
+    }
+
+    // Defensive for patientId
+    String? patientId;
+    if (json['patientId'] is Map) {
+      patientId = json['patientId']['_id'];
+    } else if (json['patientId'] is String) {
+      patientId = json['patientId'];
+    }
+
+    // Defensive for hospitalId
+    String? hospitalId;
+    if (json['hospitalId'] is Map) {
+      hospitalId = json['hospitalId']['_id'];
+    } else if (json['hospitalId'] is String) {
+      hospitalId = json['hospitalId'];
+    }
+
+    // Defensive for symptoms
+    List<String>? symptoms;
+    if (json['symptoms'] is List) {
+      symptoms = List<String>.from(json['symptoms']);
+    } else if (json['symptoms'] is String && json['symptoms'].isNotEmpty) {
+      symptoms = [json['symptoms']];
+    }
+
     return Appointment(
       id: json['_id'] ?? json['id'] ?? '',
-      patientId: json['patientId']?['_id'] ?? json['patientId'],
-      doctorId: json['doctorId']?['_id'] ?? json['doctorId'],
-      hospitalId: json['hospitalId']?['_id'] ?? json['hospitalId'],
-      doctorName: json['doctorId']?['profile']?['name'] ?? json['doctorName'] ?? 'Unknown Doctor',
-      doctorImage: json['doctorImage'] ?? 'https://randomuser.me/api/portraits/men/1.jpg',
+      patientId: patientId,
+      doctorId: doctorId,
+      hospitalId: hospitalId,
+      doctorName: doctorName,
+      doctorImage: doctorImage,
       specialty: json['specialty'] ?? 'General',
       isVideoCall: json['isVideoCall'] ?? false,
-      date: json['date'] != null ? DateTime.parse(json['date']).toIso8601String().split('T')[0] : '',
-      time: json['time'] ?? '10:00',
+      date: json['date'] ?? '',
+      time: json['time'] ?? '',
       appointmentType: json['appointmentType'] ?? 'consultation',
       reason: json['reason'],
-      symptoms: json['symptoms'] != null ? List<String>.from(json['symptoms']) : null,
+      symptoms: symptoms,
       insuranceProvider: json['insuranceProvider'],
       insuranceNumber: json['insuranceNumber'],
       preferredTimeSlot: json['preferredTimeSlot'],
@@ -99,5 +138,27 @@ class Appointment {
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
     };
+  }
+}
+
+/// Returns the preferred time slot string for a given time (24-hour format).
+/// Enum values must match your backend: e.g. 'morning', 'afternoon', 'evening', 'night'.
+String getPreferredTimeSlot(String time) {
+  // Expects time in "HH:mm" or "HH:mm:ss" format
+  final parts = time.split(':');
+  if (parts.length < 2) return 'morning'; // fallback
+
+  final hour = int.tryParse(parts[0]) ?? 0;
+  final minute = int.tryParse(parts[1]) ?? 0;
+  final totalMinutes = hour * 60 + minute;
+
+  if (totalMinutes >= 360 && totalMinutes < 720) {
+    return 'morning';    // 06:00 - 12:00
+  } else if (totalMinutes >= 720 && totalMinutes < 1020) {
+    return 'afternoon';  // 12:00 - 17:00
+  } else if (totalMinutes >= 1020 && totalMinutes < 1260) {
+    return 'evening';    // 17:00 - 21:00
+  } else {
+    return 'night';      // 21:00 - 06:00
   }
 }

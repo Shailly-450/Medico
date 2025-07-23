@@ -6,6 +6,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../prescriptions/widgets/prescription_card.dart';
 import '../patients/patient_summary_screen.dart';
 import '../../../models/patient_record.dart';
+import '../../../viewmodels/prescriptions_view_model.dart';
+import '../../../core/views/base_view.dart';
 
 class DoctorPrescriptionsPanel extends StatefulWidget {
   final String doctorName;
@@ -153,6 +155,7 @@ class _AddPrescriptionScreenState extends State<_AddPrescriptionScreen> {
   final _frequencyController = TextEditingController();
   final _durationController = TextEditingController();
   String? _selectedFilePath;
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -165,9 +168,8 @@ class _AddPrescriptionScreenState extends State<_AddPrescriptionScreen> {
     super.dispose();
   }
 
-  void _save() {
+  void _save(PrescriptionsViewModel model) async {
     if (_formKey.currentState?.validate() ?? false) {
-      // Optional: ensure a file is selected
       if (_selectedFilePath == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -177,143 +179,168 @@ class _AddPrescriptionScreenState extends State<_AddPrescriptionScreen> {
         );
         return;
       }
-      final prescription = Prescription(
-        id: const Uuid().v4(),
-        patientName: _patientNameController.text.trim(),
-        doctorName: widget.doctorName,
-        doctorSpecialty: widget.doctorSpecialty,
-        prescriptionDate: DateTime.now(),
+      setState(() => _isSubmitting = true);
+      final success = await model.createPrescription(
+        patientId: _patientNameController.text.trim(), // Replace with actual patientId in real app
         diagnosis: _diagnosisController.text.trim(),
         medications: [
-          PrescriptionMedication(
-            name: _medicationController.text.trim(),
-            dosage: _dosageController.text.trim(),
-            frequency: _frequencyController.text.trim(),
-            duration: _durationController.text.trim(),
-            quantity: 1,
-            isActive: true,
-          ),
+          {
+            'name': _medicationController.text.trim(),
+            'dosage': _dosageController.text.trim(),
+            'frequency': _frequencyController.text.trim(),
+            'duration': _durationController.text.trim(),
+            'quantity': 1,
+            'isActive': true,
+          },
         ],
-        status: PrescriptionStatus.active,
-        prescriptionImageUrl: _selectedFilePath,
+        instructions: null, // Add if you have an instructions field
+        notes: null, // Add if you have a notes field
       );
-      Navigator.pop(context, prescription);
+      setState(() => _isSubmitting = false);
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Prescription uploaded successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context, true);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to upload prescription.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add Prescription'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextFormField(
-                controller: _patientNameController,
-                decoration: const InputDecoration(labelText: 'Patient Name'),
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Required' : null,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _diagnosisController,
-                decoration: const InputDecoration(labelText: 'Diagnosis'),
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Required' : null,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _medicationController,
-                decoration: const InputDecoration(labelText: 'Medication Name'),
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Required' : null,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _dosageController,
-                decoration:
-                    const InputDecoration(labelText: 'Dosage (e.g. 500mg)'),
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Required' : null,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _frequencyController,
-                decoration: const InputDecoration(
-                    labelText: 'Frequency (e.g. Twice daily)'),
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Required' : null,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _durationController,
-                decoration:
-                    const InputDecoration(labelText: 'Duration (e.g. 7 days)'),
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Required' : null,
-              ),
-              const SizedBox(height: 12),
-              // File upload
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      _selectedFilePath != null
-                          ? _selectedFilePath!.split('/').last
-                          : 'No file selected',
-                      style: TextStyle(
-                        color: _selectedFilePath != null
-                            ? AppColors.textBlack
-                            : Colors.grey[600],
-                        fontStyle: _selectedFilePath != null
-                            ? FontStyle.normal
-                            : FontStyle.italic,
-                        fontSize: 13,
+    return BaseView<PrescriptionsViewModel>(
+      viewModelBuilder: () => PrescriptionsViewModel(),
+      builder: (context, model, child) => Scaffold(
+        appBar: AppBar(
+          title: const Text('Add Prescription'),
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextFormField(
+                  controller: _patientNameController,
+                  decoration: const InputDecoration(labelText: 'Patient Name'),
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'Required' : null,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _diagnosisController,
+                  decoration: const InputDecoration(labelText: 'Diagnosis'),
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'Required' : null,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _medicationController,
+                  decoration: const InputDecoration(labelText: 'Medication Name'),
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'Required' : null,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _dosageController,
+                  decoration:
+                      const InputDecoration(labelText: 'Dosage (e.g. 500mg)'),
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'Required' : null,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _frequencyController,
+                  decoration: const InputDecoration(
+                      labelText: 'Frequency (e.g. Twice daily)'),
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'Required' : null,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _durationController,
+                  decoration:
+                      const InputDecoration(labelText: 'Duration (e.g. 7 days)'),
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'Required' : null,
+                ),
+                const SizedBox(height: 12),
+                // File upload
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        _selectedFilePath != null
+                            ? _selectedFilePath!.split('/').last
+                            : 'No file selected',
+                        style: TextStyle(
+                          color: _selectedFilePath != null
+                              ? AppColors.textBlack
+                              : Colors.grey[600],
+                          fontStyle: _selectedFilePath != null
+                              ? FontStyle.normal
+                              : FontStyle.italic,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: _pickFile,
-                    icon: const Icon(Icons.attach_file, size: 18),
-                    label: const Text('Upload'),
+                    ElevatedButton.icon(
+                      onPressed: _pickFile,
+                      icon: const Icon(Icons.attach_file, size: 18),
+                      label: const Text('Upload'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.accent,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: _isSubmitting ? null : () => _save(model),
+                    icon: _isSubmitting
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Icon(Icons.save),
+                    label: Text(_isSubmitting ? 'Uploading...' : 'Upload Prescription'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.accent,
+                      backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 12),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: _save,
-                  icon: const Icon(Icons.save),
-                  label: const Text('Upload Prescription'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

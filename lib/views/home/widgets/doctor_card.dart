@@ -31,11 +31,30 @@ class DoctorCard extends StatelessWidget {
               height: 88,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                image: DecorationImage(
-                  image: NetworkImage(doctor.imageUrl),
-                  fit: BoxFit.cover,
-                ),
+                color: Colors.grey[200],
               ),
+              child: doctor.imageUrl.isNotEmpty
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        doctor.imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Center(
+                          child: Icon(
+                            Icons.person,
+                            size: 48,
+                            color: Colors.blue[500],
+                          ),
+                        ),
+                      ),
+                    )
+                  : Center(
+                      child: Icon(
+                        Icons.person,
+                        size: 48,
+                        color: Colors.blue[500],
+                      ),
+                    ),
             ),
             const SizedBox(width: 16),
             Expanded(

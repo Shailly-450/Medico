@@ -61,34 +61,38 @@ class Doctor {
 
   // Factory constructor to create Doctor from JSON
   factory Doctor.fromJson(Map<String, dynamic> json) {
+    final profile = json['profile'] ?? {};
+    final doctorProfile = json['doctorProfile'] ?? {};
+    final rating = json['rating'] ?? {};
+
     return Doctor(
-      id: json['id'] as String? ?? '',
-      name: json['name'] as String? ?? '',
-      imageUrl: json['imageUrl'] as String? ?? '',
-      specialty: json['specialty'] as String? ?? '',
-      hospital: json['hospital'] as String? ?? '',
-      rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
-      reviews: json['reviews'] as int? ?? 0,
-      price: (json['price'] as num?)?.toDouble() ?? 0.0,
-      isOnline: json['isOnline'] as bool? ?? false,
-      isAvailable: json['isAvailable'] as bool? ?? true,
-      experience: json['experience'] as int? ?? 0,
-      education: json['education'] as String? ?? '',
-      languages: List<String>.from(json['languages'] ?? []),
-      specializations: List<String>.from(json['specializations'] ?? []),
-      about: json['about'] as String? ?? '',
-      availability: Map<String, String>.from(json['availability'] ?? {}),
-      awards: List<String>.from(json['awards'] ?? []),
-      consultationFee: json['consultationFee'] as String? ?? '',
-      acceptsInsurance: json['acceptsInsurance'] as bool? ?? false,
-      insuranceProviders: List<String>.from(json['insuranceProviders'] ?? []),
-      location: json['location'] as String? ?? '',
-      distance: (json['distance'] as num?)?.toDouble() ?? 0.0,
-      isVerified: json['isVerified'] as bool? ?? false,
-      phoneNumber: json['phoneNumber'] as String? ?? '',
-      email: json['email'] as String? ?? '',
-      symptoms: List<String>.from(json['symptoms'] ?? []),
-      videoCall: json['videoCall'] as bool? ?? false,
+      id: json['_id'] as String? ?? '',
+      name: profile['name'] ?? '',
+      specialty: doctorProfile['specialty'] ?? '',
+      hospital: json['hospital'] ?? '',
+      imageUrl: profile['imageUrl'] ?? '',
+      rating: (rating['average'] as num?)?.toDouble() ?? 0.0,
+      reviews: rating['totalReviews'] as int? ?? 0,
+      isAvailable: doctorProfile['availability'] != null ? (doctorProfile['availability'] as List).isNotEmpty : false,
+      price: (doctorProfile['consultationFee'] as num?)?.toDouble() ?? 0.0,
+      isOnline: doctorProfile['isOnline'] as bool? ?? false,
+      experience: doctorProfile['experience'] as int? ?? 0,
+      education: doctorProfile['education'] ?? '',
+      languages: List<String>.from(doctorProfile['languages'] ?? []),
+      specializations: doctorProfile['specializations'] != null ? List<String>.from(doctorProfile['specializations']) : [],
+      about: doctorProfile['about'] ?? '',
+      availability: const {}, // Map as needed
+      awards: const [], // Map as needed
+      consultationFee: (doctorProfile['consultationFee']?.toString() ?? ''),
+      acceptsInsurance: doctorProfile['acceptsInsurance'] as bool? ?? false,
+      insuranceProviders: const [], // Map as needed
+      location: doctorProfile['location'] ?? '',
+      distance: 0.0, // Map as needed
+      isVerified: doctorProfile['isVerified'] as bool? ?? false,
+      phoneNumber: profile['phone'] ?? '',
+      email: json['email'] ?? '',
+      symptoms: const [], // Map as needed
+      videoCall: false, // Map as needed
     );
   }
 

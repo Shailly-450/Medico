@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../core/viewmodels/base_view_model.dart';
 import '../models/prescription.dart';
+import '../core/services/api_service.dart';
+import '../core/services/auth_service.dart';
 
 class PrescriptionsViewModel extends BaseViewModel {
   List<Prescription> _prescriptions = [];
@@ -26,20 +28,54 @@ class PrescriptionsViewModel extends BaseViewModel {
   @override
   void init() {
     print('DEBUG: PrescriptionsViewModel init called');
-    _loadPrescriptions();
+    loadPrescriptionsFromApi();
   }
 
-  void _loadPrescriptions() {
-    print('DEBUG: Loading prescriptions...');
+  Future<void> loadPrescriptionsFromApi() async {
     _setLoading(true);
+    try {
+      final response = await ApiService.getPrescriptions();
+      if (response['success'] == true && response['data'] != null) {
+        _prescriptions = (response['data'] as List)
+            .map((json) => Prescription.fromJson(json))
+            .toList();
+      } else {
+        _prescriptions = [];
+      }
+    } catch (e) {
+      _prescriptions = [];
+    }
+    _setLoading(false);
+    notifyListeners();
+  }
 
-    // Simulate API call delay
-    Future.delayed(const Duration(milliseconds: 800), () {
-      _prescriptions = _getMockPrescriptions();
-      print('DEBUG: Loaded ${_prescriptions.length} prescriptions');
-      _setLoading(false);
-      notifyListeners();
-    });
+  Future<bool> createPrescription({
+    required String patientId,
+    required String diagnosis,
+    required List<Map<String, dynamic>> medications,
+    String? instructions,
+    String? notes,
+  }) async {
+    _setLoading(true);
+    try {
+      final data = {
+        'patientId': patientId,
+        'diagnosis': diagnosis,
+        'medications': medications,
+        if (instructions != null) 'instructions': instructions,
+        if (notes != null) 'notes': notes,
+      };
+      final response = await ApiService.createPrescription(data);
+      if (response['success'] == true && response['data'] != null) {
+        final newPrescription = Prescription.fromJson(response['data']);
+        _prescriptions.insert(0, newPrescription);
+        notifyListeners();
+        _setLoading(false);
+        return true;
+      }
+    } catch (e) {}
+    _setLoading(false);
+    return false;
   }
 
   void setFilter(String filter) {
@@ -53,7 +89,7 @@ class PrescriptionsViewModel extends BaseViewModel {
   }
 
   void refreshPrescriptions() {
-    _loadPrescriptions();
+    loadPrescriptionsFromApi();
   }
 
   List<Prescription> _getFilteredPrescriptions() {

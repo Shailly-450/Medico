@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:provider/provider.dart';
 import '../../models/appointment.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/services/pre_approval_service.dart';
+import '../../viewmodels/appointment_view_model.dart';
 
 class AppointmentCalendarScreen extends StatefulWidget {
   const AppointmentCalendarScreen({Key? key}) : super(key: key);
@@ -16,522 +18,34 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
-  Map<DateTime, List<Appointment>> _events = {};
   final PreApprovalService _preApprovalService = PreApprovalService();
 
   @override
   void initState() {
     super.initState();
     _selectedDay = _focusedDay;
-    _loadEvents();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final appointmentViewModel = Provider.of<AppointmentViewModel>(context, listen: false);
+      appointmentViewModel.loadAppointments();
+    });
   }
 
-  void _loadEvents() {
-    // Sample appointments data - in real app, this would come from a service
-    final appointments = [
-      // January 2025 Appointments
-      Appointment(
-        id: '4001',
-        doctorName: "Dr. Sarah Johnson",
-        doctorImage:
-            "https://img.freepik.com/free-photo/woman-doctor-wearing-lab-coat-with-stethoscope-isolated_1303-29791.jpg",
-        specialty: "Cardiologist",
-        isVideoCall: true,
-        date: "2025-01-15",
-        time: "10:00 AM",
-        appointmentType: "consultation",
-        preApprovalStatus:
-            _preApprovalService.isPreApprovalRequired("Cardiologist")
-                ? 'pending'
-                : 'notRequired',
-      ),
-      Appointment(
-        id: '4002',
-        doctorName: "Dr. Michael Chen",
-        doctorImage:
-            "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
-        specialty: "Dentist",
-        isVideoCall: false,
-        date: "2025-01-15",
-        time: "2:30 PM",
-        appointmentType: "consultation",
-        preApprovalStatus: 'notRequired',
-      ),
-      Appointment(
-        id: '4003',
-        doctorName: "Dr. Emily Brown",
-        doctorImage:
-            "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
-        specialty: "Pediatrician",
-        isVideoCall: true,
-        date: "2025-01-20",
-        time: "4:00 PM",
-        appointmentType: "consultation",
-        preApprovalStatus: 'notRequired',
-      ),
-      Appointment(
-        id: '4004',
-        doctorName: "Dr. Rajesh Kumar",
-        doctorImage:
-            "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
-        specialty: "General Physician",
-        isVideoCall: false,
-        date: "2025-01-22",
-        time: "11:00 AM",
-        appointmentType: "consultation",
-        preApprovalStatus: 'notRequired',
-      ),
-      Appointment(
-        id: '4005',
-        doctorName: "Dr. Priya Sharma",
-        doctorImage:
-            "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
-        specialty: "Dermatologist",
-        isVideoCall: true,
-        date: "2025-01-25",
-        time: "3:00 PM",
-        appointmentType: "consultation",
-        preApprovalStatus: 'notRequired',
-      ),
-
-      // February 2025 Appointments
-      Appointment(
-        id: '4006',
-        doctorName: "Dr. David Wilson",
-        doctorImage:
-            "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
-        specialty: "Orthopedic Surgeon",
-        isVideoCall: false,
-        date: "2025-02-03",
-        time: "9:00 AM",
-        appointmentType: "consultation",
-        preApprovalStatus:
-            _preApprovalService.isPreApprovalRequired("Orthopedic")
-                ? 'pending'
-                : 'notRequired',
-      ),
-      Appointment(
-        id: '4007',
-        doctorName: "Dr. Lisa Anderson",
-        doctorImage:
-            "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
-        specialty: "Gynecologist",
-        isVideoCall: true,
-        date: "2025-02-05",
-        time: "1:30 PM",
-        appointmentType: "consultation",
-        preApprovalStatus: 'notRequired',
-      ),
-      Appointment(
-        id: '4008',
-        doctorName: "Dr. James Rodriguez",
-        doctorImage:
-            "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
-        specialty: "Neurologist",
-        isVideoCall: false,
-        date: "2025-02-08",
-        time: "3:45 PM",
-        appointmentType: "consultation",
-        preApprovalStatus:
-            _preApprovalService.isPreApprovalRequired("Neurologist")
-                ? 'approved'
-                : 'notRequired',
-      ),
-      Appointment(
-        id: '4009',
-        doctorName: "Dr. Maria Garcia",
-        doctorImage:
-            "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
-        specialty: "Psychiatrist",
-        isVideoCall: true,
-        date: "2025-02-12",
-        time: "11:15 AM",
-        appointmentType: "consultation",
-        preApprovalStatus:
-            _preApprovalService.isPreApprovalRequired("Psychiatrist")
-                ? 'rejected'
-                : 'notRequired',
-      ),
-      Appointment(
-        id: '4010',
-        doctorName: "Dr. Robert Taylor",
-        doctorImage:
-            "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
-        specialty: "Urologist",
-        isVideoCall: false,
-        date: "2025-02-15",
-        time: "2:00 PM",
-        appointmentType: "consultation",
-        preApprovalStatus: 'notRequired',
-      ),
-      Appointment(
-        id: '4011',
-        doctorName: "Dr. Jennifer Lee",
-        doctorImage:
-            "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
-        specialty: "Endocrinologist",
-        isVideoCall: true,
-        date: "2025-02-18",
-        time: "10:30 AM",
-        appointmentType: "consultation",
-        preApprovalStatus: 'notRequired',
-      ),
-      Appointment(
-        id: '4012',
-        doctorName: "Dr. Thomas Martinez",
-        doctorImage:
-            "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
-        specialty: "Pulmonologist",
-        isVideoCall: false,
-        date: "2025-02-22",
-        time: "4:15 PM",
-        appointmentType: "consultation",
-        preApprovalStatus: 'notRequired',
-      ),
-
-      // March 2025 Appointments
-      Appointment(
-        id: '4013',
-        doctorName: "Dr. Amanda White",
-        doctorImage:
-            "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
-        specialty: "Ophthalmologist",
-        isVideoCall: true,
-        date: "2025-03-01",
-        time: "9:30 AM",
-        appointmentType: "consultation",
-        preApprovalStatus: 'notRequired',
-      ),
-      Appointment(
-        id: '4014',
-        doctorName: "Dr. Christopher Davis",
-        doctorImage:
-            "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
-        specialty: "Gastroenterologist",
-        isVideoCall: false,
-        date: "2025-03-05",
-        time: "1:00 PM",
-        appointmentType: "consultation",
-        preApprovalStatus: 'notRequired',
-      ),
-      Appointment(
-        id: '4015',
-        doctorName: "Dr. Nicole Thompson",
-        doctorImage:
-            "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
-        specialty: "Rheumatologist",
-        isVideoCall: true,
-        date: "2025-03-08",
-        time: "3:30 PM",
-        appointmentType: "consultation",
-        preApprovalStatus: 'notRequired',
-      ),
-      Appointment(
-        id: '4016',
-        doctorName: "Dr. Kevin Johnson",
-        doctorImage:
-            "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
-        specialty: "Hematologist",
-        isVideoCall: false,
-        date: "2025-03-12",
-        time: "11:45 AM",
-        appointmentType: "consultation",
-        preApprovalStatus: 'notRequired',
-      ),
-      Appointment(
-        id: '4017',
-        doctorName: "Dr. Rachel Green",
-        doctorImage:
-            "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
-        specialty: "Oncologist",
-        isVideoCall: true,
-        date: "2025-03-15",
-        time: "2:30 PM",
-        appointmentType: "consultation",
-        preApprovalStatus: 'notRequired',
-      ),
-      Appointment(
-        id: '4018',
-        doctorName: "Dr. Daniel Brown",
-        doctorImage:
-            "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
-        specialty: "Nephrologist",
-        isVideoCall: false,
-        date: "2025-03-18",
-        time: "10:15 AM",
-        appointmentType: "consultation",
-        preApprovalStatus: 'notRequired',
-      ),
-      Appointment(
-        id: '4019',
-        doctorName: "Dr. Stephanie Clark",
-        doctorImage:
-            "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
-        specialty: "Dermatologist",
-        isVideoCall: true,
-        date: "2025-03-20",
-        time: "4:45 PM",
-        appointmentType: "consultation",
-        preApprovalStatus: 'notRequired',
-      ),
-      Appointment(
-        id: '4020',
-        doctorName: "Dr. Matthew Lewis",
-        doctorImage:
-            "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
-        specialty: "Cardiologist",
-        isVideoCall: false,
-        date: "2025-03-22",
-        time: "1:15 PM",
-        appointmentType: "consultation",
-        preApprovalStatus:
-            _preApprovalService.isPreApprovalRequired("Cardiologist")
-                ? 'pending'
-                : 'notRequired',
-      ),
-      Appointment(
-        id: '4021',
-        doctorName: "Dr. Jessica Hall",
-        doctorImage:
-            "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
-        specialty: "Neurologist",
-        isVideoCall: true,
-        date: "2025-03-25",
-        time: "3:00 PM",
-        appointmentType: "consultation",
-        preApprovalStatus:
-            _preApprovalService.isPreApprovalRequired("Neurologist")
-                ? 'pending'
-                : 'notRequired',
-      ),
-
-      // April 2025 Appointments
-      Appointment(
-        id: '4022',
-        doctorName: "Dr. Andrew Young",
-        doctorImage:
-            "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
-        specialty: "Orthopedic",
-        isVideoCall: false,
-        date: "2025-04-02",
-        time: "10:30 AM",
-        appointmentType: "consultation",
-        preApprovalStatus:
-            _preApprovalService.isPreApprovalRequired("Orthopedic")
-                ? 'pending'
-                : 'notRequired',
-      ),
-      Appointment(
-        id: '4023',
-        doctorName: "Dr. Michelle King",
-        doctorImage:
-            "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
-        specialty: "Psychiatrist",
-        isVideoCall: true,
-        date: "2025-04-05",
-        time: "2:45 PM",
-        appointmentType: "consultation",
-        preApprovalStatus:
-            _preApprovalService.isPreApprovalRequired("Psychiatrist")
-                ? 'pending'
-                : 'notRequired',
-      ),
-      Appointment(
-        id: '4024',
-        doctorName: "Dr. Ryan Scott",
-        doctorImage:
-            "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
-        specialty: "Orthopedic Surgeon",
-        isVideoCall: false,
-        date: "2025-04-08",
-        time: "3:30 PM",
-        appointmentType: "consultation",
-        preApprovalStatus: 'notRequired',
-      ),
-      Appointment(
-        id: '4025',
-        doctorName: "Dr. Kimberly Adams",
-        doctorImage:
-            "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
-        specialty: "Gynecologist",
-        isVideoCall: true,
-        date: "2025-04-12",
-        time: "10:45 AM",
-        appointmentType: "consultation",
-        preApprovalStatus: 'notRequired',
-      ),
-      Appointment(
-        id: '4026',
-        doctorName: "Dr. Brandon Baker",
-        doctorImage:
-            "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
-        specialty: "Neurologist",
-        isVideoCall: false,
-        date: "2025-04-15",
-        time: "1:20 PM",
-        appointmentType: "consultation",
-        preApprovalStatus: 'notRequired',
-      ),
-      Appointment(
-        id: '4027',
-        doctorName: "Dr. Ashley Nelson",
-        doctorImage:
-            "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
-        specialty: "Psychiatrist",
-        isVideoCall: true,
-        date: "2025-04-18",
-        time: "4:30 PM",
-        appointmentType: "consultation",
-        preApprovalStatus: 'notRequired',
-      ),
-      Appointment(
-        id: '4028',
-        doctorName: "Dr. Jonathan Carter",
-        doctorImage:
-            "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
-        specialty: "Urologist",
-        isVideoCall: false,
-        date: "2025-04-22",
-        time: "11:30 AM",
-        appointmentType: "consultation",
-        preApprovalStatus: 'notRequired',
-      ),
-      Appointment(
-        id: '4029',
-        doctorName: "Dr. Samantha Mitchell",
-        doctorImage:
-            "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
-        specialty: "Endocrinologist",
-        isVideoCall: true,
-        date: "2025-04-25",
-        time: "2:45 PM",
-        appointmentType: "consultation",
-        preApprovalStatus: 'notRequired',
-      ),
-      Appointment(
-        id: '4030',
-        doctorName: "Dr. Tyler Perez",
-        doctorImage:
-            "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
-        specialty: "Pulmonologist",
-        isVideoCall: false,
-        date: "2025-04-28",
-        time: "9:15 AM", appointmentType: 'Diagnosis',
-      ),
-
-      // May 2025 Appointments
-      Appointment(
-        id: '4031',
-        doctorName: "Dr. Lauren Roberts",
-        doctorImage:
-            "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
-        specialty: "Ophthalmologist",
-        isVideoCall: true,
-        date: "2025-05-03",
-        time: "3:00 PM", appointmentType: 'Diagnosis',
-      ),
-      Appointment(
-        id: '4032',
-        doctorName: "Dr. Nathan Turner",
-        doctorImage:
-            "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
-        specialty: "Gastroenterologist",
-        isVideoCall: false,
-        date: "2025-05-06",
-        time: "10:30 AM", appointmentType: 'Diagnosis',
-      ),
-      Appointment(
-        id: '4033',
-        doctorName: "Dr. Victoria Phillips",
-        doctorImage:
-            "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
-        specialty: "Rheumatologist",
-        isVideoCall: true,
-        date: "2025-05-10",
-        time: "1:45 PM", appointmentType: 'Diagnosis',
-      ),
-      Appointment(
-        id: '4034',
-        doctorName: "Dr. Gregory Campbell",
-        doctorImage:
-            "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
-        specialty: "Hematologist",
-        isVideoCall: false,
-        date: "2025-05-13",
-        time: "4:15 PM", appointmentType: 'Diagnosis',
-      ),
-      Appointment(
-        id: '4035',
-        doctorName: "Dr. Danielle Parker",
-        doctorImage:
-            "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
-        specialty: "Oncologist",
-        isVideoCall: true,
-        date: "2025-05-16",
-        time: "11:00 AM", appointmentType: 'Consultation',
-      ),
-      Appointment(
-        id: '4036',
-        doctorName: "Dr. Sean Evans",
-        doctorImage:
-            "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
-        specialty: "Nephrologist",
-        isVideoCall: false,
-        date: "2025-05-20",
-        time: "2:30 PM", appointmentType: '',
-      ),
-      Appointment(
-        id: '4037',
-        doctorName: "Dr. Rebecca Edwards",
-        doctorImage:
-            "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
-        specialty: "Dermatologist",
-        isVideoCall: true,
-        date: "2025-05-23",
-        time: "9:45 AM", appointmentType: 'Diagnosis',
-      ),
-      Appointment(
-        id: '4038',
-        doctorName: "Dr. Patrick Collins",
-        doctorImage:
-            "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg",
-        specialty: "Cardiologist",
-        isVideoCall: false,
-        date: "2025-05-27",
-        time: "3:30 PM", appointmentType: 'consultation',
-      ),
-      Appointment(
-        id: '4039',
-        doctorName: "Dr. Hannah Stewart",
-        doctorImage:
-            "https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg",
-        specialty: "Pediatrician",
-        isVideoCall: true,
-        date: "2025-05-30",
-        time: "10:15 AM", appointmentType: 'Diagnosis',
-      ),
-    ];
-
-    // Convert dates to DateTime and organize appointments by date
+  Map<DateTime, List<Appointment>> _organizeAppointmentsByDate(List<Appointment> appointments) {
+    final Map<DateTime, List<Appointment>> events = {};
     for (final appointment in appointments) {
       try {
-        final parts = appointment.date.split('-');
-        if (parts.length == 3) {
-          final year = int.parse(parts[0]);
-          final month = int.parse(parts[1]);
-          final day = int.parse(parts[2]);
-          final date = DateTime(year, month, day);
-
-          if (_events[date] != null) {
-            _events[date]!.add(appointment);
-          } else {
-            _events[date] = [appointment];
-          }
+        final utcDate = DateTime.parse(appointment.date).toUtc();
+        final dateOnly = DateTime.utc(utcDate.year, utcDate.month, utcDate.day);
+        if (events[dateOnly] != null) {
+          events[dateOnly]!.add(appointment);
+        } else {
+          events[dateOnly] = [appointment];
         }
       } catch (e) {
-        print('Error parsing date ${appointment.date}: $e');
+        print('Error parsing appointment date: $e');
       }
     }
+    return events;
   }
 
   DateTime _parseDate(String dateString) {
@@ -540,130 +54,163 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
         int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
   }
 
-  List<Appointment> _getEventsForDay(DateTime day) {
-    return _events[day] ?? [];
+  List<Appointment> _getEventsForDay(DateTime day, Map<DateTime, List<Appointment>> events) {
+    final selectedDateOnly = DateTime.utc(day.year, day.month, day.day);
+    return events[selectedDateOnly] ?? [];
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Appointment Calendar'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        actions: [
-          PopupMenuButton<CalendarFormat>(
-            icon: const Icon(Icons.view_week),
-            onSelected: (CalendarFormat format) {
-              setState(() {
-                _calendarFormat = format;
-              });
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: CalendarFormat.month,
-                child: Text('Month'),
+    return Consumer<AppointmentViewModel>(
+      builder: (context, viewModel, child) {
+        if (viewModel.isLoading) {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Appointment Calendar'),
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              elevation: 0,
+            ),
+            body: const Center(child: CircularProgressIndicator()),
+          );
+        }
+        if (viewModel.errorMessage != null) {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Appointment Calendar'),
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              elevation: 0,
+            ),
+            body: Center(
+              child: Text(
+                viewModel.errorMessage!,
+                style: const TextStyle(color: Colors.red, fontSize: 16),
               ),
-              const PopupMenuItem(
-                value: CalendarFormat.week,
-                child: Text('Week'),
-              ),
-              const PopupMenuItem(
-                value: CalendarFormat.twoWeeks,
-                child: Text('2 Weeks'),
+            ),
+          );
+        }
+        final appointments = viewModel.appointments;
+        final events = _organizeAppointmentsByDate(appointments);
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Appointment Calendar'),
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
+            elevation: 0,
+            actions: [
+              PopupMenuButton<CalendarFormat>(
+                icon: const Icon(Icons.view_week),
+                onSelected: (CalendarFormat format) {
+                  setState(() {
+                    _calendarFormat = format;
+                  });
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: CalendarFormat.month,
+                    child: Text('Month'),
+                  ),
+                  const PopupMenuItem(
+                    value: CalendarFormat.week,
+                    child: Text('Week'),
+                  ),
+                  const PopupMenuItem(
+                    value: CalendarFormat.twoWeeks,
+                    child: Text('2 Weeks'),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Calendar
-          TableCalendar<Appointment>(
-            firstDay: DateTime.utc(2024, 1, 1),
-            lastDay: DateTime.utc(2030, 12, 31),
-            focusedDay: _focusedDay,
-            calendarFormat: _calendarFormat,
-            selectedDayPredicate: (day) {
-              return isSameDay(_selectedDay, day);
-            },
-            onDaySelected: (selectedDay, focusedDay) {
-              setState(() {
-                _selectedDay = selectedDay;
-                _focusedDay = focusedDay;
-              });
-            },
-            onFormatChanged: (format) {
-              setState(() {
-                _calendarFormat = format;
-              });
-            },
-            onPageChanged: (focusedDay) {
-              _focusedDay = focusedDay;
-            },
-            eventLoader: _getEventsForDay,
-            calendarStyle: CalendarStyle(
-              outsideDaysVisible: false,
-              weekendTextStyle: const TextStyle(color: Colors.red),
-              holidayTextStyle: const TextStyle(color: Colors.red),
-              selectedDecoration: BoxDecoration(
-                color: AppColors.primary,
-                shape: BoxShape.circle,
+          body: Column(
+            children: [
+              // Calendar
+              TableCalendar<Appointment>(
+                firstDay: DateTime.utc(2024, 1, 1),
+                lastDay: DateTime.utc(2030, 12, 31),
+                focusedDay: _focusedDay,
+                calendarFormat: _calendarFormat,
+                selectedDayPredicate: (day) {
+                  return isSameDay(_selectedDay, day);
+                },
+                onDaySelected: (selectedDay, focusedDay) {
+                  setState(() {
+                    _selectedDay = selectedDay;
+                    _focusedDay = focusedDay;
+                  });
+                },
+                onFormatChanged: (format) {
+                  setState(() {
+                    _calendarFormat = format;
+                  });
+                },
+                onPageChanged: (focusedDay) {
+                  _focusedDay = focusedDay;
+                },
+                eventLoader: (day) => _getEventsForDay(day, events),
+                calendarStyle: CalendarStyle(
+                  outsideDaysVisible: false,
+                  weekendTextStyle: const TextStyle(color: Colors.red),
+                  holidayTextStyle: const TextStyle(color: Colors.red),
+                  selectedDecoration: BoxDecoration(
+                    color: AppColors.primary,
+                    shape: BoxShape.circle,
+                  ),
+                  todayDecoration: BoxDecoration(
+                    color: AppColors.secondary,
+                    shape: BoxShape.circle,
+                  ),
+                  markerDecoration: BoxDecoration(
+                    color: AppColors.primary,
+                    shape: BoxShape.circle,
+                  ),
+                  markersMaxCount: 3,
+                ),
+                headerStyle: HeaderStyle(
+                  formatButtonVisible: false,
+                  titleCentered: true,
+                  titleTextStyle: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
-              todayDecoration: BoxDecoration(
-                color: AppColors.secondary,
-                shape: BoxShape.circle,
+              const SizedBox(height: 16),
+              // Selected day appointments
+              Expanded(
+                child: _selectedDay == null
+                    ? const Center(
+                        child: Text(
+                          'Select a date to view appointments',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      )
+                    : _buildAppointmentsList(events),
               ),
-              markerDecoration: BoxDecoration(
-                color: AppColors.primary,
-                shape: BoxShape.circle,
-              ),
-              markersMaxCount: 3,
-            ),
-            headerStyle: HeaderStyle(
-              formatButtonVisible: false,
-              titleCentered: true,
-              titleTextStyle: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            ],
           ),
-          const SizedBox(height: 16),
-
-          // Selected day appointments
-          Expanded(
-            child: _selectedDay == null
-                ? const Center(
-                    child: Text(
-                      'Select a date to view appointments',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  )
-                : _buildAppointmentsList(),
+          floatingActionButton: FloatingActionButton.extended(
+            onPressed: () {
+              Navigator.pushNamed(context, '/doctor-selection');
+            },
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
+            icon: const Icon(Icons.add),
+            label: const Text('Book Appointment'),
           ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Navigate to book appointment screen
-          Navigator.pushNamed(context, '/book-appointment');
-        },
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        child: const Icon(Icons.add),
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildAppointmentsList() {
-    final events = _getEventsForDay(_selectedDay!);
+  Widget _buildAppointmentsList(Map<DateTime, List<Appointment>> events) {
+    final eventsForDay = _selectedDay == null ? [] : _getEventsForDay(_selectedDay!, events);
 
-    if (events.isEmpty) {
+    if (eventsForDay.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -696,9 +243,9 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
 
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: events.length,
+      itemCount: eventsForDay.length,
       itemBuilder: (context, index) {
-        final appointment = events[index];
+        final appointment = eventsForDay[index];
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
           elevation: 2,
@@ -768,8 +315,8 @@ class _AppointmentCalendarScreenState extends State<AppointmentCalendarScreen> {
                             ),
                             decoration: BoxDecoration(
                               color: appointment.isVideoCall
-                                  ? Colors.blue.withOpacity(0.1)
-                                  : Colors.green.withOpacity(0.1),
+                                  ? Colors.blue.withValues(alpha: 0.1)
+                                  : Colors.green.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Row(

@@ -5,6 +5,7 @@ import '../admin/appointments/admin_appointments_panel.dart';
 import 'package:medico/views/home/home_screen.dart';
 import 'package:medico/views/doctor/patients/patient_list_screen.dart';
 import 'forgot_password_screen.dart';
+import '../admin/admin_dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -52,7 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => const AdminAppointmentsPanel(),
+                builder: (context) => const AdminDashboardScreen(),
               ),
             );
           } else if (role == UserRole.doctor) {

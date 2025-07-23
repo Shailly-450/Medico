@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import '../../core/views/base_view.dart';
 import '../../viewmodels/home_view_model.dart';
 import '../../core/theme/app_colors.dart';
@@ -27,6 +28,9 @@ import '../shared/widgets/content_list_widget.dart';
 import '../../models/video_content.dart';
 import '../../models/article_content.dart';
 import '../video/video_player_screen.dart';
+import '../../core/config.dart';
+import '../../models/doctor.dart';
+import '../../viewmodels/doctors_view_model.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -176,91 +180,104 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    print('HomeScreen build called');
     return BaseView<HomeViewModel>(
       viewModelBuilder: () => HomeViewModel(),
-      builder: (context, model, child) => Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color(0xFFE8F5E8), // Light mint green
-                Color(0xFFF0F8F0), // Very light sage
-                Color(0xFFE6F3E6), // Soft green tint
-                Color(0xFFF5F9F5), // Almost white with green tint
-              ],
-              stops: [0.0, 0.3, 0.7, 1.0],
+      onModelReady: (model) {
+        print('HomeViewModel onModelReady called');
+        model.init();
+      },
+      builder: (context, model, child) {
+        print('HomeScreen offers length: ${model.offers.length}');
+        if (model.offers.isNotEmpty) {
+          for (var offer in model.offers) {
+            print('Offer: title=${offer.title}, id=${offer.id}, isActive=${offer.isActive}, validUntil=${offer.validUntil}');
+          }
+        }
+        print('API Base URL: ${AppConfig.apiBaseUrl}');
+        return Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFFE8F5E8), // Light mint green
+                  Color(0xFFF0F8F0), // Very light sage
+                  Color(0xFFE6F3E6), // Soft green tint
+                  Color(0xFFF5F9F5), // Almost white with green tint
+                ],
+                stops: [0.0, 0.3, 0.7, 1.0],
+              ),
             ),
-          ),
-          child: SafeArea(
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: SlideTransition(
-                position: _slideAnimation,
-                child: CustomScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  slivers: [
-                    // App Bar with Profile
-                    SliverToBoxAdapter(
-                      child: _buildAppBar(context, model),
-                    ),
-
-                    // Search Section
-                    SliverToBoxAdapter(
-                      child: _buildSearchSection(context),
-                    ),
-
-                    // Quick Actions
-                    SliverToBoxAdapter(
-                      child: _buildQuickActions(context, model),
-                    ),
-
-                    // Categories Grid
-                    SliverToBoxAdapter(
-                      child: _buildCategoriesSection(context, model),
-                    ),
-
-                    // Upcoming Appointments
-                    if (model.upcomingAppointments.isNotEmpty)
+            child: SafeArea(
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: SlideTransition(
+                  position: _slideAnimation,
+                  child: CustomScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    slivers: [
+                      // App Bar with Profile
                       SliverToBoxAdapter(
-                        child: _buildAppointmentsSection(context, model),
+                        child: _buildAppBar(context, model),
                       ),
 
-                    // Offers Section
-                    if (model.offers.isNotEmpty)
+                      // Search Section
+                      SliverToBoxAdapter(
+                        child: _buildSearchSection(context),
+                      ),
+
+                      // Quick Actions
+                      SliverToBoxAdapter(
+                        child: _buildQuickActions(context, model),
+                      ),
+
+                      // Categories Grid
+                      SliverToBoxAdapter(
+                        child: _buildCategoriesSection(context, model),
+                      ),
+
+                      // Upcoming Appointments
+                      if (model.upcomingAppointments.isNotEmpty)
+                        SliverToBoxAdapter(
+                          child: _buildAppointmentsSection(context, model),
+                        ),
+
+                      // Offers Section (always visible, even if empty)
                       SliverToBoxAdapter(
                         child: _buildOffersSection(context, model),
                       ),
 
-                    // Doctors Section
-                    SliverToBoxAdapter(
-                      child: _buildDoctorsSection(context, model),
-                    ),
+                      // Doctors Section
+                      SliverToBoxAdapter(
+                        child: _buildDoctorsSection(context, model),
+                      ),
 
-                    // Hospitals Section
-                    SliverToBoxAdapter(
-                      child: _buildHospitalsSection(context, model),
-                    ),
+                      // Hospitals Section
+                      SliverToBoxAdapter(
+                        child: _buildHospitalsSection(context, model),
+                      ),
 
-                    // Health Content Section
-                    SliverToBoxAdapter(
-                      child: _buildHealthContentSection(context),
-                    ),
+                      // Health Content Section
+                      SliverToBoxAdapter(
+                        child: _buildHealthContentSection(context),
+                      ),
 
-                    // Bottom padding
-                    const SliverToBoxAdapter(
-                      child: SizedBox(height: 32),
-                    ),
-                  ],
+                      // Bottom padding
+                      const SliverToBoxAdapter(
+                        child: SizedBox(height: 32),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-        floatingActionButton: _buildFloatingActionButton(context),
-      ),
+          floatingActionButton: _buildFloatingActionButton(context),
+        );
+      },
     );
   }
 
@@ -1149,22 +1166,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(20),
                   onTap: () {
-                    HapticFeedback.lightImpact();
                     Navigator.of(context).push(
-                      PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            const OffersScreen(),
-                        transitionsBuilder:
-                            (context, animation, secondaryAnimation, child) {
-                          return SlideTransition(
-                            position: Tween<Offset>(
-                              begin: const Offset(1.0, 0.0),
-                              end: Offset.zero,
-                            ).animate(animation),
-                            child: child,
-                          );
-                        },
-                        transitionDuration: const Duration(milliseconds: 400),
+                      MaterialPageRoute(
+                        builder: (context) => const OffersScreen(),
                       ),
                     );
                   },
@@ -1195,252 +1199,270 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           const SizedBox(height: 20),
           SizedBox(
             height: 240,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              itemCount: model.offers.length,
-              itemBuilder: (context, index) {
-                return TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0.0, end: 1.0),
-                  duration: Duration(milliseconds: 600 + (index * 100)),
-                  builder: (context, value, child) {
-                    return Transform.translate(
-                      offset: Offset(0, 20 * (1 - value)),
-                      child: Opacity(
-                        opacity: value,
-                        child: Container(
-                          width: 300,
-                          margin: EdgeInsets.only(
-                            right: index == model.offers.length - 1 ? 0 : 20,
-                          ),
-                          child: OfferCard(
-                            offer: model.offers[index],
-                            onTap: () {
-                              HapticFeedback.lightImpact();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                      'Booking ${model.offers[index].title}...'),
-                                  duration: const Duration(seconds: 2),
-                                  behavior: SnackBarBehavior.floating,
-                                  backgroundColor: const Color(0xFF4CAF50),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
+            child: model.offers.isEmpty
+                ? Center(
+                    child: Text(
+                      'No offers available at the moment.',
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 16,
                       ),
-                    );
-                  },
-                );
-              },
-            ),
+                    ),
+                  )
+                : ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: model.offers.length,
+                    itemBuilder: (context, index) {
+                      return TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        duration: Duration(milliseconds: 600 + (index * 100)),
+                        builder: (context, value, child) {
+                          return Transform.translate(
+                            offset: Offset(0, 20 * (1 - value)),
+                            child: Opacity(
+                              opacity: value,
+                              child: Container(
+                                width: 300,
+                                margin: EdgeInsets.only(
+                                  right: index == model.offers.length - 1 ? 0 : 20,
+                                ),
+                                child: OfferCard(
+                                  offer: model.offers[index],
+                                  onTap: () {
+                                    HapticFeedback.lightImpact();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            'Booking ${model.offers[index].title}...'),
+                                        duration: const Duration(seconds: 2),
+                                        behavior: SnackBarBehavior.floating,
+                                        backgroundColor: const Color(0xFF4CAF50),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildDoctorsSection(BuildContext context, HomeViewModel model) {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _buildDoctorsSection(BuildContext context, HomeViewModel homeModel) {
+    return Consumer<DoctorsViewModel>(
+      builder: (context, docModel, child) {
+        if (docModel.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final topDoctors = List<Doctor>.from(docModel.filteredDoctors)
+          ..sort((a, b) => b.rating.compareTo(a.rating));
+        return Container(
+          margin: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Top Doctors',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textBlack,
-                  letterSpacing: 0.2,
-                ),
-              ),
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(20),
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    Navigator.of(context).push(
-                      PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            const DoctorsScreen(),
-                        transitionsBuilder:
-                            (context, animation, secondaryAnimation, child) {
-                          return SlideTransition(
-                            position: Tween<Offset>(
-                              begin: const Offset(1.0, 0.0),
-                              end: Offset.zero,
-                            ).animate(animation),
-                            child: child,
-                          );
-                        },
-                        transitionDuration: const Duration(milliseconds: 400),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.blueAccent.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: Colors.blueAccent.withOpacity(0.3),
-                        width: 1,
-                      ),
-                    ),
-                    child: Text(
-                      'See All',
-                      style: TextStyle(
-                        color: Colors.blueAccent,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
-                      ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Top Doctors',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textBlack,
+                      letterSpacing: 0.2,
                     ),
                   ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-
-          // Specialties Filter
-          SizedBox(
-            height: 44,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              itemCount: model.specialties.length,
-              itemBuilder: (context, index) {
-                final specialty = model.specialties[index];
-                final isSelected = model.selectedSpecialty == specialty;
-
-                return Container(
-                  margin: const EdgeInsets.only(right: 12),
-                  child: Material(
+                  Material(
                     color: Colors.transparent,
                     child: InkWell(
-                      borderRadius: BorderRadius.circular(22),
+                      borderRadius: BorderRadius.circular(20),
                       onTap: () {
                         HapticFeedback.lightImpact();
-                        if (isSelected) {
-                          model.setSpecialty('');
-                        } else {
-                          model.setSpecialty(specialty);
-                        }
-                      },
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? const Color(0xFF4CAF50)
-                              : Colors.white,
-                          borderRadius: BorderRadius.circular(22),
-                          border: Border.all(
-                            color: isSelected
-                                ? const Color(0xFF4CAF50)
-                                : Colors.blueAccent.withOpacity(0.3),
-                            width: 1.5,
+                        Navigator.of(context).push(
+                          PageRouteBuilder(
+                            pageBuilder: (context, animation, secondaryAnimation) =>
+                                const DoctorsScreen(),
+                            transitionsBuilder:
+                                (context, animation, secondaryAnimation, child) {
+                              return SlideTransition(
+                                position: Tween<Offset>(
+                                  begin: const Offset(1.0, 0.0),
+                                  end: Offset.zero,
+                                ).animate(animation),
+                                child: child,
+                              );
+                            },
+                            transitionDuration: const Duration(milliseconds: 400),
                           ),
-                          boxShadow: isSelected
-                              ? [
-                                  BoxShadow(
-                                    color: const Color(0xFF4CAF50)
-                                        .withOpacity(0.4),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ]
-                              : null,
+                        );
+                      },
+                      child: Container(
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.blueAccent.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: Colors.blueAccent.withOpacity(0.3),
+                            width: 1,
+                          ),
                         ),
                         child: Text(
-                          specialty,
+                          'See All',
                           style: TextStyle(
-                            color: isSelected
-                                ? Colors.white
-                                : Colors.blueAccent,
+                            color: Colors.blueAccent,
                             fontWeight: FontWeight.w600,
-                            fontSize: 14,
+                            fontSize: 15,
                           ),
                         ),
                       ),
                     ),
                   ),
-                );
-              },
-            ),
-          ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              // Specialties Filter
+              SizedBox(
+                height: 44,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: homeModel.specialties.length,
+                  itemBuilder: (context, index) {
+                    final specialty = homeModel.specialties[index];
+                    final isSelected = homeModel.selectedSpecialty == specialty;
 
-          const SizedBox(height: 20),
-
-          // Doctor Cards
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: model.doctors.length,
-            itemBuilder: (context, index) {
-              return TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0.0, end: 1.0),
-                duration: Duration(milliseconds: 600 + (index * 100)),
-                builder: (context, value, child) {
-                  return Transform.translate(
-                    offset: Offset(0, 20 * (1 - value)),
-                    child: Opacity(
-                      opacity: value,
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(16),
-                            onTap: () {
-                              HapticFeedback.lightImpact();
-                              Navigator.of(context).push(
-                                PageRouteBuilder(
-                                  pageBuilder: (context, animation,
-                                          secondaryAnimation) =>
-                                      DoctorDetailScreen(
-                                    doctor: model.doctors[index],
-                                  ),
-                                  transitionsBuilder: (context, animation,
-                                      secondaryAnimation, child) {
-                                    return SlideTransition(
-                                      position: Tween<Offset>(
-                                        begin: const Offset(1.0, 0.0),
-                                        end: Offset.zero,
-                                      ).animate(animation),
-                                      child: child,
-                                    );
-                                  },
-                                  transitionDuration:
-                                      const Duration(milliseconds: 400),
-                                ),
-                              );
-                            },
-                            child: DoctorCard(
-                              doctor: model.doctors[index],
+                    return Container(
+                      margin: const EdgeInsets.only(right: 12),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(22),
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            if (isSelected) {
+                              homeModel.setSpecialty('');
+                            } else {
+                              homeModel.setSpecialty(specialty);
+                            }
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? const Color(0xFF4CAF50)
+                                  : Colors.white,
+                              borderRadius: BorderRadius.circular(22),
+                              border: Border.all(
+                                color: isSelected
+                                    ? const Color(0xFF4CAF50)
+                                    : Colors.blueAccent.withOpacity(0.3),
+                                width: 1.5,
+                              ),
+                              boxShadow: isSelected
+                                  ? [
+                                      BoxShadow(
+                                        color: const Color(0xFF4CAF50)
+                                            .withOpacity(0.4),
+                                        blurRadius: 12,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                            child: Text(
+                              specialty,
+                              style: TextStyle(
+                                color: isSelected
+                                    ? Colors.white
+                                    : Colors.blueAccent,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
+                    );
+                  },
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Doctor Cards
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: topDoctors.length,
+                itemBuilder: (context, index) {
+                  return TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0.0, end: 1.0),
+                    duration: Duration(milliseconds: 600 + (index * 100)),
+                    builder: (context, value, child) {
+                      return Transform.translate(
+                        offset: Offset(0, 20 * (1 - value)),
+                        child: Opacity(
+                          opacity: value,
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 16),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(16),
+                                onTap: () {
+                                  HapticFeedback.lightImpact();
+                                  Navigator.of(context).push(
+                                    PageRouteBuilder(
+                                      pageBuilder: (context, animation,
+                                              secondaryAnimation) =>
+                                          DoctorDetailScreen(
+                                        doctor: topDoctors[index],
+                                      ),
+                                      transitionsBuilder: (context, animation,
+                                          secondaryAnimation, child) {
+                                        return SlideTransition(
+                                          position: Tween<Offset>(
+                                            begin: const Offset(1.0, 0.0),
+                                            end: Offset.zero,
+                                          ).animate(animation),
+                                          child: child,
+                                        );
+                                      },
+                                      transitionDuration:
+                                          const Duration(milliseconds: 400),
+                                    ),
+                                  );
+                                },
+                                child: DoctorCard(
+                                  doctor: topDoctors[index],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   );
                 },
-              );
-            },
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 

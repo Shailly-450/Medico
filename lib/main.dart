@@ -32,6 +32,10 @@ import 'views/ai_symptom/ai_symptom_chat_screen.dart';
 import 'core/services/ai_symptom_service.dart';
 import 'views/invoices/invoices_screen.dart';
 import 'views/doctor/doctor_dashboard_screen.dart';
+import 'views/appointments/create_appointment_screen.dart';
+import 'views/appointments/doctor_selection_screen.dart';
+import 'views/appointments/book_appointment_screen.dart';
+import 'viewmodels/doctors_view_model.dart';
 
 void main() {
   // Initialize mock data for OrderService
@@ -59,6 +63,8 @@ class MyApp extends StatelessWidget {
             create: (_) => ConsentViewModel()),
         ChangeNotifierProvider<AppointmentViewModel>(
             create: (_) => AppointmentViewModel()),
+        ChangeNotifierProvider<DoctorsViewModel>(
+            create: (_) => DoctorsViewModel()),
       ],
       child: Builder(
         builder: (context) => MaterialApp(
@@ -106,6 +112,9 @@ class MyApp extends StatelessWidget {
             '/ai-symptom-chat': (context) => const AISymptomChatScreen(),
             '/invoices': (context) => const InvoicesScreen(),
             '/doctor-dashboard': (context) => const DoctorDashboardScreen(),
+            '/create-appointment': (context) => const CreateAppointmentScreen(),
+            '/doctor-selection': (context) => const DoctorSelectionScreen(),
+            '/book-appointment': (context) => const BookAppointmentScreen(),
           },
           onGenerateRoute: (settings) {
             print('Navigating to: ${settings.name}');

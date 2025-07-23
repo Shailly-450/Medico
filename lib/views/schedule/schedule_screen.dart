@@ -141,7 +141,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
           IconButton(
             onPressed: () {
               HapticFeedback.lightImpact();
-              // Add new appointment functionality
+              Navigator.pushNamed(context, '/book-appointment');
             },
             icon: const Icon(Icons.add),
             tooltip: 'Add Appointment',
