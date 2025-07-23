@@ -273,6 +273,8 @@ class _FullWidthOfferCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isAdmin = AuthService.currentUserRole == UserRole.admin;
+    final model = Provider.of<HomeViewModel>(context, listen: false);
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -353,6 +355,44 @@ class _FullWidthOfferCard extends StatelessWidget {
                         ),
                       ),
                     ),
+                    if (isAdmin)
+                      Positioned(
+                        top: 12,
+                        left: 12,
+                        child: IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.white, size: 28),
+                          tooltip: 'Delete Offer',
+                          onPressed: () async {
+                            final confirm = await showDialog<bool>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('Delete Offer'),
+                                content: Text('Are you sure you want to delete "${offer.title}"?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context, false),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () => Navigator.pop(context, true),
+                                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                                    child: const Text('Delete'),
+                                  ),
+                                ],
+                              ),
+                            );
+                            if (confirm == true) {
+                              final success = await model.deleteOffer(offer.id);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(success ? 'Offer deleted.' : 'Failed to delete offer.'),
+                                  backgroundColor: success ? Colors.green : Colors.red,
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ),
                   ],
                 ),
               ),

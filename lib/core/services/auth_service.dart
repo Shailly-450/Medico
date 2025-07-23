@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'api_service.dart';
-import '../config.dart';
+// import '../config.dart';
+import 'package:medico/core/config.dart';
 
 enum UserRole { patient, doctor, admin }
 
@@ -72,6 +73,7 @@ class AuthService {
       ).timeout(timeout);
 
       final data = jsonDecode(response.body);
+      print('Raw login response: $data');
       
       if (data['success'] == true) {
         // Save tokens
@@ -91,6 +93,7 @@ class AuthService {
           'message': 'Login successful',
           'role': _currentUserRole,
           'user': user,
+          'token': data['data']['token'],
         };
       } else {
         return {

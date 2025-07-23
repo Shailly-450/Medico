@@ -3,9 +3,11 @@ import '../models/order.dart';
 import '../models/medical_service.dart';
 import '../core/viewmodels/base_view_model.dart';
 import '../core/services/order_service.dart';
+import 'package:dio/dio.dart';
 
 class OrderViewModel extends BaseViewModel {
-  final OrderService _orderService = OrderService();
+  final OrderService orderService;
+  OrderViewModel(this.orderService);
   
   List<Order> _orders = [];
   Order? _currentOrder;
@@ -48,12 +50,11 @@ class OrderViewModel extends BaseViewModel {
   }
 
   // Initialize orders from backend
-  Future<void> loadOrders() async {
+  Future<void> loadOrders({String? status, int page = 1, int limit = 10}) async {
     setLoading(true);
     setError(null);
-
     try {
-      _orders = await _orderService.getOrders(userId: 'user_123');
+      _orders = await orderService.fetchOrders(status: status, page: page, limit: limit);
       notifyListeners();
     } catch (e) {
       setError('Failed to load orders: ${e.toString()}');
@@ -62,31 +63,29 @@ class OrderViewModel extends BaseViewModel {
     }
   }
 
-  // Create new order
-  Future<bool> createOrder({
-    required String serviceProviderId,
-    required String serviceProviderName,
-    required List<MedicalService> services,
-    required DateTime scheduledDate,
-    String? notes,
-  }) async {
+  // Get order details
+  Future<void> loadOrderDetail(String orderId) async {
     setLoading(true);
     setError(null);
-
     try {
-      final newOrder = await _orderService.createOrder(
-        userId: 'user_123',
-        serviceProviderId: serviceProviderId,
-        serviceProviderName: serviceProviderName,
-        services: services,
-        scheduledDate: scheduledDate,
-        notes: notes,
-      );
+      _currentOrder = await orderService.fetchOrderDetail(orderId);
+      notifyListeners();
+    } catch (e) {
+      setError('Failed to load order detail: ${e.toString()}');
+    } finally {
+      setLoading(false);
+    }
+  }
 
+  // Create new order
+  Future<bool> createOrder(Map<String, dynamic> orderData) async {
+    setLoading(true);
+    setError(null);
+    try {
+      final newOrder = await orderService.createOrder(orderData);
       _orders.insert(0, newOrder);
       _currentOrder = newOrder;
       notifyListeners();
-
       return true;
     } catch (e) {
       setError('Failed to create order: ${e.toString()}');
@@ -96,47 +95,18 @@ class OrderViewModel extends BaseViewModel {
     }
   }
 
-  // Update order status
-  Future<bool> updateOrderStatus(String orderId, OrderStatus newStatus) async {
-    setLoading(true);
-    setError(null);
-
-    try {
-      final success = await _orderService.updateOrderStatus(orderId, newStatus);
-      if (success) {
-        final orderIndex = _orders.indexWhere((order) => order.id == orderId);
-        if (orderIndex != -1) {
-          _orders[orderIndex] = _orders[orderIndex].copyWith(status: newStatus);
-          notifyListeners();
-        }
-      }
-      return success;
-    } catch (e) {
-      setError('Failed to update order status: ${e.toString()}');
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  }
-
   // Cancel order
-  Future<bool> cancelOrder(String orderId, String reason) async {
+  Future<bool> cancelOrder(String orderId) async {
     setLoading(true);
     setError(null);
-
     try {
-      final success = await _orderService.cancelOrder(orderId, reason);
-      if (success) {
-        final orderIndex = _orders.indexWhere((order) => order.id == orderId);
-        if (orderIndex != -1) {
-          _orders[orderIndex] = _orders[orderIndex].copyWith(
-            status: OrderStatus.cancelled,
-            cancellationReason: reason,
-          );
-          notifyListeners();
-        }
+      await orderService.cancelOrder(orderId);
+      final orderIndex = _orders.indexWhere((order) => order.id == orderId);
+      if (orderIndex != -1) {
+        _orders[orderIndex] = _orders[orderIndex].copyWith(status: OrderStatus.cancelled);
+        notifyListeners();
       }
-      return success;
+      return true;
     } catch (e) {
       setError('Failed to cancel order: ${e.toString()}');
       return false;
@@ -146,28 +116,49 @@ class OrderViewModel extends BaseViewModel {
   }
 
   // Request return/refund
-  Future<bool> requestReturn(String orderId, String returnType, String reason) async {
+  Future<bool> returnOrder(String orderId) async {
     setLoading(true);
     setError(null);
-
     try {
-      final success = await _orderService.requestReturn(orderId, returnType, reason);
-      if (success) {
-        final orderIndex = _orders.indexWhere((order) => order.id == orderId);
-        if (orderIndex != -1) {
-          _orders[orderIndex] = _orders[orderIndex].copyWith(
-            status: OrderStatus.refunded,
-            cancellationReason: '${returnType.toUpperCase()}: $reason',
-          );
-          notifyListeners();
-        }
+      await orderService.returnOrder(orderId);
+      final orderIndex = _orders.indexWhere((order) => order.id == orderId);
+      if (orderIndex != -1) {
+        _orders[orderIndex] = _orders[orderIndex].copyWith(status: OrderStatus.refunded);
+        notifyListeners();
       }
-      return success;
+      return true;
     } catch (e) {
-      setError('Failed to request return: ${e.toString()}');
+      setError('Failed to return order: ${e.toString()}');
       return false;
     } finally {
       setLoading(false);
+    }
+  }
+
+  // Repeat order
+  Future<bool> repeatOrder(String orderId) async {
+    setLoading(true);
+    setError(null);
+    try {
+      final newOrder = await orderService.repeatOrder(orderId);
+      _orders.insert(0, newOrder);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      setError('Failed to repeat order: ${e.toString()}');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Get order statistics
+  Future<Map<String, dynamic>> getOrderStatistics() async {
+    try {
+      return await orderService.fetchOrderStatistics();
+    } catch (e) {
+      setError('Failed to get statistics: ${e.toString()}');
+      return {};
     }
   }
 
@@ -181,56 +172,6 @@ class OrderViewModel extends BaseViewModel {
   void updateStatusFilter(OrderStatus status) {
     _selectedStatusFilter = status;
     notifyListeners();
-  }
-
-  // Get services from backend
-  Future<List<MedicalService>> getServices() async {
-    try {
-      return await _orderService.getServices();
-    } catch (e) {
-      setError('Failed to load services: ${e.toString()}');
-      return [];
-    }
-  }
-
-  // Get services by category
-  Future<List<MedicalService>> getServicesByCategory(String category) async {
-    try {
-      return await _orderService.getServicesByCategory(category);
-    } catch (e) {
-      setError('Failed to load services by category: ${e.toString()}');
-      return [];
-    }
-  }
-
-  // Get service providers
-  Future<List<Map<String, dynamic>>> getServiceProviders() async {
-    try {
-      return await _orderService.getServiceProviders();
-    } catch (e) {
-      setError('Failed to load service providers: ${e.toString()}');
-      return [];
-    }
-  }
-
-  // Search orders
-  Future<List<Order>> searchOrders(String query) async {
-    try {
-      return await _orderService.searchOrders(query);
-    } catch (e) {
-      setError('Failed to search orders: ${e.toString()}');
-      return [];
-    }
-  }
-
-  // Get order statistics
-  Future<Map<String, dynamic>> getOrderStatistics() async {
-    try {
-      return await _orderService.getOrderStatistics();
-    } catch (e) {
-      setError('Failed to get statistics: ${e.toString()}');
-      return {};
-    }
   }
 
   // Clear current order
@@ -249,6 +190,4 @@ class OrderViewModel extends BaseViewModel {
     _errorMessage = error;
     notifyListeners();
   }
-
-
 } 

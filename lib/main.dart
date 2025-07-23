@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:medico/views/home/home_screen.dart';
 import 'package:medico/views/registration/steps/create_account_step.dart';
@@ -6,7 +7,6 @@ import 'package:provider/provider.dart';
 import 'core/services/navigation_service.dart';
 import 'core/services/order_service.dart';
 import 'core/theme/app_theme.dart';
-import 'models/hospital.dart';
 import 'models/registration_data.dart';
 import 'views/auth/login_screen.dart';
 
@@ -36,13 +36,39 @@ import 'views/appointments/create_appointment_screen.dart';
 import 'views/appointments/doctor_selection_screen.dart';
 import 'views/appointments/book_appointment_screen.dart';
 import 'viewmodels/doctors_view_model.dart';
+import 'auth/auth_provider.dart';
 
 void main() {
-  // Initialize mock data for OrderService
-  OrderService.initializeMockData();
   // Initialize AI Symptom Service
   AISymptomService().initialize();
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
+        ChangeNotifierProxyProvider<AuthProvider, OrderViewModel>(
+          create: (context) => OrderViewModel(OrderService(Dio(BaseOptions(baseUrl: 'http://10.0.2.2:3000/api')), '')),
+          update: (context, auth, previous) {
+            final dio = Dio(BaseOptions(baseUrl: 'http://10.0.2.2:3000/api'));
+            final jwtToken = auth.jwtToken ?? '';
+            return OrderViewModel(OrderService(dio, jwtToken));
+          },
+        ),
+        Provider<NavigationService>(create: (_) => NavigationService()),
+        ChangeNotifierProvider<HomeViewModel>(create: (_) => HomeViewModel()),
+        ChangeNotifierProvider<InvoiceViewModel>(
+            create: (_) => InvoiceViewModel()),
+        ChangeNotifierProvider<FamilyMembersViewModel>(
+            create: (_) => FamilyMembersViewModel()),
+        ChangeNotifierProvider<ConsentViewModel>(
+            create: (_) => ConsentViewModel()),
+        ChangeNotifierProvider<AppointmentViewModel>(
+            create: (_) => AppointmentViewModel()),
+        ChangeNotifierProvider<DoctorsViewModel>(
+            create: (_) => DoctorsViewModel()),
+      ],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -54,7 +80,6 @@ class MyApp extends StatelessWidget {
       providers: [
         Provider<NavigationService>(create: (_) => NavigationService()),
         ChangeNotifierProvider<HomeViewModel>(create: (_) => HomeViewModel()),
-        ChangeNotifierProvider<OrderViewModel>(create: (_) => OrderViewModel()),
         ChangeNotifierProvider<InvoiceViewModel>(
             create: (_) => InvoiceViewModel()),
         ChangeNotifierProvider<FamilyMembersViewModel>(

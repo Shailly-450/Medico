@@ -31,19 +31,25 @@ class MedicalService {
 
   factory MedicalService.fromJson(Map<String, dynamic> json) {
     return MedicalService(
-      id: json['id'] ?? '',
+      id: json['id'] ?? json['_id'] ?? '',
       name: json['name'] ?? '',
       description: json['description'] ?? '',
       category: json['category'] ?? '',
-      price: (json['price'] ?? 0.0).toDouble(),
+      price: (json['price'] is num)
+          ? (json['price'] as num).toDouble()
+          : 0.0,
       currency: json['currency'] ?? 'INR',
       duration: json['duration'] ?? 0,
       includedTests: List<String>.from(json['includedTests'] ?? []),
       requirements: List<String>.from(json['requirements'] ?? []),
       notes: json['notes'],
       isAvailable: json['isAvailable'] ?? true,
-      rating: (json['rating'] ?? 0.0).toDouble(),
-      reviewCount: json['reviewCount'] ?? 0,
+      rating: (json['rating'] != null && json['rating']['average'] is num)
+          ? (json['rating']['average'] as num).toDouble()
+          : 0.0,
+      reviewCount: (json['rating'] != null && json['rating']['count'] is int)
+          ? json['rating']['count'] as int
+          : 0,
     );
   }
 

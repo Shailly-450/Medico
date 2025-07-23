@@ -21,6 +21,7 @@ class OfferService {
   }
 
   static Future<List<OfferPackage>> getOffers() async {
+    print('Calling GET $baseUrl/offers');
     final response = await http.get(
       Uri.parse('$baseUrl/offers'),
       headers: _authHeaders,

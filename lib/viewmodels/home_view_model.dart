@@ -401,6 +401,19 @@ class HomeViewModel extends BaseViewModel {
     return false;
   }
 
+  Future<bool> deleteOffer(String id) async {
+    setBusy(true);
+    final success = await OfferService.deleteOffer(id);
+    if (success) {
+      offers.removeWhere((offer) => offer.id == id);
+      setBusy(false);
+      notifyListeners();
+      return true;
+    }
+    setBusy(false);
+    return false;
+  }
+
 
   void setSpecialty(String specialty) {
     selectedSpecialty = specialty;

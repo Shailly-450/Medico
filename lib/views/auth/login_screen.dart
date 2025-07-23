@@ -6,6 +6,8 @@ import 'package:medico/views/home/home_screen.dart';
 import 'package:medico/views/doctor/patients/patient_list_screen.dart';
 import 'forgot_password_screen.dart';
 import '../admin/admin_dashboard_screen.dart';
+import 'package:medico/auth/auth_provider.dart';
+import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -41,9 +43,19 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
+      print('Attempting login with email: $email, password: $password');
       final result = await AuthService.login(email, password);
-      
+      print('Login result: $result');
       if (result['success'] == true) {
+        final token = result['token'];
+        if (token == null) {
+          print('Raw login response: $result');
+          _showSnackBar('Login failed: No token received');
+          return;
+        }
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        authProvider.setToken(token);
+        print('Raw login response: $result');
         _showSnackBar('Login successful!');
         
         // Navigate based on user role

@@ -432,7 +432,51 @@ class OrderDetailScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
-                  onPressed: () => _showCancelDialog(context, orderViewModel),
+                  onPressed: () async {
+                    final confirmed = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Cancel Order'),
+                        content: const Text('Are you sure you want to cancel this order?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: const Text('No'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            child: const Text('Yes'),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirmed == true) {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) => const Center(child: CircularProgressIndicator()),
+                      );
+                      final success = await orderViewModel.cancelOrder(order.id);
+                      Navigator.pop(context); // Remove loading dialog
+                      if (success) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Order cancelled successfully!'),
+                            backgroundColor: AppColors.success,
+                          ),
+                        );
+                        Navigator.pop(context); // Go back to order list
+                        orderViewModel.loadOrders(); // Refresh list
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(orderViewModel.errorMessage ?? 'Failed to cancel order.'),
+                            backgroundColor: AppColors.error,
+                          ),
+                        );
+                      }
+                    }
+                  },
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.error,
                     side: const BorderSide(color: AppColors.error),
@@ -455,7 +499,51 @@ class OrderDetailScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
-                  onPressed: () => _showReturnDialog(context, orderViewModel),
+                  onPressed: () async {
+                    final confirmed = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Request Return/Refund'),
+                        content: const Text('Are you sure you want to request a return/refund for this order?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: const Text('No'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            child: const Text('Yes'),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirmed == true) {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) => const Center(child: CircularProgressIndicator()),
+                      );
+                      final success = await orderViewModel.returnOrder(order.id);
+                      Navigator.pop(context); // Remove loading dialog
+                      if (success) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Return/refund requested successfully!'),
+                            backgroundColor: AppColors.success,
+                          ),
+                        );
+                        Navigator.pop(context); // Go back to order list
+                        orderViewModel.loadOrders(); // Refresh list
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(orderViewModel.errorMessage ?? 'Failed to request return/refund.'),
+                            backgroundColor: AppColors.error,
+                          ),
+                        );
+                      }
+                    }
+                  },
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.warning,
                     side: const BorderSide(color: AppColors.warning),
@@ -668,10 +756,7 @@ class OrderDetailScreen extends StatelessWidget {
             ElevatedButton(
               onPressed: () async {
                 Navigator.of(context).pop();
-                final success = await orderViewModel.cancelOrder(
-                  order.id,
-                  reasonController.text.isNotEmpty ? reasonController.text : 'No reason provided',
-                );
+                final success = await orderViewModel.cancelOrder(order.id);
                 if (success && context.mounted) {
                   Navigator.of(context).pop(); // Go back to orders list
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -758,10 +843,8 @@ class OrderDetailScreen extends StatelessWidget {
                 ElevatedButton(
                   onPressed: reasonController.text.isEmpty ? null : () async {
                     Navigator.of(context).pop();
-                    final success = await orderViewModel.requestReturn(
+                    final success = await orderViewModel.returnOrder(
                       order.id,
-                      selectedReturnType,
-                      reasonController.text,
                     );
                     if (success && context.mounted) {
                       Navigator.of(context).pop(); // Go back to orders list
