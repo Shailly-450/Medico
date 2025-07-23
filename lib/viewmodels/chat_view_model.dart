@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/viewmodels/base_view_model.dart';
 import '../models/chat_message.dart';
-import '../models/doctor.dart';
 
 class ChatViewModel extends BaseViewModel {
   List<ChatConversation> _conversations = [];

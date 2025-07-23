@@ -76,7 +76,9 @@ class _TestCheckupsScreenState extends State<TestCheckupsScreen>
                             if (model.todayCheckups.isNotEmpty)
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 6, vertical: 2),
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.white.withOpacity(0.8),
                                   borderRadius: BorderRadius.circular(10),
@@ -105,7 +107,9 @@ class _TestCheckupsScreenState extends State<TestCheckupsScreen>
                             if (model.upcomingCheckups.isNotEmpty)
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 6, vertical: 2),
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.white.withOpacity(0.8),
                                   borderRadius: BorderRadius.circular(10),
@@ -134,7 +138,9 @@ class _TestCheckupsScreenState extends State<TestCheckupsScreen>
                             if (model.overdueCheckups.isNotEmpty)
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 6, vertical: 2),
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.red.withOpacity(0.9),
                                   borderRadius: BorderRadius.circular(10),
@@ -163,7 +169,9 @@ class _TestCheckupsScreenState extends State<TestCheckupsScreen>
                             if (model.completedCheckups.isNotEmpty)
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 6, vertical: 2),
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.green.withOpacity(0.9),
                                   borderRadius: BorderRadius.circular(10),
@@ -191,7 +199,9 @@ class _TestCheckupsScreenState extends State<TestCheckupsScreen>
                             const SizedBox(width: 6),
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 2),
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.white.withOpacity(0.8),
                                 borderRadius: BorderRadius.circular(10),
@@ -224,7 +234,8 @@ class _TestCheckupsScreenState extends State<TestCheckupsScreen>
                     return Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: TestCheckupStatsCard(
-                          statistics: model.getStatistics()),
+                        statistics: model.getStatistics(),
+                      ),
                     );
                   }
                   return const SizedBox.shrink();
@@ -238,10 +249,16 @@ class _TestCheckupsScreenState extends State<TestCheckupsScreen>
                   children: [
                     _buildCheckupList(model.todayCheckups, 'Today', model),
                     _buildCheckupList(
-                        model.upcomingCheckups, 'Upcoming', model),
+                      model.upcomingCheckups,
+                      'Upcoming',
+                      model,
+                    ),
                     _buildCheckupList(model.overdueCheckups, 'Overdue', model),
                     _buildCheckupList(
-                        model.completedCheckups, 'Completed', model),
+                      model.completedCheckups,
+                      'Completed',
+                      model,
+                    ),
                     _buildCheckupList(model.checkups, 'All', model),
                   ],
                 ),
@@ -260,33 +277,52 @@ class _TestCheckupsScreenState extends State<TestCheckupsScreen>
   }
 
   Widget _buildCheckupList(
-      List<TestCheckup> checkups, String title, TestCheckupViewModel model) {
+    List<TestCheckup> checkups,
+    String title,
+    TestCheckupViewModel model,
+  ) {
+    if (model.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (model.error != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+            const SizedBox(height: 16),
+            Text(
+              'Error loading checkups',
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              model.error!,
+              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+
     if (checkups.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              _getEmptyStateIcon(title),
-              size: 64,
-              color: Colors.grey[400],
-            ),
+            Icon(_getEmptyStateIcon(title), size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
               _getEmptyStateMessage(title),
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             ),
             const SizedBox(height: 8),
             if (title == 'Today' || title == 'Upcoming')
               Text(
                 'Tap the + button to schedule a new test',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[500],
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey[500]),
               ),
           ],
         ),
@@ -349,9 +385,7 @@ class _TestCheckupsScreenState extends State<TestCheckupsScreen>
   void _addNewCheckup(BuildContext context, TestCheckupViewModel model) async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const AddTestCheckupScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const AddTestCheckupScreen()),
     );
 
     if (result != null && result is TestCheckup) {
@@ -376,8 +410,11 @@ class _TestCheckupsScreenState extends State<TestCheckupsScreen>
     );
   }
 
-  void _markAsCompleted(BuildContext context, TestCheckup checkup,
-      TestCheckupViewModel model) async {
+  void _markAsCompleted(
+    BuildContext context,
+    TestCheckup checkup,
+    TestCheckupViewModel model,
+  ) async {
     final results = await _showResultsDialog(context);
     if (results != null) {
       await model.markAsCompleted(checkup.id, results: results);
@@ -392,8 +429,11 @@ class _TestCheckupsScreenState extends State<TestCheckupsScreen>
     }
   }
 
-  void _cancelCheckup(BuildContext context, TestCheckup checkup,
-      TestCheckupViewModel model) async {
+  void _cancelCheckup(
+    BuildContext context,
+    TestCheckup checkup,
+    TestCheckupViewModel model,
+  ) async {
     final confirmed = await _showConfirmationDialog(
       context,
       'Cancel Test',
@@ -413,8 +453,11 @@ class _TestCheckupsScreenState extends State<TestCheckupsScreen>
     }
   }
 
-  void _rescheduleCheckup(BuildContext context, TestCheckup checkup,
-      TestCheckupViewModel model) async {
+  void _rescheduleCheckup(
+    BuildContext context,
+    TestCheckup checkup,
+    TestCheckupViewModel model,
+  ) async {
     final result = await _showRescheduleDialog(context, checkup);
     if (result != null) {
       final newDate = result['date'] as DateTime;
@@ -433,7 +476,9 @@ class _TestCheckupsScreenState extends State<TestCheckupsScreen>
   }
 
   Future<Map<String, dynamic>?> _showRescheduleDialog(
-      BuildContext context, TestCheckup checkup) async {
+    BuildContext context,
+    TestCheckup checkup,
+  ) async {
     DateTime? selectedDate;
     TimeOfDay? selectedTime;
 
@@ -468,15 +513,15 @@ class _TestCheckupsScreenState extends State<TestCheckupsScreen>
                         context: context,
                         initialDate:
                             checkup.scheduledDate.isAfter(DateTime.now())
-                                ? checkup.scheduledDate
-                                : DateTime.now().add(const Duration(days: 1)),
+                            ? checkup.scheduledDate
+                            : DateTime.now().add(const Duration(days: 1)),
                         firstDate: DateTime.now(),
                         lastDate: DateTime.now().add(const Duration(days: 365)),
                         builder: (context, child) => Theme(
                           data: Theme.of(context).copyWith(
-                            colorScheme: Theme.of(context).colorScheme.copyWith(
-                                  primary: AppColors.primary,
-                                ),
+                            colorScheme: Theme.of(
+                              context,
+                            ).colorScheme.copyWith(primary: AppColors.primary),
                           ),
                           child: child!,
                         ),
@@ -518,9 +563,9 @@ class _TestCheckupsScreenState extends State<TestCheckupsScreen>
                         initialTime: checkup.scheduledTime,
                         builder: (context, child) => Theme(
                           data: Theme.of(context).copyWith(
-                            colorScheme: Theme.of(context).colorScheme.copyWith(
-                                  primary: AppColors.primary,
-                                ),
+                            colorScheme: Theme.of(
+                              context,
+                            ).colorScheme.copyWith(primary: AppColors.primary),
                           ),
                           child: child!,
                         ),
@@ -553,13 +598,17 @@ class _TestCheckupsScreenState extends State<TestCheckupsScreen>
                     decoration: BoxDecoration(
                       color: AppColors.primary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
-                      border:
-                          Border.all(color: AppColors.primary.withOpacity(0.3)),
+                      border: Border.all(
+                        color: AppColors.primary.withOpacity(0.3),
+                      ),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.schedule,
-                            color: AppColors.primary, size: 20),
+                        Icon(
+                          Icons.schedule,
+                          color: AppColors.primary,
+                          size: 20,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -585,9 +634,9 @@ class _TestCheckupsScreenState extends State<TestCheckupsScreen>
             ElevatedButton(
               onPressed: selectedDate != null && selectedTime != null
                   ? () => Navigator.pop(context, {
-                        'date': selectedDate,
-                        'time': selectedTime,
-                      })
+                      'date': selectedDate,
+                      'time': selectedTime,
+                    })
                   : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,

@@ -6,11 +6,11 @@ import '../../shared/app_card.dart';
 class MedicineReminderCard extends StatelessWidget {
   final MedicineReminder reminder;
   final VoidCallback? onTap;
-  final VoidCallback? onTakeDose;
-  final VoidCallback? onSkipDose;
+  final Future<bool> Function()? onTakeDose;
+  final Future<bool> Function()? onSkipDose;
   final VoidCallback? onEdit;
-  final VoidCallback? onDelete;
-  final VoidCallback? onPause;
+  final Future<bool> Function()? onDelete;
+  final Future<bool> Function()? onPause;
   final VoidCallback? onRefill;
   final bool showDoseActions;
   final bool isOverdue;
@@ -77,11 +77,7 @@ class MedicineReminderCard extends StatelessWidget {
             color: _getStatusColor().withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(
-            _getStatusIcon(),
-            color: _getStatusColor(),
-            size: 20,
-          ),
+          child: Icon(_getStatusIcon(), color: _getStatusColor(), size: 20),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -97,10 +93,7 @@ class MedicineReminderCard extends StatelessWidget {
               ),
               Text(
                 reminder.frequencyDescription,
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 14,
-                ),
+                style: TextStyle(color: Colors.grey[600], fontSize: 14),
               ),
             ],
           ),
@@ -122,11 +115,7 @@ class MedicineReminderCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.medication,
-            color: AppColors.primary,
-            size: 20,
-          ),
+          Icon(Icons.medication, color: AppColors.primary, size: 20),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
@@ -141,10 +130,7 @@ class MedicineReminderCard extends StatelessWidget {
                 ),
                 Text(
                   '${medicine.dosage} • ${medicine.medicineType}',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
                 ),
               ],
             ),
@@ -154,7 +140,10 @@ class MedicineReminderCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.orange.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(4),
@@ -173,7 +162,10 @@ class MedicineReminderCard extends StatelessWidget {
                   GestureDetector(
                     onTap: onRefill,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.orange,
                         borderRadius: BorderRadius.circular(4),
@@ -198,11 +190,7 @@ class MedicineReminderCard extends StatelessWidget {
   Widget _buildReminderInfo() {
     return Row(
       children: [
-        Icon(
-          Icons.access_time,
-          size: 16,
-          color: Colors.grey[500],
-        ),
+        Icon(Icons.access_time, size: 16, color: Colors.grey[500]),
         const SizedBox(width: 4),
         Text(
           _getNextDoseText(),
@@ -214,18 +202,11 @@ class MedicineReminderCard extends StatelessWidget {
         ),
         const Spacer(),
         if (reminder.totalDoses != null) ...[
-          Icon(
-            Icons.track_changes,
-            size: 16,
-            color: Colors.grey[500],
-          ),
+          Icon(Icons.track_changes, size: 16, color: Colors.grey[500]),
           const SizedBox(width: 4),
           Text(
             '${reminder.dosesCompleted}/${reminder.totalDoses}',
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 12,
-            ),
+            style: TextStyle(color: Colors.grey[600], fontSize: 12),
           ),
         ],
       ],
@@ -242,19 +223,12 @@ class MedicineReminderCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.info_outline,
-            size: 16,
-            color: Colors.blue,
-          ),
+          Icon(Icons.info_outline, size: 16, color: Colors.blue),
           const SizedBox(width: 6),
           Expanded(
             child: Text(
               reminder.instructions!,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.blue,
-              ),
+              style: const TextStyle(fontSize: 12, color: Colors.blue),
             ),
           ),
         ],
@@ -267,7 +241,15 @@ class MedicineReminderCard extends StatelessWidget {
       children: [
         Expanded(
           child: ElevatedButton.icon(
-            onPressed: onTakeDose,
+            onPressed: onTakeDose != null
+                ? () async {
+                    final success = await onTakeDose!();
+                    if (!success) {
+                      // Show error message if needed
+                      // This could be handled by the parent widget
+                    }
+                  }
+                : null,
             icon: const Icon(Icons.check, size: 18),
             label: const Text('Take Dose'),
             style: ElevatedButton.styleFrom(
@@ -282,7 +264,15 @@ class MedicineReminderCard extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: OutlinedButton.icon(
-            onPressed: onSkipDose,
+            onPressed: onSkipDose != null
+                ? () async {
+                    final success = await onSkipDose!();
+                    if (!success) {
+                      // Show error message if needed
+                      // This could be handled by the parent widget
+                    }
+                  }
+                : null,
             icon: const Icon(Icons.close, size: 18),
             label: const Text('Skip'),
             style: OutlinedButton.styleFrom(
@@ -303,7 +293,13 @@ class MedicineReminderCard extends StatelessWidget {
       children: [
         if (onPause != null)
           TextButton.icon(
-            onPressed: onPause,
+            onPressed: () async {
+              final success = await onPause!();
+              if (!success) {
+                // Show error message if needed
+                // This could be handled by the parent widget
+              }
+            },
             icon: Icon(
               reminder.status == ReminderStatus.active
                   ? Icons.pause
@@ -313,27 +309,27 @@ class MedicineReminderCard extends StatelessWidget {
             label: Text(
               reminder.status == ReminderStatus.active ? 'Pause' : 'Resume',
             ),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.blue,
-            ),
+            style: TextButton.styleFrom(foregroundColor: Colors.blue),
           ),
         if (onEdit != null)
           TextButton.icon(
             onPressed: onEdit,
             icon: const Icon(Icons.edit, size: 16),
             label: const Text('Edit'),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.green,
-            ),
+            style: TextButton.styleFrom(foregroundColor: Colors.green),
           ),
         if (onDelete != null)
           TextButton.icon(
-            onPressed: onDelete,
+            onPressed: () async {
+              final success = await onDelete!();
+              if (!success) {
+                // Show error message if needed
+                // This could be handled by the parent widget
+              }
+            },
             icon: const Icon(Icons.delete, size: 16),
             label: const Text('Delete'),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
-            ),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
           ),
       ],
     );

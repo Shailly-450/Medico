@@ -33,12 +33,7 @@ enum TestCheckupStatus {
   pendingResults,
 }
 
-enum TestCheckupPriority {
-  low,
-  medium,
-  high,
-  urgent,
-}
+enum TestCheckupPriority { low, medium, high, urgent }
 
 class TestCheckup {
   final String id;
@@ -257,32 +252,47 @@ class TestCheckup {
 
   // Create from JSON
   factory TestCheckup.fromJson(Map<String, dynamic> json) {
-    final timeParts = json['scheduledTime'].split(':');
+    // Parse scheduled time from the scheduledAt field
+    final scheduledDateTime = DateTime.parse(json['scheduledAt']);
     final scheduledTime = TimeOfDay(
-      hour: int.parse(timeParts[0]),
-      minute: int.parse(timeParts[1]),
+      hour: scheduledDateTime.hour,
+      minute: scheduledDateTime.minute,
+    );
+
+    // Map status string to enum
+    final statusStr = json['status'].toString().toLowerCase();
+    final status = TestCheckupStatus.values.firstWhere(
+      (e) => e.toString().split('.').last.toLowerCase() == statusStr,
+      orElse: () => TestCheckupStatus.scheduled,
+    );
+
+    // Map type string to enum
+    final typeStr = json['type'].toString().replaceAll('-', '').toLowerCase();
+    final type = TestCheckupType.values.firstWhere(
+      (e) => e.toString().split('.').last.toLowerCase() == typeStr,
+      orElse: () => TestCheckupType.custom,
+    );
+
+    // Map priority string to enum
+    final priorityStr = json['priority'].toString().toLowerCase();
+    final priority = TestCheckupPriority.values.firstWhere(
+      (e) => e.toString().split('.').last.toLowerCase() == priorityStr,
+      orElse: () => TestCheckupPriority.medium,
     );
 
     return TestCheckup(
-      id: json['id'],
-      title: json['title'],
-      description: json['description'],
-      type: TestCheckupType.values.firstWhere(
-        (e) => e.toString() == json['type'],
-      ),
-      status: TestCheckupStatus.values.firstWhere(
-        (e) => e.toString() == json['status'],
-      ),
-      priority: TestCheckupPriority.values.firstWhere(
-        (e) => e.toString() == json['priority'],
-      ),
-      scheduledDate: DateTime.parse(json['scheduledDate']),
+      id: json['_id'] ?? json['id'] ?? '',
+      title: json['name'] ?? '',
+      description: json['description'] ?? '',
+      type: type,
+      status: status,
+      priority: priority,
+      scheduledDate: scheduledDateTime,
       scheduledTime: scheduledTime,
-      location: json['location'],
-      doctorName: json['doctorName'],
-      doctorSpecialty: json['doctorSpecialty'],
-      doctorImage: json['doctorImage'],
-      estimatedCost: json['estimatedCost']?.toDouble(),
+      location: json['provider']?['clinic'],
+      doctorName: json['provider']?['name'],
+      doctorSpecialty: json['provider']?['specialty'],
+      estimatedCost: (json['cost'] ?? 0.0).toDouble(),
       instructions: json['instructions'],
       requiresFasting: json['requiresFasting'] ?? false,
       requiresPreparation: json['requiresPreparation'] ?? false,
@@ -292,8 +302,8 @@ class TestCheckup {
       reminderTime: json['reminderTime'] != null
           ? DateTime.parse(json['reminderTime'])
           : null,
-      completedDate: json['completedDate'] != null
-          ? DateTime.parse(json['completedDate'])
+      completedDate: json['completedAt'] != null
+          ? DateTime.parse(json['completedAt'])
           : null,
       results: json['results'],
       resultsFile: json['resultsFile'],
@@ -303,8 +313,12 @@ class TestCheckup {
           ? DateTime.parse(json['nextDueDate'])
           : null,
       notes: json['notes'],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'])
+          : DateTime.now(),
     );
   }
 

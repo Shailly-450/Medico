@@ -84,10 +84,7 @@ class _MedicineRemindersScreenState extends State<MedicineRemindersScreen>
                   child: const Icon(Icons.warning),
                 ),
               ),
-              const Tab(
-                text: 'All',
-                icon: Icon(Icons.medication),
-              ),
+              const Tab(text: 'All', icon: Icon(Icons.medication)),
             ],
           ),
         ),
@@ -154,7 +151,9 @@ class _MedicineRemindersScreenState extends State<MedicineRemindersScreen>
           onTap: () => _navigateToDetail(context, reminder),
           onTakeDose: () => model.markDoseTaken(reminder.id),
           onSkipDose: () => model.markDoseSkipped(reminder.id),
-          onRefill: reminder.medicine?.needsRefill == true ? () => _navigateToRxOrders(context) : null,
+          onRefill: reminder.medicine?.needsRefill == true
+              ? () => _navigateToRxOrders(context)
+              : null,
           showDoseActions: true,
         );
       },
@@ -162,7 +161,9 @@ class _MedicineRemindersScreenState extends State<MedicineRemindersScreen>
   }
 
   Widget _buildUpcomingTab(
-      BuildContext context, MedicineReminderViewModel model) {
+    BuildContext context,
+    MedicineReminderViewModel model,
+  ) {
     if (model.upcomingReminders.isEmpty) {
       return _buildEmptyState(
         icon: Icons.schedule,
@@ -186,7 +187,9 @@ class _MedicineRemindersScreenState extends State<MedicineRemindersScreen>
   }
 
   Widget _buildOverdueTab(
-      BuildContext context, MedicineReminderViewModel model) {
+    BuildContext context,
+    MedicineReminderViewModel model,
+  ) {
     if (model.overdueReminders.isEmpty) {
       return _buildEmptyState(
         icon: Icons.check_circle_outline,
@@ -205,7 +208,9 @@ class _MedicineRemindersScreenState extends State<MedicineRemindersScreen>
           onTap: () => _navigateToDetail(context, reminder),
           onTakeDose: () => model.markDoseTaken(reminder.id),
           onSkipDose: () => model.markDoseSkipped(reminder.id),
-          onRefill: reminder.medicine?.needsRefill == true ? () => _navigateToRxOrders(context) : null,
+          onRefill: reminder.medicine?.needsRefill == true
+              ? () => _navigateToRxOrders(context)
+              : null,
           showDoseActions: true,
           isOverdue: true,
         );
@@ -233,7 +238,14 @@ class _MedicineRemindersScreenState extends State<MedicineRemindersScreen>
           reminder: reminder,
           onTap: () => _navigateToDetail(context, reminder),
           onEdit: () => _navigateToEdit(context, model, reminder),
-          onDelete: () => _showDeleteConfirmation(context, model, reminder),
+          onDelete: () async {
+            final success = await _showDeleteConfirmation(
+              context,
+              model,
+              reminder,
+            );
+            return success;
+          },
           onPause: reminder.status == ReminderStatus.active
               ? () => model.pauseReminder(reminder.id)
               : () => model.resumeReminder(reminder.id),
@@ -253,11 +265,7 @@ class _MedicineRemindersScreenState extends State<MedicineRemindersScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 80,
-              color: Colors.grey[400],
-            ),
+            Icon(icon, size: 80, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
               title,
@@ -270,10 +278,7 @@ class _MedicineRemindersScreenState extends State<MedicineRemindersScreen>
             const SizedBox(height: 8),
             Text(
               subtitle,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
           ],
@@ -285,14 +290,14 @@ class _MedicineRemindersScreenState extends State<MedicineRemindersScreen>
   void _navigateToRxOrders(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const RxOrdersScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const RxOrdersScreen()),
     );
   }
 
   void _navigateToAddReminder(
-      BuildContext context, MedicineReminderViewModel model) async {
+    BuildContext context,
+    MedicineReminderViewModel model,
+  ) async {
     final result = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) =>
@@ -301,10 +306,19 @@ class _MedicineRemindersScreenState extends State<MedicineRemindersScreen>
     );
 
     if (result != null && result is MedicineReminder) {
-      model.addReminder(result);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Reminder added successfully')),
-      );
+      final success = await model.addReminder(result);
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Reminder added successfully')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(model.errorMessage ?? 'Failed to add reminder'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -316,8 +330,11 @@ class _MedicineRemindersScreenState extends State<MedicineRemindersScreen>
     );
   }
 
-  void _navigateToEdit(BuildContext context, MedicineReminderViewModel model,
-      MedicineReminder reminder) async {
+  void _navigateToEdit(
+    BuildContext context,
+    MedicineReminderViewModel model,
+    MedicineReminder reminder,
+  ) async {
     final result = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => AddMedicineReminderScreen(
@@ -328,44 +345,71 @@ class _MedicineRemindersScreenState extends State<MedicineRemindersScreen>
     );
 
     if (result != null && result is MedicineReminder) {
-      model.updateReminder(result);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Reminder updated successfully')),
-      );
+      final success = await model.updateReminder(result);
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Reminder updated successfully')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(model.errorMessage ?? 'Failed to update reminder'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
-  void _showDeleteConfirmation(BuildContext context,
-      MedicineReminderViewModel model, MedicineReminder reminder) {
-    showDialog(
+  Future<bool> _showDeleteConfirmation(
+    BuildContext context,
+    MedicineReminderViewModel model,
+    MedicineReminder reminder,
+  ) async {
+    final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Reminder'),
         content: Text(
-            'Are you sure you want to delete the reminder for ${reminder.reminderName}?'),
+          'Are you sure you want to delete the reminder for ${reminder.reminderName}?',
+        ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(context).pop(false),
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
-              model.deleteReminder(reminder.id);
-              Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Reminder deleted')),
-              );
-            },
+            onPressed: () => Navigator.of(context).pop(true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Delete'),
           ),
         ],
       ),
     );
+
+    if (result == true) {
+      final success = await model.deleteReminder(reminder.id);
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Reminder deleted successfully')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(model.errorMessage ?? 'Failed to delete reminder'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return success;
+    }
+    return false;
   }
 
   void _showSearchDialog(
-      BuildContext context, MedicineReminderViewModel model) {
+    BuildContext context,
+    MedicineReminderViewModel model,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -395,7 +439,9 @@ class _MedicineRemindersScreenState extends State<MedicineRemindersScreen>
   }
 
   void _showFilterDialog(
-      BuildContext context, MedicineReminderViewModel model) {
+    BuildContext context,
+    MedicineReminderViewModel model,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -410,13 +456,14 @@ class _MedicineRemindersScreenState extends State<MedicineRemindersScreen>
             ),
             const Divider(),
             const Text('Status Filter:'),
-            ...ReminderStatus.values
-                .map((status) => RadioListTile<ReminderStatus>(
-                      title: Text(status.name.toUpperCase()),
-                      value: status,
-                      groupValue: model.statusFilter,
-                      onChanged: model.setStatusFilter,
-                    )),
+            ...ReminderStatus.values.map(
+              (status) => RadioListTile<ReminderStatus>(
+                title: Text(status.name.toUpperCase()),
+                value: status,
+                groupValue: model.statusFilter,
+                onChanged: model.setStatusFilter,
+              ),
+            ),
             RadioListTile<ReminderStatus?>(
               title: const Text('All'),
               value: null,

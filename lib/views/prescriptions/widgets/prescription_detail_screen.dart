@@ -246,8 +246,7 @@ class PrescriptionDetailScreen extends StatelessWidget {
           _buildMedicationDetail('Quantity', '${medication.quantity} tablets'),
           if (medication.refills != null)
             _buildMedicationDetail('Refills', medication.refills!),
-          if (medication.instructions != null)
-            _buildMedicationDetail('Instructions', medication.instructions!),
+          _buildMedicationDetail('Instructions', medication.instructions!),
           if (medication.startDate != null)
             _buildMedicationDetail(
               'Start Date',

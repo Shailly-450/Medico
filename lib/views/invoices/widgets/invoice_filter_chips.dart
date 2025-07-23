@@ -4,16 +4,16 @@ import '../../../core/theme/app_colors.dart';
 
 class InvoiceFilterChips extends StatelessWidget {
   final InvoiceStatus? selectedStatus;
-  final InvoiceType? selectedType;
-  final Function(InvoiceStatus?)? onStatusChanged;
-  final Function(InvoiceType?)? onTypeChanged;
+  final String? selectedType;
+  final Function(InvoiceStatus?) onStatusChanged;
+  final Function(String?) onTypeChanged;
 
   const InvoiceFilterChips({
     Key? key,
-    this.selectedStatus,
-    this.selectedType,
-    this.onStatusChanged,
-    this.onTypeChanged,
+    required this.selectedStatus,
+    required this.selectedType,
+    required this.onStatusChanged,
+    required this.onTypeChanged,
   }) : super(key: key);
 
   @override
@@ -21,186 +21,93 @@ class InvoiceFilterChips extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Status filters
         Text(
-          'Status',
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppColors.textBlack,
-              ),
+          'Filter by Status',
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(color: AppColors.textSecondary),
         ),
         const SizedBox(height: 8),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              _buildFilterChip(
-                context,
-                label: 'All',
-                isSelected: selectedStatus == null,
-                onTap: () => onStatusChanged?.call(null),
-              ),
-              const SizedBox(width: 8),
-              ...InvoiceStatus.values.map((status) => Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: _buildFilterChip(
-                  context,
-                  label: _getStatusLabel(status),
-                  isSelected: selectedStatus == status,
-                  onTap: () => onStatusChanged?.call(status),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            FilterChip(
+              label: const Text('All'),
+              selected: selectedStatus == null,
+              onSelected: (selected) {
+                if (selected) {
+                  onStatusChanged(null);
+                }
+              },
+            ),
+            ...InvoiceStatus.values.map((status) {
+              return FilterChip(
+                label: Text(status.toString().split('.').last),
+                selected: selectedStatus == status,
+                onSelected: (selected) {
+                  onStatusChanged(selected ? status : null);
+                },
+                backgroundColor: _getStatusColor(status).withOpacity(0.1),
+                selectedColor: _getStatusColor(status).withOpacity(0.2),
+                labelStyle: TextStyle(
                   color: _getStatusColor(status),
+                  fontWeight: selectedStatus == status ? FontWeight.bold : null,
                 ),
-              )),
-            ],
-          ),
+              );
+            }),
+          ],
         ),
         const SizedBox(height: 16),
-
-        // Type filters
         Text(
-          'Type',
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppColors.textBlack,
-              ),
+          'Filter by Type',
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(color: AppColors.textSecondary),
         ),
         const SizedBox(height: 8),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              _buildFilterChip(
-                context,
-                label: 'All',
-                isSelected: selectedType == null,
-                onTap: () => onTypeChanged?.call(null),
-              ),
-              const SizedBox(width: 8),
-              ...InvoiceType.values.map((type) => Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: _buildFilterChip(
-                  context,
-                  label: _getTypeLabel(type),
-                  isSelected: selectedType == type,
-                  onTap: () => onTypeChanged?.call(type),
-                  color: _getTypeColor(type),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            FilterChip(
+              label: const Text('All'),
+              selected: selectedType == null,
+              onSelected: (selected) {
+                if (selected) {
+                  onTypeChanged(null);
+                }
+              },
+            ),
+            ...['Consultation', 'Prescription'].map((type) {
+              return FilterChip(
+                label: Text(type),
+                selected: selectedType == type,
+                onSelected: (selected) {
+                  onTypeChanged(selected ? type : null);
+                },
+                backgroundColor: Colors.blue[50],
+                selectedColor: Colors.blue[100],
+                labelStyle: TextStyle(
+                  color: Colors.blue[900],
+                  fontWeight: selectedType == type ? FontWeight.bold : null,
                 ),
-              )),
-            ],
-          ),
+              );
+            }),
+          ],
         ),
       ],
     );
   }
 
-  Widget _buildFilterChip(
-    BuildContext context, {
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-    Color? color,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? (color ?? AppColors.primary)
-              : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected
-                ? (color ?? AppColors.primary)
-                : Colors.grey[300]!,
-            width: 1,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: (color ?? AppColors.primary).withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
-        child: Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: isSelected ? Colors.white : AppColors.textBlack,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-              ),
-        ),
-      ),
-    );
-  }
-
-  String _getStatusLabel(InvoiceStatus status) {
-    switch (status) {
-      case InvoiceStatus.draft:
-        return 'Draft';
-      case InvoiceStatus.sent:
-        return 'Sent';
-      case InvoiceStatus.paid:
-        return 'Paid';
-      case InvoiceStatus.overdue:
-        return 'Overdue';
-      case InvoiceStatus.cancelled:
-        return 'Cancelled';
-      case InvoiceStatus.refunded:
-        return 'Refunded';
-    }
-  }
-
   Color _getStatusColor(InvoiceStatus status) {
     switch (status) {
-      case InvoiceStatus.paid:
-        return Colors.green;
-      case InvoiceStatus.overdue:
-        return Colors.red;
-      case InvoiceStatus.sent:
-        return Colors.blue;
-      case InvoiceStatus.draft:
-        return Colors.grey;
-      case InvoiceStatus.cancelled:
-        return Colors.grey;
-      case InvoiceStatus.refunded:
-        return Colors.orange;
+      case InvoiceStatus.Paid:
+        return Colors.green[700]!;
+      case InvoiceStatus.Pending:
+        return Colors.blue[700]!;
+      case InvoiceStatus.Overdue:
+        return Colors.red[700]!;
     }
   }
-
-  String _getTypeLabel(InvoiceType type) {
-    switch (type) {
-      case InvoiceType.medicalService:
-        return 'Medical Service';
-      case InvoiceType.prescription:
-        return 'Prescription';
-      case InvoiceType.consultation:
-        return 'Consultation';
-      case InvoiceType.test:
-        return 'Medical Test';
-      case InvoiceType.procedure:
-        return 'Procedure';
-      case InvoiceType.other:
-        return 'Other';
-    }
-  }
-
-  Color _getTypeColor(InvoiceType type) {
-    switch (type) {
-      case InvoiceType.medicalService:
-        return Colors.blue;
-      case InvoiceType.prescription:
-        return Colors.green;
-      case InvoiceType.consultation:
-        return Colors.purple;
-      case InvoiceType.test:
-        return Colors.orange;
-      case InvoiceType.procedure:
-        return Colors.red;
-      case InvoiceType.other:
-        return Colors.grey;
-    }
-  }
-} 
+}

@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import '../core/viewmodels/base_view_model.dart';
+import '../core/services/medicine_reminder_service.dart';
+import '../core/services/auth_service.dart';
 import '../models/medicine.dart';
 import '../models/medicine_reminder.dart';
 
 class MedicineReminderViewModel extends BaseViewModel {
+  final MedicineReminderService _reminderService = MedicineReminderService();
+
   List<Medicine> _medicines = [];
   List<MedicineReminder> _reminders = [];
   List<MedicineReminder> _todayReminders = [];
@@ -38,12 +42,32 @@ class MedicineReminderViewModel extends BaseViewModel {
       _medicines.where((m) => m.needsRefill).length;
   int get expiredMedicines => _medicines.where((m) => m.isExpired).length;
 
-  // Initialize with sample data
-  void initializeData() {
-    _loadSampleMedicines();
-    _loadSampleReminders();
-    _updateReminderLists();
-    notifyListeners();
+  // Initialize with API data
+  Future<void> initializeData() async {
+    setBusy(true);
+    setError(null);
+
+    try {
+      await _loadReminders();
+      _loadSampleMedicines(); // Keep medicines as sample data for now
+      _updateReminderLists();
+      notifyListeners();
+    } catch (e) {
+      setError('Failed to load reminders: ${e.toString()}');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // Load reminders from API
+  Future<void> _loadReminders() async {
+    try {
+      _reminders = await _reminderService.getReminders();
+    } catch (e) {
+      // If API fails, fall back to sample data
+      _loadSampleReminders();
+      throw e;
+    }
   }
 
   void _loadSampleMedicines() {
@@ -61,6 +85,50 @@ class MedicineReminderViewModel extends BaseViewModel {
       ),
       Medicine(
         id: '2',
+        name: 'Ibuprofen',
+        dosage: '400mg',
+        medicineType: 'Tablet',
+        manufacturer: 'Pfizer',
+        expiryDate: DateTime.now().add(const Duration(days: 400)),
+        totalQuantity: 20,
+        remainingQuantity: 10,
+        notes: 'For pain and inflammation',
+      ),
+      Medicine(
+        id: '3',
+        name: 'Amoxicillin',
+        dosage: '250mg',
+        medicineType: 'Capsule',
+        manufacturer: 'Abbott',
+        expiryDate: DateTime.now().add(const Duration(days: 200)),
+        totalQuantity: 15,
+        remainingQuantity: 8,
+        notes: 'Antibiotic for infections',
+      ),
+      Medicine(
+        id: '4',
+        name: 'Cetirizine',
+        dosage: '10mg',
+        medicineType: 'Tablet',
+        manufacturer: 'Dr. Reddy',
+        expiryDate: DateTime.now().add(const Duration(days: 500)),
+        totalQuantity: 25,
+        remainingQuantity: 20,
+        notes: 'For allergy relief',
+      ),
+      Medicine(
+        id: '5',
+        name: 'Metformin',
+        dosage: '500mg',
+        medicineType: 'Tablet',
+        manufacturer: 'Teva',
+        expiryDate: DateTime.now().add(const Duration(days: 200)),
+        totalQuantity: 100,
+        remainingQuantity: 45,
+        notes: 'For diabetes management',
+      ),
+      Medicine(
+        id: '6',
         name: 'Vitamin D3',
         dosage: '1000 IU',
         medicineType: 'Capsule',
@@ -71,7 +139,7 @@ class MedicineReminderViewModel extends BaseViewModel {
         notes: 'Daily vitamin supplement',
       ),
       Medicine(
-        id: '3',
+        id: '7',
         name: 'Omega-3',
         dosage: '1000mg',
         medicineType: 'Softgel',
@@ -80,17 +148,6 @@ class MedicineReminderViewModel extends BaseViewModel {
         totalQuantity: 90,
         remainingQuantity: 8,
         notes: 'Fish oil supplement',
-      ),
-      Medicine(
-        id: '4',
-        name: 'Metformin',
-        dosage: '500mg',
-        medicineType: 'Tablet',
-        manufacturer: 'Teva',
-        expiryDate: DateTime.now().add(const Duration(days: 200)),
-        totalQuantity: 100,
-        remainingQuantity: 45,
-        notes: 'For diabetes management',
       ),
     ];
   }
@@ -118,6 +175,12 @@ class MedicineReminderViewModel extends BaseViewModel {
         takeWithFood: true,
         createdAt: DateTime.now().subtract(const Duration(days: 5)),
         updatedAt: DateTime.now(),
+        notificationSettings: NotificationSettings(
+          email: NotificationChannelSettings(enabled: true, timeBeforeDose: 10),
+          push: NotificationChannelSettings(enabled: true, timeBeforeDose: 10),
+          sms: NotificationChannelSettings(enabled: false, timeBeforeDose: 10),
+        ),
+        reminderVibration: true,
       ),
       MedicineReminder(
         id: '2',
@@ -134,6 +197,12 @@ class MedicineReminderViewModel extends BaseViewModel {
         takeWithFood: true,
         createdAt: DateTime.now().subtract(const Duration(days: 30)),
         updatedAt: DateTime.now(),
+        notificationSettings: NotificationSettings(
+          email: NotificationChannelSettings(enabled: true, timeBeforeDose: 10),
+          push: NotificationChannelSettings(enabled: true, timeBeforeDose: 10),
+          sms: NotificationChannelSettings(enabled: false, timeBeforeDose: 10),
+        ),
+        reminderVibration: true,
       ),
       MedicineReminder(
         id: '3',
@@ -150,6 +219,12 @@ class MedicineReminderViewModel extends BaseViewModel {
         takeWithFood: true,
         createdAt: DateTime.now().subtract(const Duration(days: 20)),
         updatedAt: DateTime.now(),
+        notificationSettings: NotificationSettings(
+          email: NotificationChannelSettings(enabled: true, timeBeforeDose: 10),
+          push: NotificationChannelSettings(enabled: true, timeBeforeDose: 10),
+          sms: NotificationChannelSettings(enabled: false, timeBeforeDose: 10),
+        ),
+        reminderVibration: true,
       ),
       MedicineReminder(
         id: '4',
@@ -166,6 +241,12 @@ class MedicineReminderViewModel extends BaseViewModel {
         takeWithFood: true,
         createdAt: DateTime.now().subtract(const Duration(days: 60)),
         updatedAt: DateTime.now(),
+        notificationSettings: NotificationSettings(
+          email: NotificationChannelSettings(enabled: true, timeBeforeDose: 10),
+          push: NotificationChannelSettings(enabled: true, timeBeforeDose: 10),
+          sms: NotificationChannelSettings(enabled: false, timeBeforeDose: 10),
+        ),
+        reminderVibration: true,
       ),
     ];
   }
@@ -180,7 +261,12 @@ class MedicineReminderViewModel extends BaseViewModel {
       if (!reminder.isActive) return false;
       return reminder.reminderTimes.any((time) {
         final reminderToday = DateTime(
-            today.year, today.month, today.day, time.hour, time.minute);
+          today.year,
+          today.month,
+          today.day,
+          time.hour,
+          time.minute,
+        );
         return reminderToday.day == today.day &&
             reminderToday.month == today.month &&
             reminderToday.year == today.year;
@@ -202,7 +288,12 @@ class MedicineReminderViewModel extends BaseViewModel {
         return false;
       return reminder.reminderTimes.any((time) {
         final reminderToday = DateTime(
-            today.year, today.month, today.day, time.hour, time.minute);
+          today.year,
+          today.month,
+          today.day,
+          time.hour,
+          time.minute,
+        );
         return reminderToday.isBefore(now) &&
             now.difference(reminderToday).inHours > 1;
       });
@@ -231,12 +322,12 @@ class MedicineReminderViewModel extends BaseViewModel {
     // Apply search filter
     if (_searchQuery.isNotEmpty) {
       filtered = filtered.where((reminder) {
-        return reminder.reminderName
-                .toLowerCase()
-                .contains(_searchQuery.toLowerCase()) ||
-            reminder.medicine?.name
-                    .toLowerCase()
-                    .contains(_searchQuery.toLowerCase()) ==
+        return reminder.reminderName.toLowerCase().contains(
+              _searchQuery.toLowerCase(),
+            ) ||
+            reminder.medicine?.name.toLowerCase().contains(
+                  _searchQuery.toLowerCase(),
+                ) ==
                 true;
       }).toList();
     }
@@ -257,83 +348,204 @@ class MedicineReminderViewModel extends BaseViewModel {
   }
 
   // CRUD operations
-  void addReminder(MedicineReminder reminder) {
-    _reminders.add(reminder);
-    _updateReminderLists();
-    notifyListeners();
-  }
+  Future<bool> addReminder(MedicineReminder reminder) async {
+    setBusy(true);
+    setError(null);
 
-  void updateReminder(MedicineReminder updatedReminder) {
-    final index = _reminders.indexWhere((r) => r.id == updatedReminder.id);
-    if (index != -1) {
-      _reminders[index] = updatedReminder;
+    try {
+      final newReminder = await _reminderService.createReminder(
+        medicineId: reminder.medicineId,
+        reminderName: reminder.reminderName,
+        frequency: reminder.frequency,
+        dosesPerDay: reminder.dosesPerDay,
+        reminderTimes: reminder.reminderTimes,
+        startDate: reminder.startDate,
+        endDate: reminder.endDate,
+        totalDoses: reminder.totalDoses,
+        instructions: reminder.instructions,
+        takeWithFood: reminder.takeWithFood,
+        takeWithWater: reminder.takeWithWater,
+        customFrequencyDescription: reminder.customFrequencyDescription,
+        customIntervalDays: reminder.customIntervalDays,
+        skipDays: reminder.skipDays,
+        hasNotifications: reminder.hasNotifications,
+        notificationSettings: reminder.notificationSettings,
+        reminderVibration: reminder.reminderVibration,
+        userId: AuthService.currentUserId ?? 'YOUR_USER_ID_HERE',
+      );
+
+      _reminders.add(newReminder);
       _updateReminderLists();
       notifyListeners();
+      return true;
+    } catch (e) {
+      setError('Failed to add reminder: ${e.toString()}');
+      return false;
+    } finally {
+      setBusy(false);
     }
   }
 
-  void deleteReminder(String reminderId) {
-    _reminders.removeWhere((r) => r.id == reminderId);
-    _updateReminderLists();
-    notifyListeners();
-  }
+  Future<bool> updateReminder(MedicineReminder updatedReminder) async {
+    setBusy(true);
+    setError(null);
 
-  void markDoseTaken(String reminderId) {
-    final index = _reminders.indexWhere((r) => r.id == reminderId);
-    if (index != -1) {
-      final reminder = _reminders[index];
-      _reminders[index] = reminder.copyWith(
-        dosesCompleted: reminder.dosesCompleted + 1,
-        status: reminder.isCompleted
-            ? ReminderStatus.completed
-            : ReminderStatus.active,
+    try {
+      final updated = await _reminderService.updateReminder(
+        updatedReminder.id,
+        reminderName: updatedReminder.reminderName,
+        frequency: updatedReminder.frequency,
+        dosesPerDay: updatedReminder.dosesPerDay,
+        reminderTimes: updatedReminder.reminderTimes,
+        startDate: updatedReminder.startDate,
+        endDate: updatedReminder.endDate,
+        totalDoses: updatedReminder.totalDoses,
+        dosesCompleted: updatedReminder.dosesCompleted,
+        isActive: updatedReminder.isActive,
+        status: updatedReminder.status,
+        instructions: updatedReminder.instructions,
+        takeWithFood: updatedReminder.takeWithFood,
+        takeWithWater: updatedReminder.takeWithWater,
+        customFrequencyDescription: updatedReminder.customFrequencyDescription,
+        customIntervalDays: updatedReminder.customIntervalDays,
+        skipDays: updatedReminder.skipDays,
+        hasNotifications: updatedReminder.hasNotifications,
       );
 
-      // Update medicine quantity
-      final medicineIndex =
-          _medicines.indexWhere((m) => m.id == reminder.medicineId);
-      if (medicineIndex != -1) {
-        final medicine = _medicines[medicineIndex];
-        _medicines[medicineIndex] = medicine.copyWith(
-          remainingQuantity: medicine.remainingQuantity - 1,
-        );
+      final index = _reminders.indexWhere((r) => r.id == updatedReminder.id);
+      if (index != -1) {
+        _reminders[index] = updated;
+        _updateReminderLists();
+        notifyListeners();
       }
-
-      _updateReminderLists();
-      notifyListeners();
+      return true;
+    } catch (e) {
+      setError('Failed to update reminder: ${e.toString()}');
+      return false;
+    } finally {
+      setBusy(false);
     }
   }
 
-  void markDoseSkipped(String reminderId) {
-    final index = _reminders.indexWhere((r) => r.id == reminderId);
-    if (index != -1) {
-      _reminders[index] = _reminders[index].copyWith(
-        status: ReminderStatus.skipped,
-      );
-      _updateReminderLists();
-      notifyListeners();
+  Future<bool> deleteReminder(String reminderId) async {
+    setBusy(true);
+    setError(null);
+
+    try {
+      final success = await _reminderService.deleteReminder(reminderId);
+      if (success) {
+        _reminders.removeWhere((r) => r.id == reminderId);
+        _updateReminderLists();
+        notifyListeners();
+      }
+      return success;
+    } catch (e) {
+      setError('Failed to delete reminder: ${e.toString()}');
+      return false;
+    } finally {
+      setBusy(false);
     }
   }
 
-  void pauseReminder(String reminderId) {
-    final index = _reminders.indexWhere((r) => r.id == reminderId);
-    if (index != -1) {
-      _reminders[index] = _reminders[index].copyWith(
-        status: ReminderStatus.paused,
-      );
-      _updateReminderLists();
-      notifyListeners();
+  Future<bool> markDoseTaken(String reminderId) async {
+    setBusy(true);
+    setError(null);
+
+    try {
+      final updatedReminder = await _reminderService.markDoseTaken(reminderId);
+
+      final index = _reminders.indexWhere((r) => r.id == reminderId);
+      if (index != -1) {
+        _reminders[index] = updatedReminder;
+
+        // Update medicine quantity
+        final medicineIndex = _medicines.indexWhere(
+          (m) => m.id == updatedReminder.medicineId,
+        );
+        if (medicineIndex != -1) {
+          final medicine = _medicines[medicineIndex];
+          _medicines[medicineIndex] = medicine.copyWith(
+            remainingQuantity: medicine.remainingQuantity - 1,
+          );
+        }
+
+        _updateReminderLists();
+        notifyListeners();
+      }
+      return true;
+    } catch (e) {
+      setError('Failed to mark dose as taken: ${e.toString()}');
+      return false;
+    } finally {
+      setBusy(false);
     }
   }
 
-  void resumeReminder(String reminderId) {
-    final index = _reminders.indexWhere((r) => r.id == reminderId);
-    if (index != -1) {
-      _reminders[index] = _reminders[index].copyWith(
-        status: ReminderStatus.active,
+  Future<bool> markDoseSkipped(String reminderId) async {
+    setBusy(true);
+    setError(null);
+
+    try {
+      final updatedReminder = await _reminderService.markDoseSkipped(
+        reminderId,
       );
-      _updateReminderLists();
-      notifyListeners();
+
+      final index = _reminders.indexWhere((r) => r.id == reminderId);
+      if (index != -1) {
+        _reminders[index] = updatedReminder;
+        _updateReminderLists();
+        notifyListeners();
+      }
+      return true;
+    } catch (e) {
+      setError('Failed to mark dose as skipped: ${e.toString()}');
+      return false;
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  Future<bool> pauseReminder(String reminderId) async {
+    setBusy(true);
+    setError(null);
+
+    try {
+      final updatedReminder = await _reminderService.pauseReminder(reminderId);
+
+      final index = _reminders.indexWhere((r) => r.id == reminderId);
+      if (index != -1) {
+        _reminders[index] = updatedReminder;
+        _updateReminderLists();
+        notifyListeners();
+      }
+      return true;
+    } catch (e) {
+      setError('Failed to pause reminder: ${e.toString()}');
+      return false;
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  Future<bool> resumeReminder(String reminderId) async {
+    setBusy(true);
+    setError(null);
+
+    try {
+      final updatedReminder = await _reminderService.resumeReminder(reminderId);
+
+      final index = _reminders.indexWhere((r) => r.id == reminderId);
+      if (index != -1) {
+        _reminders[index] = updatedReminder;
+        _updateReminderLists();
+        notifyListeners();
+      }
+      return true;
+    } catch (e) {
+      setError('Failed to resume reminder: ${e.toString()}');
+      return false;
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -365,8 +577,9 @@ class MedicineReminderViewModel extends BaseViewModel {
 
   // Utility methods
   String getTimeUntilNextReminder() {
-    final activeReminders = _reminders
-        .where((r) => r.isActive && r.status == ReminderStatus.active);
+    final activeReminders = _reminders.where(
+      (r) => r.isActive && r.status == ReminderStatus.active,
+    );
     if (activeReminders.isEmpty) return 'No active reminders';
 
     DateTime? nextReminder;
@@ -395,8 +608,10 @@ class MedicineReminderViewModel extends BaseViewModel {
   double getOverallComplianceRate() {
     if (_reminders.isEmpty) return 0.0;
 
-    final completedDoses =
-        _reminders.fold(0, (sum, reminder) => sum + reminder.dosesCompleted);
+    final completedDoses = _reminders.fold(
+      0,
+      (sum, reminder) => sum + reminder.dosesCompleted,
+    );
     final totalExpectedDoses = _reminders.fold(0, (sum, reminder) {
       if (reminder.totalDoses != null) {
         return sum + reminder.totalDoses!;
@@ -425,7 +640,7 @@ class MedicineReminderViewModel extends BaseViewModel {
   }
 
   // Initialize method called when view model is created
-  void initialize() {
-    initializeData();
+  Future<void> initialize() async {
+    await initializeData();
   }
 }

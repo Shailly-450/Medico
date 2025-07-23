@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/views/base_view.dart';
 import '../../viewmodels/dashboard_view_model.dart';
 import '../../core/theme/app_colors.dart';
+
 import 'widgets/health_overview_card.dart';
 import 'widgets/recent_visit_card.dart';
 import 'widgets/medication_card.dart';
@@ -22,6 +23,8 @@ import 'widgets/policy_documents_card.dart';
 import 'widgets/vitals_graph_section.dart';
 import '../chat/chat_list_screen.dart';
 import '../video_call/test_video_call_screen.dart';
+import '../insurance/insurance_screen.dart';
+import '../appointments/appointment_calendar_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -108,10 +111,7 @@ class DashboardScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.85),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.3),
-          width: 1.5,
-        ),
+        border: Border.all(color: Colors.white.withOpacity(0.3), width: 1.5),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
@@ -163,15 +163,15 @@ class DashboardScreen extends StatelessWidget {
                 Text(
                   'Dashboard',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: AppColors.textBlack,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    color: AppColors.textBlack,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 Text(
                   'Your health at a glance',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -181,7 +181,10 @@ class DashboardScreen extends StatelessWidget {
           Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.medical_information, color: AppColors.primary),
+                icon: const Icon(
+                  Icons.medical_information,
+                  color: AppColors.primary,
+                ),
                 tooltip: 'Health Records',
                 onPressed: () {
                   Navigator.of(context).push(
@@ -192,7 +195,10 @@ class DashboardScreen extends StatelessWidget {
                 },
               ),
               IconButton(
-                icon: const Icon(Icons.compare_arrows, color: AppColors.primary),
+                icon: const Icon(
+                  Icons.compare_arrows,
+                  color: AppColors.primary,
+                ),
                 tooltip: 'Compare Services',
                 onPressed: () {
                   Navigator.of(context).push(
@@ -206,7 +212,8 @@ class DashboardScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                        builder: (_) => const TestVideoCallScreen()),
+                      builder: (_) => const TestVideoCallScreen(),
+                    ),
                   );
                 },
               ),
@@ -224,10 +231,7 @@ class DashboardScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.85),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.3),
-          width: 1.5,
-        ),
+        border: Border.all(color: Colors.white.withOpacity(0.3), width: 1.5),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
@@ -306,8 +310,8 @@ class DashboardScreen extends StatelessWidget {
                 Text(
                   'How can we help you today?',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -343,9 +347,9 @@ class DashboardScreen extends StatelessWidget {
               Text(
                 'Health Overview',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textBlack,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textBlack,
+                ),
               ),
             ],
           ),
@@ -415,9 +419,9 @@ class DashboardScreen extends StatelessWidget {
               Text(
                 'Health Tracker',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textBlack,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textBlack,
+                ),
               ),
               const Spacer(),
               TextButton(
@@ -470,11 +474,11 @@ class DashboardScreen extends StatelessWidget {
                         const SizedBox(width: 8),
                         Text(
                           'Latest Vital Signs',
-                          style:
-                              Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textBlack,
-                                  ),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textBlack,
+                              ),
                         ),
                         const Spacer(),
                         Text(
@@ -503,7 +507,8 @@ class DashboardScreen extends StatelessWidget {
                                   'systolic':
                                       model.latestVitals!.bloodPressureSystolic,
                                   'diastolic': model
-                                      .latestVitals!.bloodPressureDiastolic,
+                                      .latestVitals!
+                                      .bloodPressureDiastolic,
                                 }),
                                 Icons.favorite,
                                 Colors.red,
@@ -628,9 +633,9 @@ class DashboardScreen extends StatelessWidget {
                       Text(
                         'Daily Health Metrics',
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textBlack,
-                            ),
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textBlack,
+                        ),
                       ),
                     ],
                   ),
@@ -870,9 +875,9 @@ class DashboardScreen extends StatelessWidget {
               Text(
                 'Quick Actions',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textBlack,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textBlack,
+                ),
               ),
             ],
           ),
@@ -915,9 +920,9 @@ class DashboardScreen extends StatelessWidget {
                   Text(
                     'Today\'s Medicine Reminders',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textBlack,
-                        ),
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textBlack,
+                    ),
                   ),
                 ],
               ),
@@ -1038,9 +1043,9 @@ class DashboardScreen extends StatelessWidget {
                   Text(
                     'Recent Medical History',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textBlack,
-                        ),
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textBlack,
+                    ),
                   ),
                 ],
               ),
@@ -1133,9 +1138,9 @@ class DashboardScreen extends StatelessWidget {
               Text(
                 'Active Care',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textBlack,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textBlack,
+                ),
               ),
             ],
           ),
@@ -1164,11 +1169,11 @@ class DashboardScreen extends StatelessWidget {
                       children: [
                         Text(
                           'Current Medications',
-                          style:
-                              Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textBlack,
-                                  ),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textBlack,
+                              ),
                         ),
                         const SizedBox(height: 8),
                         ...model.activeMedications.map((medication) {
@@ -1195,11 +1200,11 @@ class DashboardScreen extends StatelessWidget {
                       children: [
                         Text(
                           'Ongoing Treatments',
-                          style:
-                              Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textBlack,
-                                  ),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textBlack,
+                              ),
                         ),
                         const SizedBox(height: 8),
                         ...model.ongoingTreatments.map((treatment) {
@@ -1299,9 +1304,9 @@ class DashboardScreen extends StatelessWidget {
                   Text(
                     'Test Checkups',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textBlack,
-                        ),
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textBlack,
+                    ),
                   ),
                 ],
               ),
@@ -1356,8 +1361,9 @@ class DashboardScreen extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                       side: BorderSide(
-                        color:
-                            isSelected ? AppColors.primary : Colors.grey[300]!,
+                        color: isSelected
+                            ? AppColors.primary
+                            : Colors.grey[300]!,
                       ),
                     ),
                   ),
@@ -1411,8 +1417,8 @@ class DashboardScreen extends StatelessWidget {
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: model.getFilteredTestCheckups().length,
                     itemBuilder: (context, index) {
-                      final testCheckup =
-                          model.getFilteredTestCheckups()[index];
+                      final testCheckup = model
+                          .getFilteredTestCheckups()[index];
                       return _buildTestCheckupCard(testCheckup);
                     },
                   ),
@@ -1585,9 +1591,9 @@ class DashboardScreen extends StatelessWidget {
               Text(
                 'Smart Recommendations',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textBlack,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textBlack,
+                ),
               ),
             ],
           ),

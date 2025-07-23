@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../models/prescription.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/services/prescription_service.dart';
+import 'package:open_file/open_file.dart';
 
 class PrescriptionCard extends StatelessWidget {
   final Prescription prescription;
@@ -15,23 +17,182 @@ class PrescriptionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: Colors.grey[200]!,
+          width: 1,
+        ),
+      ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(context),
-              const SizedBox(height: 12),
-              _buildDiagnosis(),
-              const SizedBox(height: 12),
-              _buildMedications(),
-              const SizedBox(height: 12),
-              _buildFooter(context),
+              // Header with prescription ID and status
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Prescription #${prescription.id}',
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.textBlack,
+                                  ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          prescription.formattedPrescriptionDate,
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  _buildStatusChip(context),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Doctor info
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Dr. ${prescription.doctorName}',
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textBlack,
+                                  ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          prescription.doctorSpecialty,
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Medications summary
+              if (prescription.medications.isNotEmpty) ...[
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Medications (${prescription.medications.length})',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textSecondary,
+                            ),
+                      ),
+                      const SizedBox(height: 8),
+                      ...prescription.medications.take(2).map((med) => Padding(
+                            padding: const EdgeInsets.only(bottom: 4),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    '• ${med.name}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.copyWith(
+                                          color: AppColors.textBlack,
+                                        ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Text(
+                                  med.dosage,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: AppColors.textSecondary,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          )),
+                      if (prescription.medications.length > 2)
+                        Text(
+                          '+${prescription.medications.length - 2} more medications',
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+
+              // Action buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => _viewPrescription(context),
+                      icon: const Icon(Icons.visibility_outlined, size: 18),
+                      label: const Text('View'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        side: BorderSide(color: AppColors.primary),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () => _downloadPDF(context),
+                      icon: const Icon(Icons.download, size: 18),
+                      label: const Text('Download PDF'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
@@ -39,274 +200,96 @@ class PrescriptionCard extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: _getStatusColor().withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(
-            _getStatusIcon(),
-            color: _getStatusColor(),
-            size: 20,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                prescription.doctorName,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: AppColors.textBlack,
-                ),
-              ),
-              Text(
-                prescription.doctorSpecialty,
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-        ),
-        _buildStatusChip(),
-      ],
-    );
-  }
+  Widget _buildStatusChip(BuildContext context) {
+    Color chipColor;
+    Color textColor;
+    IconData? icon;
 
-  Widget _buildDiagnosis() {
+    switch (prescription.status.toLowerCase()) {
+      case 'active':
+        chipColor = Colors.green[100]!;
+        textColor = Colors.green[800]!;
+        icon = Icons.check_circle;
+        break;
+      case 'expired':
+        chipColor = Colors.red[100]!;
+        textColor = Colors.red[800]!;
+        icon = Icons.warning;
+        break;
+      case 'pending':
+        chipColor = Colors.blue[100]!;
+        textColor = Colors.blue[800]!;
+        icon = Icons.schedule;
+        break;
+      default:
+        chipColor = Colors.grey[100]!;
+        textColor = Colors.grey[800]!;
+        icon = Icons.info;
+    }
+
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.blue.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.blue.withOpacity(0.2)),
+        color: chipColor,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.medical_information,
-            color: Colors.blue,
-            size: 16,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              prescription.diagnosis,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-                color: AppColors.textBlack,
-              ),
-            ),
+          if (icon != null) ...[
+            Icon(icon, size: 14, color: textColor),
+            const SizedBox(width: 4),
+          ],
+          Text(
+            prescription.statusDisplayName,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: textColor,
+                  fontWeight: FontWeight.w600,
+                ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildMedications() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(
-              Icons.medication,
-              color: Colors.green,
-              size: 16,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'Medications (${prescription.medications.length})',
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-                color: AppColors.textBlack,
-              ),
-            ),
-          ],
+  Future<void> _downloadPDF(BuildContext context) async {
+    try {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Generating PDF...'),
+          duration: Duration(seconds: 2),
         ),
-        const SizedBox(height: 8),
-        ...prescription.medications.take(2).map((medication) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Row(
-              children: [
-                Container(
-                  width: 4,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[600],
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    '${medication.name} ${medication.dosage}',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey[700],
-                    ),
-                  ),
-                ),
-                if (medication.isActive)
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      'Active',
-                      style: TextStyle(
-                        color: Colors.green,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          );
-        }).toList(),
-        if (prescription.medications.length > 2)
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Text(
-              '+${prescription.medications.length - 2} more medications',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 12,
-                fontStyle: FontStyle.italic,
-              ),
+      );
+
+      final service = PrescriptionService();
+      final pdfPath = await service.downloadPrescriptionPDF(prescription.id);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('PDF generated successfully!'),
+            action: SnackBarAction(
+              label: 'Open',
+              onPressed: () => OpenFile.open(pdfPath),
             ),
           ),
-      ],
-    );
-  }
-
-  Widget _buildFooter(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.calendar_today,
-                    size: 14,
-                    color: Colors.grey[600],
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    _formatDate(prescription.prescriptionDate),
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-              if (prescription.expiryDate != null) ...[
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.schedule,
-                      size: 14,
-                      color: Colors.grey[600],
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Expires: ${_formatDate(prescription.expiryDate!)}',
-                      style: TextStyle(
-                        color: prescription.isExpired
-                            ? Colors.red
-                            : Colors.grey[600],
-                        fontSize: 12,
-                        fontWeight: prescription.isExpired
-                            ? FontWeight.w600
-                            : FontWeight.normal,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ],
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to generate PDF: $e'),
+            backgroundColor: Colors.red,
           ),
-        ),
-        Icon(
-          Icons.arrow_forward_ios,
-          size: 16,
-          color: Colors.grey[400],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatusChip() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: _getStatusColor().withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _getStatusColor().withOpacity(0.3)),
-      ),
-      child: Text(
-        prescription.status.displayName,
-        style: TextStyle(
-          color: _getStatusColor(),
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-
-  Color _getStatusColor() {
-    switch (prescription.status) {
-      case PrescriptionStatus.active:
-        return Colors.green;
-      case PrescriptionStatus.completed:
-        return Colors.blue;
-      case PrescriptionStatus.expired:
-        return Colors.red;
-      case PrescriptionStatus.cancelled:
-        return Colors.grey;
-      case PrescriptionStatus.pending:
-        return Colors.orange;
+        );
+      }
     }
   }
 
-  IconData _getStatusIcon() {
-    switch (prescription.status) {
-      case PrescriptionStatus.active:
-        return Icons.check_circle;
-      case PrescriptionStatus.completed:
-        return Icons.done_all;
-      case PrescriptionStatus.expired:
-        return Icons.warning;
-      case PrescriptionStatus.cancelled:
-        return Icons.cancel;
-      case PrescriptionStatus.pending:
-        return Icons.schedule;
+  void _viewPrescription(BuildContext context) {
+    if (onTap != null) {
+      onTap!();
     }
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
   }
 }

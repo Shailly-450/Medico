@@ -1,4 +1,3 @@
-import '../core/services/pre_approval_service.dart';
 
 class Appointment {
   final String id;

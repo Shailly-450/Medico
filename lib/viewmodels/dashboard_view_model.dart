@@ -4,6 +4,18 @@ import '../models/appointment.dart';
 import '../models/doctor.dart';
 import '../models/test_checkup.dart';
 import '../models/health_record.dart';
+import '../views/dashboard/widgets/quick_action_card.dart';
+import '../views/appointments/appointment_calendar_screen.dart';
+import '../views/medicine_reminders/medicine_reminders_screen.dart';
+import '../views/test_checkups/test_checkups_screen.dart';
+import '../views/health_records/health_records_screen.dart';
+import '../views/insurance/insurance_screen.dart';
+import '../views/chat/chat_list_screen.dart';
+import '../views/ai_symptom/ai_symptom_chat_screen.dart';
+import '../views/journey_tracker/journey_tracker_screen.dart';
+import '../views/workflow/medical_workflow_screen.dart';
+import '../views/prescriptions/prescriptions_screen.dart';
+import '../views/invoices/invoices_screen.dart';
 
 class DashboardViewModel extends BaseViewModel {
   String userName = 'John Doe';
@@ -243,57 +255,81 @@ class DashboardViewModel extends BaseViewModel {
     'Today',
     'Upcoming',
     'Completed',
-    'Overdue'
+    'Overdue',
   ];
 
   // Quick Actions
-  List<Map<String, dynamic>> quickActions = [
-    {
-      'title': 'AI Symptom Check',
-      'icon': Icons.smart_toy,
-      'color': Colors.purple,
-    },
-    {
-      'title': 'Book Appointment',
-      'icon': Icons.calendar_today,
-      'color': Colors.blue,
-    },
-    {
-      'title': 'Journey Tracker',
-      'icon': Icons.timeline,
-      'color': Colors.teal,
-
-    },
-    {
-      'title': 'Medical Workflow',
-      'icon': Icons.timeline,
-      'color': Colors.teal,
-    },
-    {
-      'title': 'Medicine Reminders',
-      'icon': Icons.medication,
-      'color': Colors.orange,
-    },
-    {
-      'title': 'E-Prescriptions',
-      'icon': Icons.receipt_long,
-      'color': Colors.red,
-    },
-    {
-      'title': 'Test Checkups',
-      'icon': Icons.science,
-      'color': Colors.purple,
-    },
-    {
-      'title': 'Health Records',
-      'icon': Icons.folder,
-      'color': Colors.indigo,
-    },
-    {
-      'title': 'Invoices',
-      'icon': Icons.receipt,
-      'color': Colors.green,
-    },
+  List<QuickAction> get quickActions => [
+    QuickAction(
+      title: 'AI Symptom Check',
+      subtitle: 'Check your symptoms',
+      icon: Icons.smart_toy,
+      color: Colors.purple,
+      screen: const AISymptomChatScreen(),
+    ),
+    QuickAction(
+      title: 'Book Appointment',
+      subtitle: 'Schedule a visit',
+      icon: Icons.calendar_today,
+      color: Colors.blue,
+      screen: const AppointmentCalendarScreen(),
+    ),
+    QuickAction(
+      title: 'Journey Tracker',
+      subtitle: 'Track your progress',
+      icon: Icons.timeline,
+      color: Colors.teal,
+      screen: const JourneyTrackerScreen(),
+    ),
+    QuickAction(
+      title: 'Medical Workflow',
+      subtitle: 'View your workflow',
+      icon: Icons.account_tree,
+      color: Colors.indigo,
+      screen: const MedicalWorkflowScreen(),
+    ),
+    QuickAction(
+      title: 'Medicine Reminders',
+      subtitle: 'Set medicine alerts',
+      icon: Icons.medication,
+      color: Colors.orange,
+      screen: const MedicineRemindersScreen(),
+    ),
+    QuickAction(
+      title: 'E-Prescriptions',
+      subtitle: 'View prescriptions',
+      icon: Icons.receipt_long,
+      color: Colors.red,
+      screen: const PrescriptionsScreen(),
+    ),
+    QuickAction(
+      title: 'Test Checkups',
+      subtitle: 'Schedule tests',
+      icon: Icons.science,
+      color: Colors.purple,
+      screen: const TestCheckupsScreen(),
+    ),
+    QuickAction(
+      title: 'Health Records',
+      subtitle: 'View your records',
+      icon: Icons.folder,
+      color: Colors.indigo,
+      screen: const HealthRecordsScreen(),
+    ),
+    QuickAction(
+      title: 'Insurance',
+      subtitle: 'Manage your policies',
+      icon: Icons.health_and_safety,
+      color: Colors.green,
+      screen: const InsuranceScreen(),
+    ),
+    QuickAction(
+      title: 'Invoices',
+      subtitle: 'View your bills',
+      icon: Icons.receipt,
+      color: Colors.amber,
+      screen: const InvoicesScreen(),
+    ),
   ];
 
   @override
@@ -337,8 +373,9 @@ class DashboardViewModel extends BaseViewModel {
       ),
     ];
 
-    _latestVitals =
-        _vitalSignsHistory.isNotEmpty ? _vitalSignsHistory.first : null;
+    _latestVitals = _vitalSignsHistory.isNotEmpty
+        ? _vitalSignsHistory.first
+        : null;
 
     // Mock health metrics
     _healthMetrics = [

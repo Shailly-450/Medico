@@ -59,7 +59,8 @@ class _AddMedicineReminderScreenState extends State<AddMedicineReminderScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-            widget.editingReminder == null ? 'Add Reminder' : 'Edit Reminder'),
+          widget.editingReminder == null ? 'Add Reminder' : 'Edit Reminder',
+        ),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         actions: [
@@ -85,21 +86,29 @@ class _AddMedicineReminderScreenState extends State<AddMedicineReminderScreen> {
                     value?.isEmpty == true ? 'Required' : null,
               ),
               const SizedBox(height: 16),
-              DropdownButtonFormField<Medicine>(
-                value: _selectedMedicine,
+              TextFormField(
                 decoration: const InputDecoration(
-                  labelText: 'Select Medicine',
+                  labelText: 'Medicine Name',
                   border: OutlineInputBorder(),
                 ),
-                items: widget.medicines.map((medicine) {
-                  return DropdownMenuItem(
-                    value: medicine,
-                    child: Text('${medicine.name} (${medicine.dosage})'),
-                  );
-                }).toList(),
-                onChanged: (medicine) =>
-                    setState(() => _selectedMedicine = medicine),
-                validator: (value) => value == null ? 'Required' : null,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedMedicine = value.isNotEmpty
+                        ? Medicine(
+                            id: '',
+                            name: value,
+                            dosage: '',
+                            medicineType: '',
+                            manufacturer: '',
+                            expiryDate: DateTime.now(),
+                            totalQuantity: 0,
+                            remainingQuantity: 0,
+                          )
+                        : null;
+                  });
+                },
+                validator: (value) =>
+                    value == null || value.isEmpty ? 'Required' : null,
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<ReminderFrequency>(
@@ -109,10 +118,7 @@ class _AddMedicineReminderScreenState extends State<AddMedicineReminderScreen> {
                   border: OutlineInputBorder(),
                 ),
                 items: ReminderFrequency.values.map((freq) {
-                  return DropdownMenuItem(
-                    value: freq,
-                    child: Text(freq.name),
-                  );
+                  return DropdownMenuItem(value: freq, child: Text(freq.name));
                 }).toList(),
                 onChanged: (freq) => setState(() => _frequency = freq!),
               ),
@@ -178,7 +184,8 @@ class _AddMedicineReminderScreenState extends State<AddMedicineReminderScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final reminder = MedicineReminder(
-      id: widget.editingReminder?.id ??
+      id:
+          widget.editingReminder?.id ??
           DateTime.now().millisecondsSinceEpoch.toString(),
       medicineId: _selectedMedicine!.id,
       medicine: _selectedMedicine,
@@ -186,8 +193,13 @@ class _AddMedicineReminderScreenState extends State<AddMedicineReminderScreen> {
       frequency: _frequency,
       dosesPerDay: _dosesPerDay,
       reminderTimes: _reminderTimes.map((time) {
-        return DateTime(_startDate.year, _startDate.month, _startDate.day,
-            time.hour, time.minute);
+        return DateTime(
+          _startDate.year,
+          _startDate.month,
+          _startDate.day,
+          time.hour,
+          time.minute,
+        );
       }).toList(),
       startDate: _startDate,
       dosesCompleted: widget.editingReminder?.dosesCompleted ?? 0,
@@ -198,6 +210,12 @@ class _AddMedicineReminderScreenState extends State<AddMedicineReminderScreen> {
       hasNotifications: _hasNotifications,
       createdAt: widget.editingReminder?.createdAt ?? DateTime.now(),
       updatedAt: DateTime.now(),
+      notificationSettings: NotificationSettings(
+        email: NotificationChannelSettings(enabled: true, timeBeforeDose: 10),
+        push: NotificationChannelSettings(enabled: true, timeBeforeDose: 10),
+        sms: NotificationChannelSettings(enabled: false, timeBeforeDose: 10),
+      ),
+      reminderVibration: true,
     );
 
     Navigator.of(context).pop(reminder);

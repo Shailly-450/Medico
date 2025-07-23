@@ -4,13 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import '../../models/personal_data.dart';
-import '../../models/health_record.dart';
-import '../../models/appointment.dart';
-import '../../models/prescription.dart';
-import '../../models/family_member.dart';
-import '../../models/invoice.dart';
 // import '../../models/notification.dart'; // Commented out - model not found
-import '../../models/consent.dart';
 
 class PersonalDataService {
   static final PersonalDataService _instance = PersonalDataService._internal();

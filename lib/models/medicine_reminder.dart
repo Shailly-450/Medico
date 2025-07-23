@@ -11,11 +11,52 @@ enum ReminderFrequency {
   custom, // Custom frequency
 }
 
-enum ReminderStatus {
-  active,
-  paused,
-  completed,
-  skipped,
+enum ReminderStatus { active, paused, completed, skipped }
+
+class NotificationChannelSettings {
+  final bool enabled;
+  final int timeBeforeDose;
+
+  NotificationChannelSettings({
+    required this.enabled,
+    required this.timeBeforeDose,
+  });
+
+  factory NotificationChannelSettings.fromJson(Map<String, dynamic> json) =>
+      NotificationChannelSettings(
+        enabled: json['enabled'] as bool,
+        timeBeforeDose: json['timeBeforeDose'] as int,
+      );
+
+  Map<String, dynamic> toJson() => {
+    'enabled': enabled,
+    'timeBeforeDose': timeBeforeDose,
+  };
+}
+
+class NotificationSettings {
+  final NotificationChannelSettings email;
+  final NotificationChannelSettings push;
+  final NotificationChannelSettings sms;
+
+  NotificationSettings({
+    required this.email,
+    required this.push,
+    required this.sms,
+  });
+
+  factory NotificationSettings.fromJson(Map<String, dynamic> json) =>
+      NotificationSettings(
+        email: NotificationChannelSettings.fromJson(json['email']),
+        push: NotificationChannelSettings.fromJson(json['push']),
+        sms: NotificationChannelSettings.fromJson(json['sms']),
+      );
+
+  Map<String, dynamic> toJson() => {
+    'email': email.toJson(),
+    'push': push.toJson(),
+    'sms': sms.toJson(),
+  };
 }
 
 class MedicineReminder {
@@ -41,6 +82,8 @@ class MedicineReminder {
   final bool hasNotifications;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final NotificationSettings notificationSettings;
+  final bool reminderVibration;
 
   MedicineReminder({
     required this.id,
@@ -63,6 +106,8 @@ class MedicineReminder {
     this.customIntervalDays,
     this.skipDays = const [],
     this.hasNotifications = true,
+    required this.notificationSettings,
+    required this.reminderVibration,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -102,6 +147,23 @@ class MedicineReminder {
       customIntervalDays: json['customIntervalDays'] as int?,
       skipDays: List<String>.from(json['skipDays'] ?? []),
       hasNotifications: json['hasNotifications'] as bool? ?? true,
+      notificationSettings: json['notificationSettings'] != null
+          ? NotificationSettings.fromJson(json['notificationSettings'])
+          : NotificationSettings(
+              email: NotificationChannelSettings(
+                enabled: true,
+                timeBeforeDose: 10,
+              ),
+              push: NotificationChannelSettings(
+                enabled: true,
+                timeBeforeDose: 10,
+              ),
+              sms: NotificationChannelSettings(
+                enabled: false,
+                timeBeforeDose: 10,
+              ),
+            ),
+      reminderVibration: json['reminderVibration'] ?? true,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
@@ -109,15 +171,16 @@ class MedicineReminder {
 
   // Convert MedicineReminder to JSON
   Map<String, dynamic> toJson() {
-    return {
+    final data = <String, dynamic>{
       'id': id,
       'medicineId': medicineId,
       'medicine': medicine?.toJson(),
       'reminderName': reminderName,
       'frequency': frequency.toString(),
       'dosesPerDay': dosesPerDay,
-      'reminderTimes':
-          reminderTimes.map((time) => time.toIso8601String()).toList(),
+      'reminderTimes': reminderTimes
+          .map((time) => time.toIso8601String())
+          .toList(),
       'startDate': startDate.toIso8601String(),
       'endDate': endDate?.toIso8601String(),
       'totalDoses': totalDoses,
@@ -131,9 +194,12 @@ class MedicineReminder {
       'customIntervalDays': customIntervalDays,
       'skipDays': skipDays,
       'hasNotifications': hasNotifications,
+      'notificationSettings': notificationSettings.toJson(),
+      'reminderVibration': reminderVibration,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
+    return data;
   }
 
   // Check if reminder is due now
@@ -253,6 +319,8 @@ class MedicineReminder {
     int? customIntervalDays,
     List<String>? skipDays,
     bool? hasNotifications,
+    NotificationSettings? notificationSettings,
+    bool? reminderVibration,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -278,6 +346,8 @@ class MedicineReminder {
       customIntervalDays: customIntervalDays ?? this.customIntervalDays,
       skipDays: skipDays ?? this.skipDays,
       hasNotifications: hasNotifications ?? this.hasNotifications,
+      notificationSettings: notificationSettings ?? this.notificationSettings,
+      reminderVibration: reminderVibration ?? this.reminderVibration,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? DateTime.now(),
     );

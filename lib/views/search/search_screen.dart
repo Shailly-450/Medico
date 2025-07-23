@@ -380,10 +380,8 @@ class _SearchScreenState extends State<SearchScreen>
                                                       GestureDetector(
                                                         onTap: () {
                                                           HapticFeedback.lightImpact();
-                                                          if (model != null) {
-                                                            model.removeFromRecentSearches(search);
-                                                          }
-                                                        },
+                                                          model.removeFromRecentSearches(search);
+                                                                                                                },
                                                         child: Icon(
                                                           Icons.close,
                                                           size: 16,

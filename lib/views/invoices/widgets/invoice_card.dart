@@ -23,10 +23,7 @@ class InvoiceCard extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: Colors.grey[200]!,
-          width: 1,
-        ),
+        side: BorderSide(color: Colors.grey[200]!, width: 1),
       ),
       child: InkWell(
         onTap: onTap,
@@ -46,7 +43,8 @@ class InvoiceCard extends StatelessWidget {
                       children: [
                         Text(
                           'Invoice #${invoice.invoiceNumber}',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.textBlack,
                               ),
@@ -54,74 +52,13 @@ class InvoiceCard extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           invoice.typeDisplayName,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: AppColors.textSecondary),
                         ),
                       ],
                     ),
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      _buildStatusChip(context),
-                      const SizedBox(height: 8),
-                      // Tax and claim flags
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (invoice.isTaxDeductible)
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: Colors.green[100],
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.receipt, size: 12, color: Colors.green[700]),
-                                  const SizedBox(width: 2),
-                                  Text(
-                                    'Tax',
-                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                          color: Colors.green[700],
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 10,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          if (invoice.isTaxDeductible && invoice.isClaimable)
-                            const SizedBox(width: 4),
-                          if (invoice.isClaimable)
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: Colors.blue[100],
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.medical_services, size: 12, color: Colors.blue[700]),
-                                  const SizedBox(width: 2),
-                                  Text(
-                                    'Claim',
-                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                          color: Colors.blue[700],
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 10,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
+                  _buildStatusChip(context),
                 ],
               ),
               const SizedBox(height: 16),
@@ -134,18 +71,18 @@ class InvoiceCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          invoice.providerName,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          invoice.provider,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.textBlack,
                               ),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          DateFormat('MMM dd, yyyy').format(invoice.issueDate),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
+                          invoice.formattedDueDate,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: AppColors.textSecondary),
                         ),
                       ],
                     ),
@@ -154,8 +91,9 @@ class InvoiceCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        '${invoice.currency} ${invoice.total.toStringAsFixed(2)}',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        invoice.formattedAmount,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: AppColors.primary,
                             ),
@@ -164,23 +102,30 @@ class InvoiceCard extends StatelessWidget {
                       if (invoice.daysUntilDue > 0)
                         Text(
                           'Due in ${invoice.daysUntilDue} days',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: invoice.isDueSoon ? Colors.orange : AppColors.textSecondary,
-                                fontWeight: invoice.isDueSoon ? FontWeight.w600 : FontWeight.normal,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: invoice.isDueSoon
+                                    ? Colors.orange
+                                    : AppColors.textSecondary,
+                                fontWeight: invoice.isDueSoon
+                                    ? FontWeight.w600
+                                    : FontWeight.normal,
                               ),
                         )
                       else if (invoice.isOverdue)
                         Text(
                           'Overdue by ${invoice.daysUntilDue.abs()} days',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
                                 color: Colors.red,
                                 fontWeight: FontWeight.w600,
                               ),
                         )
                       else if (invoice.isPaid)
                         Text(
-                          'Paid on ${DateFormat('MMM dd, yyyy').format(invoice.paidDate!)}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          'Paid',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
                                 color: Colors.green,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -205,39 +150,48 @@ class InvoiceCard extends StatelessWidget {
                       Text(
                         'Items (${invoice.items.length})',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textSecondary,
-                            ),
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                       const SizedBox(height: 8),
-                      ...invoice.items.take(2).map((item) => Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                '• ${item.description}',
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: AppColors.textBlack,
+                      ...invoice.items
+                          .take(2)
+                          .map(
+                            (item) => Padding(
+                              padding: const EdgeInsets.only(bottom: 4),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      '• ${item.name}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: AppColors.textBlack,
+                                          ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    '₹ ${item.price.toStringAsFixed(2)}',
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(
+                                          color: AppColors.textSecondary,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                  ),
+                                ],
                               ),
                             ),
-                            Text(
-                              '${invoice.currency} ${item.totalPrice.toStringAsFixed(2)}',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: AppColors.textSecondary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                            ),
-                          ],
-                        ),
-                      )),
+                          ),
                       if (invoice.items.length > 2)
                         Text(
                           '+${invoice.items.length - 2} more items',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
                                 color: AppColors.primary,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -248,38 +202,10 @@ class InvoiceCard extends StatelessWidget {
                 const SizedBox(height: 16),
               ],
 
-              // Linked entity indicators
-              if (invoice.orderId != null || invoice.rxOrderId != null || invoice.appointmentId != null) ...[
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.blue[50],
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.blue[200]!),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.link, color: Colors.blue[700], size: 16),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          _getLinkedEntityText(),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.blue[700],
-                                fontWeight: FontWeight.w600,
-                              ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
-
               // Action buttons
               Row(
                 children: [
-                  if (!invoice.isPaid && !invoice.isCancelled) ...[
+                  if (!invoice.isPaid) ...[
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: onMarkAsPaid,
@@ -319,63 +245,26 @@ class InvoiceCard extends StatelessWidget {
     );
   }
 
-  String _getLinkedEntityText() {
-    final linkedEntities = <String>[];
-    
-    if (invoice.orderId != null) {
-      linkedEntities.add('Order');
-    }
-    if (invoice.rxOrderId != null) {
-      linkedEntities.add('Prescription');
-    }
-    if (invoice.appointmentId != null) {
-      linkedEntities.add('Appointment');
-    }
-    
-    if (linkedEntities.length == 1) {
-      return 'Linked to ${linkedEntities.first}';
-    } else if (linkedEntities.length == 2) {
-      return 'Linked to ${linkedEntities.first} & ${linkedEntities.last}';
-    } else {
-      return 'Linked to ${linkedEntities.take(linkedEntities.length - 1).join(', ')} & ${linkedEntities.last}';
-    }
-  }
-
   Widget _buildStatusChip(BuildContext context) {
     Color chipColor;
     Color textColor;
     IconData? icon;
 
     switch (invoice.status) {
-      case InvoiceStatus.paid:
+      case InvoiceStatus.Paid:
         chipColor = Colors.green[100]!;
         textColor = Colors.green[800]!;
         icon = Icons.check_circle;
         break;
-      case InvoiceStatus.overdue:
+      case InvoiceStatus.Overdue:
         chipColor = Colors.red[100]!;
         textColor = Colors.red[800]!;
         icon = Icons.warning;
         break;
-      case InvoiceStatus.sent:
+      case InvoiceStatus.Pending:
         chipColor = Colors.blue[100]!;
         textColor = Colors.blue[800]!;
-        icon = Icons.send;
-        break;
-      case InvoiceStatus.draft:
-        chipColor = Colors.grey[100]!;
-        textColor = Colors.grey[800]!;
-        icon = Icons.edit;
-        break;
-      case InvoiceStatus.cancelled:
-        chipColor = Colors.grey[200]!;
-        textColor = Colors.grey[600]!;
-        icon = Icons.cancel;
-        break;
-      case InvoiceStatus.refunded:
-        chipColor = Colors.orange[100]!;
-        textColor = Colors.orange[800]!;
-        icon = Icons.refresh;
+        icon = Icons.schedule;
         break;
     }
 
@@ -395,12 +284,12 @@ class InvoiceCard extends StatelessWidget {
           Text(
             invoice.statusDisplayName,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: textColor,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: textColor,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),
     );
   }
-} 
+}
