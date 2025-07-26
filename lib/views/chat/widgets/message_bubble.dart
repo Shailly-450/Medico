@@ -141,8 +141,6 @@ class MessageBubble extends StatelessWidget {
         return _buildImageAttachment();
       case MessageType.file:
         return _buildFileAttachment();
-      case MessageType.prescription:
-        return _buildPrescriptionAttachment();
       case MessageType.appointment:
         return _buildAppointmentAttachment();
       default:

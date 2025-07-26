@@ -29,9 +29,9 @@ class NotificationChannelSettings {
       );
 
   Map<String, dynamic> toJson() => {
-    'enabled': enabled,
-    'timeBeforeDose': timeBeforeDose,
-  };
+        'enabled': enabled,
+        'timeBeforeDose': timeBeforeDose,
+      };
 }
 
 class NotificationSettings {
@@ -53,10 +53,10 @@ class NotificationSettings {
       );
 
   Map<String, dynamic> toJson() => {
-    'email': email.toJson(),
-    'push': push.toJson(),
-    'sms': sms.toJson(),
-  };
+        'email': email.toJson(),
+        'push': push.toJson(),
+        'sms': sms.toJson(),
+      };
 }
 
 class MedicineReminder {
@@ -78,7 +78,8 @@ class MedicineReminder {
   final bool takeWithWater;
   final String? customFrequencyDescription; // For custom frequency
   final int? customIntervalDays; // For custom frequency
-  final List<String> skipDays; // Days to skip (e.g., ["Saturday", "Sunday"])
+  final List<int>?
+      skipDays; // Days of the week to skip (0-6, where 0 is Sunday)
   final bool hasNotifications;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -145,7 +146,8 @@ class MedicineReminder {
       takeWithWater: json['takeWithWater'] as bool? ?? true,
       customFrequencyDescription: json['customFrequencyDescription'] as String?,
       customIntervalDays: json['customIntervalDays'] as int?,
-      skipDays: List<String>.from(json['skipDays'] ?? []),
+      skipDays:
+          json['skipDays'] != null ? List<int>.from(json['skipDays']) : null,
       hasNotifications: json['hasNotifications'] as bool? ?? true,
       notificationSettings: json['notificationSettings'] != null
           ? NotificationSettings.fromJson(json['notificationSettings'])
@@ -178,9 +180,8 @@ class MedicineReminder {
       'reminderName': reminderName,
       'frequency': frequency.toString(),
       'dosesPerDay': dosesPerDay,
-      'reminderTimes': reminderTimes
-          .map((time) => time.toIso8601String())
-          .toList(),
+      'reminderTimes':
+          reminderTimes.map((time) => time.toIso8601String()).toList(),
       'startDate': startDate.toIso8601String(),
       'endDate': endDate?.toIso8601String(),
       'totalDoses': totalDoses,
@@ -317,7 +318,7 @@ class MedicineReminder {
     bool? takeWithWater,
     String? customFrequencyDescription,
     int? customIntervalDays,
-    List<String>? skipDays,
+    List<int>? skipDays,
     bool? hasNotifications,
     NotificationSettings? notificationSettings,
     bool? reminderVibration,

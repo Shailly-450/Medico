@@ -53,7 +53,10 @@ class VitalSignsCard extends StatelessWidget {
                     'Blood Pressure',
                     '${vitalSigns.bloodPressureSystolic}/${vitalSigns.bloodPressureDiastolic}',
                     'mmHg',
-                    _getBloodPressureStatus(vitalSigns.bloodPressureSystolic, vitalSigns.bloodPressureDiastolic),
+                    _getBloodPressureStatus(
+                      vitalSigns.bloodPressureSystolic ?? 0.0,
+                      vitalSigns.bloodPressureDiastolic ?? 0.0,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -63,7 +66,7 @@ class VitalSignsCard extends StatelessWidget {
                     'Heart Rate',
                     '${vitalSigns.heartRate}',
                     'bpm',
-                    _getHeartRateStatus(vitalSigns.heartRate),
+                    _getHeartRateStatus(vitalSigns.heartRate ?? 0),
                   ),
                 ),
               ],
@@ -77,7 +80,7 @@ class VitalSignsCard extends StatelessWidget {
                     'Temperature',
                     '${vitalSigns.temperature}',
                     '°F',
-                    _getTemperatureStatus(vitalSigns.temperature),
+                    _getTemperatureStatus(vitalSigns.temperature ?? 0.0),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -87,7 +90,7 @@ class VitalSignsCard extends StatelessWidget {
                     'O₂ Saturation',
                     '${vitalSigns.oxygenSaturation}',
                     '%',
-                    _getOxygenStatus(vitalSigns.oxygenSaturation),
+                    _getOxygenStatus(vitalSigns.oxygenSaturation ?? 0),
                   ),
                 ),
               ],
@@ -130,7 +133,7 @@ class VitalSignsCard extends StatelessWidget {
     String status,
   ) {
     Color statusColor = _getStatusColor(status);
-    
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -235,7 +238,7 @@ class VitalSignsCard extends StatelessWidget {
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date).inDays;
-    
+
     if (difference == 0) {
       return 'Today';
     } else if (difference == 1) {
@@ -246,4 +249,4 @@ class VitalSignsCard extends StatelessWidget {
       return '${date.day}/${date.month}/${date.year}';
     }
   }
-} 
+}

@@ -24,8 +24,7 @@ import 'views/profile/profile_screen.dart';
 import 'viewmodels/family_members_view_model.dart';
 import 'viewmodels/consent_view_model.dart';
 import 'viewmodels/appointment_view_model.dart';
-import 'views/prescriptions/prescriptions_screen.dart';
-import 'views/prescriptions/test_prescriptions_screen.dart';
+
 import 'views/workflow/medical_workflow_screen.dart';
 import 'views/workflow/workflow_demo_screen.dart';
 import 'views/ai_symptom/ai_symptom_chat_screen.dart';
@@ -99,8 +98,6 @@ class MyApp extends StatelessWidget {
             '/appointment-calendar': (context) =>
                 const AppointmentCalendarScreen(),
             '/orders': (context) => const OrdersScreen(),
-            '/prescriptions': (context) => const PrescriptionsScreen(),
-            '/test-prescriptions': (context) => const TestPrescriptionsScreen(),
             '/workflow': (context) => const MedicalWorkflowScreen(),
             '/workflow-demo': (context) => const WorkflowDemoScreen(),
             '/ai-symptom-chat': (context) => const AISymptomChatScreen(),
@@ -180,7 +177,8 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
         bottomNavigationBar: NavigationBar(
           selectedIndex: _selectedIndex,
           backgroundColor: Colors.white,
-          indicatorColor: AppTheme.theme.colorScheme.secondary.withValues(alpha: 0.2),
+          indicatorColor:
+              AppTheme.theme.colorScheme.secondary.withValues(alpha: 0.2),
           onDestinationSelected: _onItemTapped,
           destinations: const [
             NavigationDestination(

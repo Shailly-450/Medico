@@ -48,7 +48,7 @@ class HealthRecordCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  
+
                   // Title and Date
                   Expanded(
                     child: Column(
@@ -59,38 +59,50 @@ class HealthRecordCard extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 record.title,
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.textBlack,
-                                    ),
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
                               ),
                             ),
                             // Family Member Indicator
                             Consumer<FamilyMembersViewModel>(
                               builder: (context, familyVM, child) {
-                                final familyMember = familyVM.members.firstWhere(
-                                  (member) => member.id == record.familyMemberId,
-                                  orElse: () => FamilyMember(id: '', name: 'Unknown', role: '', imageUrl: ''),
+                                final familyMember =
+                                    familyVM.members.firstWhere(
+                                  (member) =>
+                                      member.id == record.familyMemberId,
+                                  orElse: () => FamilyMember(
+                                      id: '',
+                                      name: 'Unknown',
+                                      role: '',
+                                      imageUrl: ''),
                                 );
-                                
+
                                 return Container(
                                   margin: const EdgeInsets.only(left: 8),
                                   child: CircleAvatar(
                                     radius: 10,
-                                    backgroundImage: familyMember.imageUrl.isNotEmpty 
-                                      ? NetworkImage(familyMember.imageUrl) 
-                                      : null,
-                                    backgroundColor: AppColors.primary.withOpacity(0.2),
-                                    child: familyMember.imageUrl.isEmpty 
-                                      ? Text(
-                                          familyMember.name.isNotEmpty ? familyMember.name[0].toUpperCase() : '?',
-                                          style: TextStyle(
-                                            color: AppColors.primary,
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        )
-                                      : null,
+                                    backgroundImage: familyMember
+                                            .imageUrl.isNotEmpty
+                                        ? NetworkImage(familyMember.imageUrl)
+                                        : null,
+                                    backgroundColor:
+                                        AppColors.primary.withOpacity(0.2),
+                                    child: familyMember.imageUrl.isEmpty
+                                        ? Text(
+                                            familyMember.name.isNotEmpty
+                                                ? familyMember.name[0]
+                                                    .toUpperCase()
+                                                : '?',
+                                            style: TextStyle(
+                                              color: AppColors.primary,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          )
+                                        : null,
                                   ),
                                 );
                               },
@@ -100,23 +112,25 @@ class HealthRecordCard extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           _formatDate(record.date),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  
+
                   // Important Badge
                   if (record.isImportant)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: Colors.red.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Text(
+                      child: const Text(
                         'Important',
                         style: TextStyle(
                           color: Colors.red,
@@ -127,40 +141,48 @@ class HealthRecordCard extends StatelessWidget {
                     ),
                 ],
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Description
-              Text(
-                record.description,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-              ),
-              
+              if (record.description != null && record.description!.isNotEmpty)
+                Text(
+                  record.description!,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                  ),
+                ),
+
               const SizedBox(height: 12),
-              
+
               // Provider Info
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 12,
-                    backgroundImage: NetworkImage(record.providerImage),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      record.provider,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
+              if (record.provider != null && record.provider!.isNotEmpty)
+                Row(
+                  children: [
+                    if (record.providerImage != null &&
+                        record.providerImage!.isNotEmpty)
+                      CircleAvatar(
+                        radius: 12,
+                        backgroundImage: NetworkImage(record.providerImage!),
+                      ),
+                    if (record.providerImage != null &&
+                        record.providerImage!.isNotEmpty)
+                      const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        record.provider!,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              
+                  ],
+                ),
+
               const SizedBox(height: 12),
-              
+
               // Action Buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -172,9 +194,12 @@ class HealthRecordCard extends StatelessWidget {
                       color: record.isImportant ? Colors.amber : Colors.grey,
                       size: 20,
                     ),
-                    tooltip: record.isImportant ? 'Remove from important' : 'Mark as important',
+                    tooltip: record.isImportant
+                        ? 'Remove from important'
+                        : 'Mark as important',
                   ),
-                  if (record.attachmentUrl != null)
+                  if (record.attachments != null &&
+                      record.attachments!.isNotEmpty)
                     IconButton(
                       onPressed: () {
                         // Handle attachment download/view
@@ -230,7 +255,7 @@ class HealthRecordCard extends StatelessWidget {
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date).inDays;
-    
+
     if (difference == 0) {
       return 'Today';
     } else if (difference == 1) {
@@ -241,4 +266,4 @@ class HealthRecordCard extends StatelessWidget {
       return '${date.day}/${date.month}/${date.year}';
     }
   }
-} 
+}

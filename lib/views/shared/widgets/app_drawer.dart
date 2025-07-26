@@ -9,7 +9,7 @@ import '../../chat/chat_list_screen.dart';
 import '../../ai_symptom/ai_symptom_chat_screen.dart';
 import '../../journey_tracker/journey_tracker_screen.dart';
 import '../../workflow/medical_workflow_screen.dart';
-import '../../prescriptions/prescriptions_screen.dart';
+
 import '../../invoices/invoices_screen.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -80,12 +80,6 @@ class AppDrawer extends StatelessWidget {
             icon: Icons.medication,
             title: 'Medicine Reminders',
             screen: const MedicineRemindersScreen(),
-          ),
-          _buildDrawerItem(
-            context,
-            icon: Icons.receipt_long,
-            title: 'E-Prescriptions',
-            screen: const PrescriptionsScreen(),
           ),
           _buildDrawerItem(
             context,

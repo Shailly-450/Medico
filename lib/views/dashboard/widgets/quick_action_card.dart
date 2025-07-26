@@ -6,8 +6,6 @@ import '../../schedule/schedule_screen.dart';
 import '../../health_records/health_records_screen.dart';
 import '../../medicine_reminders/medicine_reminders_screen.dart';
 import '../../test_checkups/test_checkups_screen.dart';
-import '../../prescriptions/prescriptions_screen.dart';
-import '../../journey_tracker/journey_tracker_screen.dart';
 import '../../insurance/insurance_screen.dart';
 import '../../appointments/appointment_calendar_screen.dart';
 import '../../chat/chat_list_screen.dart';

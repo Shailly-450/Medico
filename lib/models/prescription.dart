@@ -1,31 +1,89 @@
-class PrescriptionMedication {
+class PrescriptionMedicine {
   final String name;
   final String dosage;
+  final String frequency;
   final String duration;
-  final String instructions;
+  final String? instructions;
+  final int quantity;
+  final String refills;
+  final String? genericName;
+  final String? brandName;
+  final String? strength;
+  final String? form;
+  final String? route;
+  final List<String>? sideEffects;
+  final List<String>? contraindications;
+  final bool isDispensed;
+  final DateTime? dispensedAt;
+  final String? dispensedBy;
 
-  PrescriptionMedication({
+  PrescriptionMedicine({
     required this.name,
     required this.dosage,
+    required this.frequency,
     required this.duration,
-    required this.instructions,
+    this.instructions,
+    this.quantity = 1,
+    this.refills = '0',
+    this.genericName,
+    this.brandName,
+    this.strength,
+    this.form,
+    this.route,
+    this.sideEffects,
+    this.contraindications,
+    this.isDispensed = false,
+    this.dispensedAt,
+    this.dispensedBy,
   });
 
-  factory PrescriptionMedication.fromJson(Map<String, dynamic> json) {
-    return PrescriptionMedication(
-      name: json['name'] as String,
-      dosage: json['dosage'] as String,
-      duration: json['duration'] as String,
-      instructions: json['instructions'] as String,
+  factory PrescriptionMedicine.fromJson(Map<String, dynamic> json) {
+    return PrescriptionMedicine(
+      name: json['name'] ?? '',
+      dosage: json['dosage'] ?? '',
+      frequency: json['frequency'] ?? '',
+      duration: json['duration'] ?? '',
+      instructions: json['instructions'],
+      quantity: json['quantity'] ?? 1,
+      refills: json['refills'] ?? '0',
+      genericName: json['genericName'],
+      brandName: json['brandName'],
+      strength: json['strength'],
+      form: json['form'],
+      route: json['route'],
+      sideEffects: json['sideEffects'] != null
+          ? List<String>.from(json['sideEffects'])
+          : null,
+      contraindications: json['contraindications'] != null
+          ? List<String>.from(json['contraindications'])
+          : null,
+      isDispensed: json['isDispensed'] ?? false,
+      dispensedAt: json['dispensedAt'] != null
+          ? DateTime.parse(json['dispensedAt'])
+          : null,
+      dispensedBy: json['dispensedBy'],
     );
   }
 
-  Map<String, dynamic> toJson() => {
-    'name': name,
-    'dosage': dosage,
-    'duration': duration,
-    'instructions': instructions,
-  };
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'dosage': dosage,
+      'frequency': frequency,
+      'duration': duration,
+      'instructions': instructions,
+      'quantity': quantity,
+      'refills': refills,
+      'genericName': genericName,
+      'brandName': brandName,
+      'strength': strength,
+      'form': form,
+      'route': route,
+      'isDispensed': isDispensed,
+      'dispensedAt': dispensedAt?.toIso8601String(),
+      'dispensedBy': dispensedBy,
+    };
+  }
 }
 
 class Prescription {
@@ -33,16 +91,14 @@ class Prescription {
   final String patientId;
   final String patientName;
   final int patientAge;
-  final String? patientGender;
   final String doctorId;
   final String doctorName;
   final String doctorSpecialty;
   final DateTime prescriptionDate;
-  final List<PrescriptionMedication> medications;
-  final String? diagnosis;
-  final String? additionalInstructions;
-  final DateTime? followUpDate;
-  final String status;
+  final DateTime? expirationDate; // Added expiration date field
+  final String diagnosis;
+  final List<PrescriptionMedicine> medications;
+  final String? notes;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -51,86 +107,79 @@ class Prescription {
     required this.patientId,
     required this.patientName,
     required this.patientAge,
-    this.patientGender,
     required this.doctorId,
     required this.doctorName,
     required this.doctorSpecialty,
     required this.prescriptionDate,
+    this.expirationDate, // Added expiration date parameter
+    required this.diagnosis,
     required this.medications,
-    this.diagnosis,
-    this.additionalInstructions,
-    this.followUpDate,
-    required this.status,
+    this.notes,
     required this.createdAt,
     required this.updatedAt,
   });
 
+  // Status check methods
+  bool isActive() {
+    final now = DateTime.now();
+    return !isExpired() && !isCompleted();
+  }
+
+  bool isExpired() {
+    final now = DateTime.now();
+    return expirationDate != null && now.isAfter(expirationDate!);
+  }
+
+  bool isCompleted() {
+    return medications.every((med) => med.isDispensed);
+  }
+
+  String get status {
+    if (isExpired()) return 'expired';
+    if (isCompleted()) return 'completed';
+    if (isActive()) return 'active';
+    return 'unknown';
+  }
+
   factory Prescription.fromJson(Map<String, dynamic> json) {
     return Prescription(
-      id: json['_id'] as String,
-      patientId: json['patientId'] as String,
-      patientName: json['patientName'] as String,
-      patientAge: json['patientAge'] as int,
-      patientGender: json['patientGender'] as String?,
-      doctorId: json['doctorId'] as String,
-      doctorName: json['doctorName'] as String,
-      doctorSpecialty: json['doctorSpecialty'] as String,
-      prescriptionDate: DateTime.parse(json['prescriptionDate'] as String),
-      medications: (json['medications'] as List<dynamic>)
-          .map(
-            (med) =>
-                PrescriptionMedication.fromJson(med as Map<String, dynamic>),
-          )
-          .toList(),
-      diagnosis: json['diagnosis'] as String?,
-      additionalInstructions: json['additionalInstructions'] as String?,
-      followUpDate: json['followUpDate'] != null
-          ? DateTime.parse(json['followUpDate'] as String)
+      id: json['id'],
+      patientId: json['patientId'],
+      patientName: json['patientName'],
+      patientAge: json['patientAge'],
+      doctorId: json['doctorId'],
+      doctorName: json['doctorName'],
+      doctorSpecialty: json['doctorSpecialty'],
+      prescriptionDate: DateTime.parse(json['prescriptionDate']),
+      expirationDate: json['expirationDate'] != null
+          ? DateTime.parse(json['expirationDate'])
           : null,
-      status: json['status'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      diagnosis: json['diagnosis'],
+      medications: (json['medications'] as List)
+          .map((med) => PrescriptionMedicine.fromJson(med))
+          .toList(),
+      notes: json['notes'],
+      createdAt: DateTime.parse(json['createdAt']),
+      updatedAt: DateTime.parse(json['updatedAt']),
     );
   }
 
-  Map<String, dynamic> toJson() => {
-    'patientId': patientId,
-    'patientName': patientName,
-    'patientAge': patientAge,
-    if (patientGender != null) 'patientGender': patientGender,
-    'doctorId': doctorId,
-    'doctorName': doctorName,
-    'doctorSpecialty': doctorSpecialty,
-    'prescriptionDate': prescriptionDate.toIso8601String(),
-    'medications': medications.map((med) => med.toJson()).toList(),
-    if (diagnosis != null) 'diagnosis': diagnosis,
-    if (additionalInstructions != null)
-      'additionalInstructions': additionalInstructions,
-    if (followUpDate != null) 'followUpDate': followUpDate!.toIso8601String(),
-    'status': status,
-  };
-
-  bool get isActive => status == 'active';
-  bool get isExpired => status == 'expired';
-  bool get isPending => status == 'pending';
-
-  String get formattedPrescriptionDate =>
-      '${prescriptionDate.day}/${prescriptionDate.month}/${prescriptionDate.year}';
-
-  String get formattedFollowUpDate => followUpDate != null
-      ? '${followUpDate!.day}/${followUpDate!.month}/${followUpDate!.year}'
-      : 'No follow-up scheduled';
-
-  String get statusDisplayName {
-    switch (status.toLowerCase()) {
-      case 'active':
-        return 'Active';
-      case 'expired':
-        return 'Expired';
-      case 'pending':
-        return 'Pending';
-      default:
-        return status;
-    }
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'patientId': patientId,
+      'patientName': patientName,
+      'patientAge': patientAge,
+      'doctorId': doctorId,
+      'doctorName': doctorName,
+      'doctorSpecialty': doctorSpecialty,
+      'prescriptionDate': prescriptionDate.toIso8601String(),
+      'expirationDate': expirationDate?.toIso8601String(),
+      'diagnosis': diagnosis,
+      'medications': medications.map((med) => med.toJson()).toList(),
+      'notes': notes,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+    };
   }
 }

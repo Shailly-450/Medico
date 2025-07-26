@@ -8,7 +8,6 @@ import 'widgets/chat_input.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import '../../models/prescription.dart';
 
 class ChatScreen extends StatefulWidget {
   final ChatConversation conversation;
@@ -144,16 +143,6 @@ class _ChatScreenState extends State<ChatScreen> {
                   Icon(Icons.calendar_today),
                   SizedBox(width: 8),
                   Text('Book Appointment'),
-                ],
-              ),
-            ),
-            const PopupMenuItem(
-              value: 'prescription',
-              child: Row(
-                children: [
-                  Icon(Icons.medication),
-                  SizedBox(width: 8),
-                  Text('Request Prescription'),
                 ],
               ),
             ),
@@ -336,14 +325,6 @@ class _ChatScreenState extends State<ChatScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.medication, color: Colors.teal),
-              title: const Text('Send Prescription'),
-              onTap: () {
-                Navigator.pop(context);
-                _sendPrescription(model);
-              },
-            ),
-            ListTile(
               leading: const Icon(Icons.camera_alt, color: Colors.orange),
               title: const Text('Take Photo'),
               onTap: () {
@@ -442,126 +423,6 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void _sendPrescription(ChatViewModel model) async {
-    // Option: Upload new or select existing
-    final action = await showModalBottomSheet<String>(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.upload_file),
-              title: const Text('Upload Prescription File'),
-              onTap: () => Navigator.pop(context, 'upload'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.list),
-              title: const Text('Select Existing Prescription'),
-              onTap: () => Navigator.pop(context, 'select'),
-            ),
-          ],
-        ),
-      ),
-    );
-    if (action == 'upload') {
-      // Upload prescription file (PDF/image)
-      final picked = await FilePicker.platform.pickFiles(
-          type: FileType.custom,
-          allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png']);
-      if (picked != null && picked.files.single.path != null) {
-        final file = File(picked.files.single.path!);
-        final fileName = picked.files.single.name;
-        final fileType = fileName.split('.').last;
-        model.sendMessage(
-          fileName,
-          type: MessageType.prescription,
-          metadata: {
-            'filePath': file.path,
-            'fileName': fileName,
-            'fileType': fileType,
-          },
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('No file selected'),
-              backgroundColor: Colors.orange),
-        );
-      }
-    } else if (action == 'select') {
-      // Select from existing prescriptions
-      final prescription = await _showPrescriptionSelector(context);
-      if (prescription != null) {
-        model.sendMessage(
-          'Prescription: ${prescription.id}',
-          type: MessageType.prescription,
-          metadata: {
-            'prescriptionId': prescription.id,
-            'doctorName': prescription.doctorName,
-            'date': prescription.prescriptionDate.toIso8601String(),
-            'diagnosis': prescription.diagnosis,
-            'medications':
-                prescription.medications.map((m) => m.toJson()).toList(),
-          },
-        );
-      }
-    }
-  }
-
-  Future<Prescription?> _showPrescriptionSelector(BuildContext context) async {
-    // TODO: Implement actual prescription fetching from viewmodel/provider
-    // For now, show a mock list
-    final mockPrescriptions = [
-      Prescription(
-        id: 'RX001',
-        patientName: 'Abdullah Alshahrani',
-        doctorName: 'Dr. Smith',
-        doctorSpecialty: 'Cardiology',
-        prescriptionDate: DateTime.now().subtract(const Duration(days: 2)),
-        expiryDate: DateTime.now().add(const Duration(days: 28)),
-        diagnosis: 'Hypertension',
-        medications: [],
-        notes: 'Take daily',
-        status: PrescriptionStatus.active,
-        prescriptionImageUrl: null,
-        digitalSignature: null,
-      ),
-      // Add more mock prescriptions if needed
-    ];
-    return showDialog<Prescription>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Select Prescription'),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: mockPrescriptions.length,
-            itemBuilder: (context, index) {
-              final p = mockPrescriptions[index];
-              return ListTile(
-                title: Text('Dr. ${p.doctorName}'),
-                subtitle:
-                    Text('${p.diagnosis} • ${_formatDate(p.prescriptionDate)}'),
-                onTap: () => Navigator.pop(context, p),
-              );
-            },
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
-  }
-
   void _takePhoto(ChatViewModel model) {
     // TODO: Implement photo taking
     ScaffoldMessenger.of(context).showSnackBar(
@@ -606,9 +467,6 @@ class _ChatScreenState extends State<ChatScreen> {
       case 'appointment':
         _bookAppointment(context);
         break;
-      case 'prescription':
-        _requestPrescription(context);
-        break;
       case 'clear':
         _clearChat(context);
         break;
@@ -651,16 +509,6 @@ class _ChatScreenState extends State<ChatScreen> {
           'Booking appointment with ${widget.conversation.doctorName}...',
         ),
         backgroundColor: Colors.blue,
-      ),
-    );
-  }
-
-  void _requestPrescription(BuildContext context) {
-    Navigator.pop(context); // Close menu
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Prescription request sent to doctor'),
-        backgroundColor: Colors.orange,
       ),
     );
   }

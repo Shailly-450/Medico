@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:medico/views/doctor/prescriptions/doctor_prescriptions_panel.dart';
+
 import '../../../models/patient_record.dart';
 import '../../../core/theme/app_colors.dart';
 
@@ -68,7 +68,8 @@ class PatientSummaryScreen extends StatelessWidget {
         runSpacing: 8,
         children: items
             .map((e) => Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: color.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
@@ -114,7 +115,8 @@ class PatientSummaryScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: accentColor?.withOpacity(0.1) ?? AppColors.primary.withOpacity(0.1),
+              color: accentColor?.withOpacity(0.1) ??
+                  AppColors.primary.withOpacity(0.1),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
@@ -185,7 +187,7 @@ class PatientSummaryScreen extends StatelessWidget {
   Widget _buildLabResult(Map<String, String> result) {
     final testName = result['Test'] ?? '';
     final testResult = result['Result'] ?? '';
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
@@ -267,7 +269,10 @@ class PatientSummaryScreen extends StatelessWidget {
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [AppColors.primary, AppColors.primary.withOpacity(0.8)],
+                  colors: [
+                    AppColors.primary,
+                    AppColors.primary.withOpacity(0.8)
+                  ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -327,7 +332,8 @@ class PatientSummaryScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      Icon(Icons.email, color: Colors.white.withOpacity(0.8), size: 16),
+                      Icon(Icons.email,
+                          color: Colors.white.withOpacity(0.8), size: 16),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -343,7 +349,8 @@ class PatientSummaryScreen extends StatelessWidget {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      Icon(Icons.phone, color: Colors.white.withOpacity(0.8), size: 16),
+                      Icon(Icons.phone,
+                          color: Colors.white.withOpacity(0.8), size: 16),
                       const SizedBox(width: 8),
                       Text(
                         record.phone,
@@ -471,7 +478,8 @@ class PatientSummaryScreen extends StatelessWidget {
                             padding: const EdgeInsets.only(bottom: 8),
                             child: Row(
                               children: [
-                                Icon(Icons.event_note, color: Colors.indigo, size: 16),
+                                Icon(Icons.event_note,
+                                    color: Colors.indigo, size: 16),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
@@ -503,7 +511,8 @@ class PatientSummaryScreen extends StatelessWidget {
                             padding: const EdgeInsets.only(bottom: 8),
                             child: Row(
                               children: [
-                                Icon(Icons.medication, color: Colors.teal, size: 16),
+                                Icon(Icons.medication,
+                                    color: Colors.teal, size: 16),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
@@ -524,19 +533,7 @@ class PatientSummaryScreen extends StatelessWidget {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) =>
-                  DoctorPrescriptionsPanel(doctorName: 'Dr. Smith'),
-            ),
-          );
-        },
-        icon: const Icon(Icons.upload_file),
-        label: const Text('Upload Prescription'),
-        backgroundColor: AppColors.primary,
-      ),
+      // Removed prescription-related FloatingActionButton
     );
   }
 

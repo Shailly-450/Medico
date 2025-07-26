@@ -3,12 +3,12 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/family_member.dart';
 import '../../viewmodels/family_members_view_model.dart';
+import '../prescriptions/prescription_screen.dart';
 import 'family_members_screen.dart';
 import 'insurance_form_screen.dart';
 import 'settings_screen.dart';
 import 'help_support_screen.dart';
 import 'privacy_policy_screen.dart';
-import 'prescriptions_reports_screen.dart';
 import 'consent_management_screen.dart';
 import 'personal_data_screen.dart';
 
@@ -71,7 +71,7 @@ class _ProfileScreenState extends State<ProfileScreen>
     final familyVM = context.watch<FamilyMembersViewModel>();
     final currentProfile = familyVM.currentProfile;
     final familyCount = familyVM.members.length;
-    
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Container(
@@ -101,7 +101,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                     child: _buildModernAppBar(context),
                   ),
 
-              // Profile Card
+                  // Profile Card
                   SliverToBoxAdapter(
                     child: _buildProfileCard(context, currentProfile, familyVM),
                   ),
@@ -117,45 +117,35 @@ class _ProfileScreenState extends State<ProfileScreen>
                         icon: Icons.group,
                         title: 'Family Members',
                         trailing: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 4),
                           decoration: BoxDecoration(
                             color: AppColors.primary.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
-                                ),
+                          ),
                           child: Text(
                             '$familyCount',
-                                  style: textTheme.bodyMedium?.copyWith(
-                                    color: AppColors.primary,
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: AppColors.primary,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const FamilyMembersScreen()),
-                      );
-                    },
-                  ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const FamilyMembersScreen()),
+                          );
+                        },
+                      ),
                       _buildModernProfileItem(
                         context,
-                    icon: Icons.description,
-                    title: 'Prescriptions & Reports',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const PrescriptionsReportsScreen()),
-                      );
-                    },
-                  ),
-                      _buildModernProfileItem(
-                        context,
-                    icon: Icons.account_balance_wallet,
-                    title: 'Payment Methods',
+                        icon: Icons.account_balance_wallet,
+                        title: 'Payment Methods',
                         trailing: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 4),
                           decoration: BoxDecoration(
                             color: AppColors.accent.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
@@ -168,36 +158,71 @@ class _ProfileScreenState extends State<ProfileScreen>
                             ),
                           ),
                         ),
-                    onTap: () {},
-                  ),
+                        onTap: () {},
+                      ),
                       _buildModernProfileItem(
                         context,
-                    icon: Icons.verified_user,
-                    title: 'Insurance',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const InsuranceFormScreen()),
-                      );
-                    },
-                  ),
+                        icon: Icons.verified_user,
+                        title: 'Insurance',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const InsuranceFormScreen()),
+                          );
+                        },
+                      ),
                       _buildModernProfileItem(
                         context,
-                    icon: Icons.settings,
-                    title: 'Settings',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const SettingsScreen()),
-                      );
-                    },
-                  ),
+                        icon: Icons.settings,
+                        title: 'Settings',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const SettingsScreen()),
+                          );
+                        },
+                      ),
                     ]),
-              ),
+                  ),
 
-              // Preferences Section
+                  // Medical Records Section
+                  SliverToBoxAdapter(
+                    child: _buildSectionTitle('Medical Records'),
+                  ),
+                  SliverToBoxAdapter(
+                    child: _buildModernSectionCard([
+                      _buildModernProfileItem(
+                        context,
+                        icon: Icons.medical_information,
+                        title: 'Prescriptions',
+                        trailing: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.accent.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.arrow_forward_ios,
+                            size: 16,
+                            color: AppColors.accent,
+                          ),
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const PrescriptionsScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ]),
+                  ),
+
+                  // Preferences Section
                   SliverToBoxAdapter(
                     child: _buildSectionTitle('Preferences'),
                   ),
@@ -205,51 +230,52 @@ class _ProfileScreenState extends State<ProfileScreen>
                     child: _buildModernSectionCard([
                       _buildModernProfileItem(
                         context,
-                    icon: Icons.support_agent,
-                    title: 'Help & Support',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const HelpSupportScreen()),
-                      );
-                    },
-                  ),
-                      _buildModernProfileItem(
-                        context,
-                    icon: Icons.privacy_tip,
-                    title: 'Privacy & Policy',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const PrivacyPolicyScreen()),
-                      );
-                    },
+                        icon: Icons.support_agent,
+                        title: 'Help & Support',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const HelpSupportScreen()),
+                          );
+                        },
                       ),
                       _buildModernProfileItem(
                         context,
-                    icon: Icons.manage_accounts,
-                    title: 'Consent Management',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const ConsentManagementScreen()),
-                      );
-                    },
+                        icon: Icons.privacy_tip,
+                        title: 'Privacy & Policy',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const PrivacyPolicyScreen()),
+                          );
+                        },
                       ),
                       _buildModernProfileItem(
                         context,
-                    icon: Icons.data_usage,
-                    title: 'Personal Data',
-                    onTap: () {
-                      Navigator.push(
+                        icon: Icons.manage_accounts,
+                        title: 'Consent Management',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) =>
+                                    const ConsentManagementScreen()),
+                          );
+                        },
+                      ),
+                      _buildModernProfileItem(
                         context,
-                        MaterialPageRoute(
-                            builder: (_) => const PersonalDataScreen()),
-                      );
-                    },
+                        icon: Icons.data_usage,
+                        title: 'Personal Data',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const PersonalDataScreen()),
+                          );
+                        },
                       ),
                     ]),
                   ),
@@ -323,15 +349,15 @@ class _ProfileScreenState extends State<ProfileScreen>
                 Text(
                   'Profile',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 Text(
                   'Manage your account settings',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+                        color: AppColors.textSecondary,
+                      ),
                 ),
               ],
             ),
@@ -341,9 +367,10 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
-  Widget _buildProfileCard(BuildContext context, FamilyMember? currentProfile, FamilyMembersViewModel familyVM) {
+  Widget _buildProfileCard(BuildContext context, FamilyMember? currentProfile,
+      FamilyMembersViewModel familyVM) {
     final textTheme = Theme.of(context).textTheme;
-    
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(24),
@@ -398,11 +425,12 @@ class _ProfileScreenState extends State<ProfileScreen>
                   ),
                   const SizedBox(height: 4),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(
                       color: AppColors.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     child: Text(
                       currentProfile?.role ?? '-',
                       style: textTheme.bodyMedium?.copyWith(
@@ -426,7 +454,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(16),
-                    ),
+            ),
             child: Material(
               color: Colors.transparent,
               child: InkWell(
@@ -435,7 +463,8 @@ class _ProfileScreenState extends State<ProfileScreen>
                   final selected = await showModalBottomSheet<FamilyMember>(
                     context: context,
                     backgroundColor: Colors.transparent,
-                    builder: (ctx) => _buildProfileSwitchModal(ctx, familyVM, currentProfile),
+                    builder: (ctx) =>
+                        _buildProfileSwitchModal(ctx, familyVM, currentProfile),
                   );
                   if (selected != null) {
                     familyVM.switchProfile(selected);
@@ -457,9 +486,10 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
-  Widget _buildProfileSwitchModal(BuildContext context, FamilyMembersViewModel familyVM, FamilyMember? currentProfile) {
+  Widget _buildProfileSwitchModal(BuildContext context,
+      FamilyMembersViewModel familyVM, FamilyMember? currentProfile) {
     final textTheme = Theme.of(context).textTheme;
-    
+
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -477,7 +507,7 @@ class _ProfileScreenState extends State<ProfileScreen>
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-              Padding(
+          Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Row(
               children: [
@@ -499,11 +529,11 @@ class _ProfileScreenState extends State<ProfileScreen>
                   style: textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
           const Divider(height: 32),
           Flexible(
             child: ListView.builder(
@@ -514,11 +544,13 @@ class _ProfileScreenState extends State<ProfileScreen>
                 final member = familyVM.members[index];
                 final isActive = member.id == currentProfile?.id;
                 final isMain = index == 0;
-                
+
                 return Container(
                   margin: const EdgeInsets.only(bottom: 8),
                   decoration: BoxDecoration(
-                    color: isActive ? AppColors.primary.withOpacity(0.08) : Colors.transparent,
+                    color: isActive
+                        ? AppColors.primary.withOpacity(0.08)
+                        : Colors.transparent,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Material(
@@ -552,14 +584,18 @@ class _ProfileScreenState extends State<ProfileScreen>
                                       if (isMain) ...[
                                         const SizedBox(width: 8),
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 8, vertical: 2),
                                           decoration: BoxDecoration(
-                                            color: AppColors.primary.withOpacity(0.12),
-                                            borderRadius: BorderRadius.circular(8),
+                                            color: AppColors.primary
+                                                .withOpacity(0.12),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                           ),
                                           child: Text(
                                             'You',
-                                            style: textTheme.bodySmall?.copyWith(
+                                            style:
+                                                textTheme.bodySmall?.copyWith(
                                               color: AppColors.primary,
                                               fontWeight: FontWeight.bold,
                                             ),
@@ -625,12 +661,12 @@ class _ProfileScreenState extends State<ProfileScreen>
           ),
           const SizedBox(width: 12),
           Text(
-        title,
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.bold,
-            ),
-      ),
+            title,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
         ],
       ),
     );
@@ -662,7 +698,7 @@ class _ProfileScreenState extends State<ProfileScreen>
       child: Column(
         children: [
           for (int i = 0; i < items.length; i++) ...[
-            if (i > 0) 
+            if (i > 0)
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 16),
                 height: 1,
@@ -706,12 +742,12 @@ class _ProfileScreenState extends State<ProfileScreen>
               const SizedBox(width: 16),
               Expanded(
                 child: Text(
-        title,
-        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w500,
-            ),
-      ),
+                  title,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
               ),
               if (trailing != null) ...[
                 trailing,
@@ -769,9 +805,9 @@ class _ProfileScreenState extends State<ProfileScreen>
                 Text(
                   'Logout',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ],
             ),
@@ -794,9 +830,9 @@ class _ProfileScreenState extends State<ProfileScreen>
           child: Text(
             'version 1.0.0',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w500,
-            ),
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
           ),
         ),
       ),
@@ -808,7 +844,7 @@ class _ModernProfileAvatar extends StatelessWidget {
   final String? name;
   final String? imageUrl;
   final double radius;
-  
+
   const _ModernProfileAvatar({
     Key? key,
     this.name,
@@ -838,13 +874,13 @@ class _ModernProfileAvatar extends StatelessWidget {
           ],
         ),
         child: CircleAvatar(
-        radius: radius,
-        backgroundImage: NetworkImage(imageUrl!),
-        backgroundColor: AppColors.primary.withOpacity(0.1),
+          radius: radius,
+          backgroundImage: NetworkImage(imageUrl!),
+          backgroundColor: AppColors.primary.withOpacity(0.1),
         ),
       );
     }
-    
+
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
@@ -865,13 +901,13 @@ class _ModernProfileAvatar extends StatelessWidget {
         ],
       ),
       child: CircleAvatar(
-      radius: radius,
+        radius: radius,
         backgroundColor: Colors.transparent,
-      child: Text(
-        getInitials(),
-        style: TextStyle(
-          color: AppColors.primary,
-          fontWeight: FontWeight.bold,
+        child: Text(
+          getInitials(),
+          style: TextStyle(
+            color: AppColors.primary,
+            fontWeight: FontWeight.bold,
             fontSize: radius * 0.6,
           ),
         ),
