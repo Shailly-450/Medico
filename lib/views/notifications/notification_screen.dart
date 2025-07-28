@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import '../../core/views/base_view.dart';
 import '../../viewmodels/notification_view_model.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/services/auth_service.dart';
+import '../../core/services/api_service.dart';
 import 'widgets/notification_card.dart';
+import 'widgets/test_notification_button.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({Key? key}) : super(key: key);
@@ -16,7 +19,16 @@ class _NotificationScreenState extends State<NotificationScreen> {
   Widget build(BuildContext context) {
     return BaseView<NotificationViewModel>(
       viewModelBuilder: () => NotificationViewModel(),
-      onModelReady: (model) => model.init(),
+      onModelReady: (model) {
+        model.init();
+        // Get auth token from AuthService or ApiService
+        final authToken = AuthService.accessToken ?? ApiService.accessToken;
+        if (authToken != null) {
+          model.fetchNotifications(authToken);
+        } else {
+          print('No auth token available for notifications');
+        }
+      },
       builder: (context, model, child) => Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
@@ -35,7 +47,15 @@ class _NotificationScreenState extends State<NotificationScreen> {
           actions: [
             if (model.unreadCount > 0)
               TextButton(
-                onPressed: model.markAllAsRead,
+                onPressed: () async {
+                  // Get auth token from AuthService or ApiService
+                  final authToken = AuthService.accessToken ?? ApiService.accessToken;
+                  if (authToken != null) {
+                    await model.markAllAsReadOnServer(authToken);
+                  } else {
+                    print('No auth token available for marking all as read');
+                  }
+                },
                 child: Text(
                   'Mark all read',
                   style: TextStyle(
@@ -69,7 +89,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
   Widget _buildNotificationsTab(
       BuildContext context, NotificationViewModel model) {
     print(
-        'Building notifications tab with ${model.notifications.length} notifications');
+        'Building notifications tab with \x1B[1m${model.notifications.length}\x1B[0m notifications');
     if (model.notifications.isEmpty) {
       return Center(
         child: Column(
@@ -94,7 +114,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
       );
     }
 
-    return ListView.builder(
+    return Column(
+      children: [
+        // Test notification button for development
+        const TestNotificationButton(),
+        Expanded(
+          child: ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: model.notifications.length,
       itemBuilder: (context, index) {
@@ -159,8 +184,16 @@ class _NotificationScreenState extends State<NotificationScreen> {
               },
             );
           },
-          onDismissed: (direction) {
+                onDismissed: (direction) async {
+                  // Get auth token from AuthService or ApiService
+                  final authToken = AuthService.accessToken ?? ApiService.accessToken;
+                  if (authToken != null) {
+                    await model.deleteNotificationOnServer(authToken, notification.id);
+                  } else {
+                    print('No auth token available for deleting notification');
+                    // Fallback to local deletion
             model.deleteNotification(notification.id);
+                  }
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('${notification.title} deleted'),
@@ -180,10 +213,23 @@ class _NotificationScreenState extends State<NotificationScreen> {
           },
           child: NotificationCard(
             notification: notification,
-            onTap: () => model.markAsRead(notification.id),
+                  onTap: () async {
+                    // Get auth token from AuthService or ApiService
+                    final authToken = AuthService.accessToken ?? ApiService.accessToken;
+                    if (authToken != null) {
+                      await model.markNotificationAsReadOnServer(authToken, notification.id);
+                    } else {
+                      print('No auth token available for marking notification as read');
+                      // Fallback to local update
+                      model.markAsRead(notification.id);
+                    }
+                  },
           ),
         );
       },
+          ),
+        ),
+      ],
     );
   }
 }

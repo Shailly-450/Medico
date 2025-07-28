@@ -6,6 +6,8 @@ import '../home/widgets/appointment_card.dart';
 import '../../core/services/pre_approval_service.dart';
 import '../../viewmodels/appointment_view_model.dart';
 import 'package:provider/provider.dart';
+import '../../viewmodels/doctors_view_model.dart';
+import '../../models/doctor.dart';
 
 class _CustomTabIndicator extends Decoration {
   final double indicatorHeight;
@@ -96,6 +98,8 @@ class _AllAppointmentsScreenState extends State<AllAppointmentsScreen>
 
   DateTime _parseDate(String date, String time) {
     // date: YYYY-MM-DD or MMM dd, yyyy, time: HH:MM AM/PM
+
+
     try {
       if (date.contains('-')) {
         // Format: YYYY-MM-DD
@@ -157,135 +161,245 @@ class _AllAppointmentsScreenState extends State<AllAppointmentsScreen>
   }
 
   Widget _buildAppointmentList(String status) {
-    return Consumer<AppointmentViewModel>(
-      builder: (context, viewModel, child) {
+    return Consumer2<AppointmentViewModel, DoctorsViewModel>(
+      builder: (context, viewModel, doctorsViewModel, child) {
         if (viewModel.isLoading) {
           return const Center(
             child: CircularProgressIndicator(),
           );
         }
-
-        final filtered = _filterAppointments(status);
+        if (viewModel.errorMessage != null) {
+          return Center(
+            child: Text(
+              viewModel.errorMessage!,
+              style: TextStyle(color: Colors.red, fontSize: 16),
+            ),
+          );
+        }
+        List<Appointment> filtered;
+        switch (status) {
+          case 'Upcoming':
+            filtered = viewModel.upcomingAppointments;
+            break;
+          case 'Completed':
+            filtered = viewModel.completedAppointments;
+            break;
+          case 'Canceled':
+            filtered = viewModel.cancelledAppointments;
+            break;
+          default:
+            filtered = viewModel.appointments;
+        }
         if (filtered.isEmpty) {
           return Center(
             child: Text('No $status appointments'),
           );
         }
-    return ListView.separated(
-      padding: const EdgeInsets.all(16),
-      itemCount: filtered.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 16),
-      itemBuilder: (context, index) {
-        final appointment = filtered[index];
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'About Doctor',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textBlack,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withOpacity(0.08),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
-                    spreadRadius: 0,
-                  ),
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                    spreadRadius: 0,
-                  ),
-                ],
-                border: Border.all(
-                  color: AppColors.secondary.withOpacity(0.1),
-                  width: 1,
-                ),
+        return ListView.separated(
+          padding: const EdgeInsets.all(16),
+          itemCount: filtered.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 16),
+          itemBuilder: (context, index) {
+            final appointment = filtered[index];
+            // Lookup doctor image by ID
+            String doctorImage = '';
+            final doctor = doctorsViewModel.allDoctors.firstWhere(
+              (d) => d.id == appointment.doctorId,
+              orElse: () => Doctor(
+                id: '',
+                name: '',
+                specialty: '',
+                hospital: '',
+                imageUrl: '',
+                rating: 0.0,
+                reviews: 0,
+                isAvailable: false,
+                price: 0.0,
+                isOnline: false,
+                experience: 0,
+                education: '',
+                languages: const [],
+                specializations: const [],
+                about: '',
+                availability: const {},
+                awards: const [],
+                consultationFee: '',
+                acceptsInsurance: false,
+                insuranceProviders: const [],
+                location: '',
+                distance: 0.0,
+                isVerified: false,
+                phoneNumber: '',
+                email: '',
+                symptoms: const [],
+                videoCall: false,
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Appointment details (reuse AppointmentCard's content if possible)
-                    Row(
+            );
+            if (doctor != null) {
+              doctorImage = doctor.imageUrl;
+            }
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'About Doctor',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textBlack,
+                      ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.08),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                        spreadRadius: 0,
+                      ),
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                        spreadRadius: 0,
+                      ),
+                    ],
+                    border: Border.all(
+                      color: AppColors.secondary.withOpacity(0.1),
+                      width: 1,
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        CircleAvatar(
-                          radius: 32,
-                          backgroundColor: AppColors.secondary.withOpacity(0.1),
-                          backgroundImage:
-                              NetworkImage(appointment.doctorImage),
-                          child: appointment.doctorImage.isEmpty
-                              ? Icon(
-                                  Icons.person,
-                                  size: 32,
-                                  color: AppColors.primary,
-                                )
-                              : null,
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
+                        // Appointment details (reuse AppointmentCard's content if possible)
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            CircleAvatar(
+                              radius: 32,
+                              backgroundColor: AppColors.secondary.withOpacity(0.1),
+                              backgroundImage: (doctorImage.isNotEmpty)
+                                  ? NetworkImage(doctorImage)
+                                  : null,
+                              child: (doctorImage.isEmpty)
+                                  ? Icon(
+                                      Icons.person,
+                                      size: 32,
+                                      color: AppColors.primary,
+                                    )
+                                  : null,
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Expanded(
-                                    child: Text(
-                                      appointment.doctorName,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleLarge
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColors.textBlack,
-                                            fontSize: 18,
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          appointment.doctorName,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleLarge
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                                color: AppColors.textBlack,
+                                                fontSize: 18,
+                                              ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Flexible(
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 6,
                                           ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                                          decoration: BoxDecoration(
+                                            color:
+                                                AppColors.secondary.withOpacity(0.15),
+                                            borderRadius: BorderRadius.circular(20),
+                                            border: Border.all(
+                                              color: AppColors.secondary
+                                                  .withOpacity(0.3),
+                                              width: 1,
+                                            ),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                Icons.person_rounded,
+                                                size: 16,
+                                                color: AppColors.secondary,
+                                              ),
+                                              const SizedBox(width: 6),
+                                              Flexible(
+                                                child: Text(
+                                                  'In Person',
+                                                  style: TextStyle(
+                                                    color: AppColors.secondary,
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.secondary.withOpacity(0.15),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      appointment.specialty,
+                                      style: TextStyle(
+                                        color: AppColors.secondary,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
                                   ),
-                                  const SizedBox(width: 8),
+                                  const SizedBox(height: 12),
                                   Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 12,
-                                      vertical: 6,
+                                      vertical: 8,
                                     ),
                                     decoration: BoxDecoration(
-                                      color:
-                                          AppColors.secondary.withOpacity(0.15),
-                                      borderRadius: BorderRadius.circular(20),
-                                      border: Border.all(
-                                        color: AppColors.secondary
-                                            .withOpacity(0.3),
-                                        width: 1,
-                                      ),
+                                      color: AppColors.paleBackground,
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Icon(
-                                          Icons.person_rounded,
-                                          size: 16,
-                                          color: AppColors.secondary,
-                                        ),
-                                        const SizedBox(width: 6),
+                                        Icon(Icons.calendar_today,
+                                            size: 18, color: AppColors.primary),
+                                        const SizedBox(width: 8),
                                         Text(
-                                          'In Person',
+                                          '${appointment.date}',
                                           style: TextStyle(
-                                            color: AppColors.secondary,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w700,
+                                            color: AppColors.textBlack,
+                                            fontWeight: FontWeight.w600,
                                           ),
                                         ),
                                       ],
@@ -293,112 +407,66 @@ class _AllAppointmentsScreenState extends State<AllAppointmentsScreen>
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.secondary.withOpacity(0.15),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  appointment.specialty,
-                                  style: TextStyle(
-                                    color: AppColors.secondary,
-                                    fontWeight: FontWeight.w600,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 18),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: () {
+                                  // TODO: Cancel logic
+                                },
+                                icon:
+                                    const Icon(Icons.close, color: AppColors.error),
+                                label: const Text('Cancel',
+                                    style: TextStyle(
+                                        color: AppColors.error,
+                                        fontWeight: FontWeight.bold)),
+                                style: OutlinedButton.styleFrom(
+                                  side: const BorderSide(
+                                      color: AppColors.error, width: 1.5),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
                                 ),
                               ),
-                              const SizedBox(height: 12),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 8,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.paleBackground,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.calendar_today,
-                                        size: 18, color: AppColors.primary),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      '${appointment.date} · ${appointment.time}',
-                                      style: TextStyle(
-                                        color: AppColors.textBlack,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: () {
+                                  // TODO: Reschedule logic
+                                },
+                                icon: const Icon(Icons.calendar_month,
+                                    color: Colors.white),
+                                label: const Text('Reschedule',
+                                    style: TextStyle(fontWeight: FontWeight.bold)),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primary,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                    const SizedBox(height: 18),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: () {
-                              // TODO: Cancel logic
-                            },
-                            icon:
-                                const Icon(Icons.close, color: AppColors.error),
-                            label: const Text('Cancel',
-                                style: TextStyle(
-                                    color: AppColors.error,
-                                    fontWeight: FontWeight.bold)),
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(
-                                  color: AppColors.error, width: 1.5),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              // TODO: Reschedule logic
-                            },
-                            icon: const Icon(Icons.calendar_month,
-                                color: Colors.white),
-                            label: const Text('Reschedule',
-                                style: TextStyle(fontWeight: FontWeight.bold)),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-          ],
+              ],
+            );
+          },
         );
       },
     );
-      },
-    );
-}
+  }
 
   Widget _buildActionButton(
       String text, Color bg, Color fg, VoidCallback onTap) {

@@ -11,10 +11,8 @@ class AppointmentService {
   static Future<Map<String, dynamic>> getAppointments(
       {bool includeCancelled = false}) async {
     try {
-      print('🌐 AppointmentService: Fetching appointments from API');
       final token = AuthService.accessToken;
       if (token == null) {
-        print('❌ AppointmentService: Not authenticated');
         return {
           'success': false,
           'message': 'Not authenticated',
@@ -22,12 +20,8 @@ class AppointmentService {
       }
 
       final queryParams = includeCancelled ? '?includeCancelled=true' : '';
-      final url = '$baseUrl/appointments$queryParams';
-      print('🌐 AppointmentService: Making GET request to $url');
-      print('🔑 AppointmentService: Auth token: ${token.substring(0, 10)}...');
-
       final response = await http.get(
-        Uri.parse(url),
+        Uri.parse('$baseUrl/appointments$queryParams'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -35,21 +29,13 @@ class AppointmentService {
         },
       ).timeout(timeout);
 
-      print('📥 AppointmentService: Response status: ${response.statusCode}');
-      print('📦 AppointmentService: Response body: ${response.body}');
-
       final data = jsonDecode(response.body);
-      final result = {
+      return {
         'success': data['success'] ?? false,
         'message': data['message'] ?? 'Failed to fetch appointments',
         'data': data['data'] ?? [],
       };
-
-      print(
-          '✅ AppointmentService: Parsed ${result['data'].length} appointments');
-      return result;
     } catch (e) {
-      print('❌ AppointmentService: Error fetching appointments: $e');
       return {
         'success': false,
         'message': 'Failed to fetch appointments: ${e.toString()}',

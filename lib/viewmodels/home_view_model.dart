@@ -6,9 +6,13 @@ import '../models/hospital.dart';
 import '../models/offer_package.dart';
 import '../core/services/pre_approval_service.dart';
 import '../core/services/hospital_service.dart';
+import '../core/services/offer_service.dart';
 import 'notification_view_model.dart';
 
 class HomeViewModel extends BaseViewModel {
+  HomeViewModel() {
+    init();
+  }
   String userName = "John Doe";
   String userLocation = "San Francisco, CA";
 
@@ -26,48 +30,7 @@ class HomeViewModel extends BaseViewModel {
   String selectedCategory = 'General';
 
   // Offers & Packages data
-  List<OfferPackage> offers = [
-    OfferPackage(
-      id: '1',
-      title: 'Health Checkup Package',
-      description:
-      'Complete body checkup with blood tests, ECG, and consultation',
-      imageUrl:
-      'https://img.freepik.com/free-photo/medical-stethoscope-laptop-keyboard_23-2147862719.jpg',
-      originalPrice: 299.99,
-      discountedPrice: 199.99,
-      discountPercentage: 33,
-      validUntil: DateTime.now().add(const Duration(days: 15)),
-      includedServices: ['Blood Test', 'ECG', 'Consultation', 'X-Ray'],
-      terms: 'Valid for 15 days. Non-refundable. Prior appointment required.',
-    ),
-    OfferPackage(
-      id: '2',
-      title: 'Dental Care Special',
-      description: 'Complete dental checkup with cleaning and consultation',
-      imageUrl:
-      'https://img.freepik.com/free-photo/medical-equipment-dentistry_23-2148847898.jpg',
-      originalPrice: 149.99,
-      discountedPrice: 99.99,
-      discountPercentage: 33,
-      validUntil: DateTime.now().add(const Duration(days: 10)),
-      includedServices: ['Dental Cleaning', 'Consultation', 'X-Ray'],
-      terms: 'Valid for 10 days. Includes basic cleaning only.',
-    ),
-    OfferPackage(
-      id: '3',
-      title: 'Eye Care Bundle',
-      description: 'Complete eye examination with prescription glasses',
-      imageUrl:
-      'https://img.freepik.com/free-photo/medical-equipment-dentistry_23-2148847898.jpg',
-      originalPrice: 199.99,
-      discountedPrice: 149.99,
-      discountPercentage: 25,
-      validUntil: DateTime.now().add(const Duration(days: 20)),
-      includedServices: ['Eye Test', 'Consultation', 'Prescription'],
-      terms: 'Valid for 20 days. Frame selection limited to basic models.',
-    ),
-  ];
+  List<OfferPackage> offers = [];
 
   List<Appointment> upcomingAppointments = [
     Appointment(
@@ -322,6 +285,9 @@ class HomeViewModel extends BaseViewModel {
   bool _hospitalsLoaded = false;
   String? _hospitalsError;
 
+  String? get hospitalsError => _hospitalsError;
+  bool get isBusy => busy;
+
   // API Integration Methods
   Future<void> loadHospitals() async {
     if (_hospitalsLoaded) return;
@@ -336,12 +302,15 @@ class HomeViewModel extends BaseViewModel {
         sortBy: 'rating',
         sortOrder: 'desc',
       );
+      print('DEBUG: API result from getHospitals:');
+      print(result);
 
       if (result['success'] == true) {
         final hospitalsData = result['data'] as List<dynamic>;
         hospitals = hospitalsData
             .map((data) => HospitalService.convertToHospitalModel(data))
             .toList();
+        print('DEBUG: Parsed hospitals count: ${hospitals.length}');
         _hospitalsLoaded = true;
         print('✅ Loaded ${hospitals.length} hospitals from API');
       } else {
@@ -372,12 +341,15 @@ class HomeViewModel extends BaseViewModel {
         longitude: longitude,
         maxDistance: maxDistance,
       );
+      print('DEBUG: API result from searchNearbyHospitals:');
+      print(result);
 
       if (result['success'] == true) {
         final hospitalsData = result['data'] as List<dynamic>;
         hospitals = hospitalsData
             .map((data) => HospitalService.convertToHospitalModel(data))
             .toList();
+        print('DEBUG: Parsed hospitals count: ${hospitals.length}');
         _hospitalsLoaded = true;
         print('✅ Found ${hospitals.length} nearby hospitals');
       } else {
@@ -400,6 +372,47 @@ class HomeViewModel extends BaseViewModel {
     await loadHospitals();
   }
 
+  @override
+  void init() {
+    super.init();
+    // Load hospitals from API when view model is initialized
+    loadHospitals();
+    loadOffers();
+  }
+
+  Future<void> loadOffers() async {
+    setBusy(true);
+    offers = await OfferService.getOffers();
+    print('Loaded offers: ${offers.length}');
+    setBusy(false);
+    notifyListeners();
+  }
+
+  Future<bool> createOffer(Map<String, dynamic> offerData) async {
+    setBusy(true);
+    final offer = await OfferService.createOffer(offerData);
+    if (offer != null) {
+      offers.insert(0, offer);
+      setBusy(false);
+      notifyListeners();
+      return true;
+    }
+    setBusy(false);
+    return false;
+  }
+
+  Future<bool> deleteOffer(String id) async {
+    setBusy(true);
+    final success = await OfferService.deleteOffer(id);
+    if (success) {
+      offers.removeWhere((offer) => offer.id == id);
+      setBusy(false);
+      notifyListeners();
+      return true;
+    }
+    setBusy(false);
+    return false;
+  }
 
 
   void setSpecialty(String specialty) {
@@ -425,12 +438,5 @@ class HomeViewModel extends BaseViewModel {
   void setHospitalSpecialty(String specialty) {
     selectedHospitalSpecialty = specialty;
     notifyListeners();
-  }
-
-  @override
-  void init() {
-    super.init();
-    // Load hospitals from API when view model is initialized
-    loadHospitals();
   }
 }

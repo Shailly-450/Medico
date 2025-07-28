@@ -7,7 +7,7 @@ import 'package:timeago/timeago.dart' as timeago;
 class FeaturedBlogCard extends StatelessWidget {
   final Blog blog;
   final VoidCallback onTap;
-  final VoidCallback onBookmark;
+  final Future<void> Function() onBookmark;
   final VoidCallback onLike;
 
   const FeaturedBlogCard({
@@ -63,11 +63,22 @@ class FeaturedBlogCard extends StatelessWidget {
                         topLeft: Radius.circular(24),
                         topRight: Radius.circular(24),
                       ),
-                      image: DecorationImage(
-                        image: NetworkImage(blog.imageUrl),
-                        fit: BoxFit.cover,
-                      ),
+                      color: Colors.grey[200],
                     ),
+                    child: (blog.imageUrl != null && blog.imageUrl.isNotEmpty)
+                        ? ClipRRect(
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(24),
+                              topRight: Radius.circular(24),
+                            ),
+                            child: Image.network(
+                              blog.imageUrl,
+                              width: double.infinity,
+                              height: 160,
+                              fit: BoxFit.cover,
+                            ),
+                          )
+                        : Center(child: Icon(Icons.image, color: Colors.grey, size: 48)),
                   ),
                   // Featured Badge
                   Positioned(
@@ -142,9 +153,9 @@ class FeaturedBlogCard extends StatelessWidget {
                       color: Colors.transparent,
                       child: InkWell(
                         borderRadius: BorderRadius.circular(12),
-                        onTap: () {
+                        onTap: () async {
                           HapticFeedback.lightImpact();
-                          onBookmark();
+                          await onBookmark();
                         },
                         child: Container(
                           width: 36,
@@ -217,11 +228,19 @@ class FeaturedBlogCard extends StatelessWidget {
                           height: 32,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),
-                            image: DecorationImage(
-                              image: NetworkImage(blog.authorAvatar),
-                              fit: BoxFit.cover,
-                            ),
+                            color: Colors.grey[200],
                           ),
+                          child: (blog.authorAvatar != null && blog.authorAvatar.isNotEmpty)
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: Image.network(
+                                    blog.authorAvatar,
+                                    width: 32,
+                                    height: 32,
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                              : Center(child: Icon(Icons.person, color: Colors.grey)),
                         ),
                         const SizedBox(width: 6),
                         // Author Name

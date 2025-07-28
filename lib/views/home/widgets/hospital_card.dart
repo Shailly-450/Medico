@@ -3,6 +3,10 @@ import '../../../models/hospital.dart';
 import '../../../core/theme/app_colors.dart';
 import 'package:medico/views/home/hospital_detail_screen.dart';
 import 'package:medico/views/home/hospital_map_screen.dart';
+import 'package:provider/provider.dart';
+// import 'package:medico/views/home/home_view_model.dart';
+
+import '../../../viewmodels/home_view_model.dart';
 
 class HospitalCard extends StatelessWidget {
   final Hospital hospital;
@@ -35,13 +39,14 @@ class HospitalCard extends StatelessWidget {
     if (onMapTap != null) {
       onMapTap!(hospital);
     } else {
-      // Fallback to direct navigation if no callback provided
+      // Use API-fetched hospitals from HomeViewModel
+      final hospitals = Provider.of<HomeViewModel>(context, listen: false).hospitals;
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => HospitalMapScreen(
             selectedHospital: hospital,
-            hospitals: [hospital],
+            hospitals: hospitals,
           ),
         ),
       );

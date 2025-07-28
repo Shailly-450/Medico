@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:medico/views/home/home_screen.dart';
 import 'package:medico/views/registration/steps/create_account_step.dart';
@@ -6,7 +7,6 @@ import 'package:provider/provider.dart';
 import 'core/services/navigation_service.dart';
 import 'core/services/order_service.dart';
 import 'core/theme/app_theme.dart';
-import 'models/hospital.dart';
 import 'models/registration_data.dart';
 import 'views/auth/login_screen.dart';
 
@@ -32,13 +32,62 @@ import 'views/ai_symptom/ai_symptom_chat_screen.dart';
 import 'core/services/ai_symptom_service.dart';
 import 'views/invoices/invoices_screen.dart';
 import 'views/doctor/doctor_dashboard_screen.dart';
+import 'views/appointments/create_appointment_screen.dart';
+import 'views/appointments/doctor_selection_screen.dart';
+import 'views/appointments/book_appointment_screen.dart';
+import 'viewmodels/doctors_view_model.dart';
+import 'auth/auth_provider.dart';
+import 'viewmodels/profile_view_model.dart';
+import 'core/services/api_service.dart';
+import 'viewmodels/blog_view_model.dart';
+import 'core/services/onesignal_service.dart';
+import 'core/config.dart';
+import 'viewmodels/comparison_view_model.dart';
+import 'views/testing/services_api_test_screen.dart';
 
-void main() {
-  // Initialize mock data for OrderService
-  OrderService.initializeMockData();
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await ApiService.initialize();
   // Initialize AI Symptom Service
   AISymptomService().initialize();
-  runApp(const MyApp());
+  // Initialize OneSignal
+  await OneSignalService.instance.initialize();
+
+  // Register user with OneSignal after successful login
+  // This will be called from your login screen
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
+        ChangeNotifierProxyProvider<AuthProvider, OrderViewModel>(
+          create: (context) => OrderViewModel(OrderService(
+              Dio(BaseOptions(baseUrl: AppConfig.apiBaseUrl)), '')),
+          update: (context, auth, previous) {
+            final dio = Dio(BaseOptions(baseUrl: AppConfig.apiBaseUrl));
+            final jwtToken = auth.jwtToken ?? '';
+            return OrderViewModel(OrderService(dio, jwtToken));
+          },
+        ),
+        Provider<NavigationService>(create: (_) => NavigationService()),
+        ChangeNotifierProvider<HomeViewModel>(create: (_) => HomeViewModel()),
+        ChangeNotifierProvider<InvoiceViewModel>(
+            create: (_) => InvoiceViewModel()),
+        ChangeNotifierProvider<FamilyMembersViewModel>(
+            create: (_) => FamilyMembersViewModel()),
+        ChangeNotifierProvider<ConsentViewModel>(
+            create: (_) => ConsentViewModel()),
+        ChangeNotifierProvider<AppointmentViewModel>(
+            create: (_) => AppointmentViewModel()),
+        ChangeNotifierProvider<DoctorsViewModel>(
+            create: (_) => DoctorsViewModel()),
+        ChangeNotifierProvider(create: (_) => ProfileViewModel()),
+        ChangeNotifierProvider(create: (_) => BlogViewModel()..fetchAllBlogs()),
+        ChangeNotifierProvider<ComparisonViewModel>(
+            create: (_) => ComparisonViewModel()..initialize()),
+      ],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -50,7 +99,6 @@ class MyApp extends StatelessWidget {
       providers: [
         Provider<NavigationService>(create: (_) => NavigationService()),
         ChangeNotifierProvider<HomeViewModel>(create: (_) => HomeViewModel()),
-        ChangeNotifierProvider<OrderViewModel>(create: (_) => OrderViewModel()),
         ChangeNotifierProvider<InvoiceViewModel>(
             create: (_) => InvoiceViewModel()),
         ChangeNotifierProvider<FamilyMembersViewModel>(
@@ -61,6 +109,8 @@ class MyApp extends StatelessWidget {
             create: (_) => AppointmentViewModel()),
         ChangeNotifierProvider<HealthRecordsViewModel>(
             create: (_) => HealthRecordsViewModel()),
+        ChangeNotifierProvider<DoctorsViewModel>(
+            create: (_) => DoctorsViewModel()),
       ],
       child: Builder(
         builder: (context) => MaterialApp(
@@ -106,6 +156,10 @@ class MyApp extends StatelessWidget {
             '/ai-symptom-chat': (context) => const AISymptomChatScreen(),
             '/invoices': (context) => const InvoicesScreen(),
             '/doctor-dashboard': (context) => const DoctorDashboardScreen(),
+            '/create-appointment': (context) => const CreateAppointmentScreen(),
+            '/doctor-selection': (context) => const DoctorSelectionScreen(),
+            '/book-appointment': (context) => const BookAppointmentScreen(),
+            '/services-api-test': (context) => const ServicesApiTestScreen(),
           },
           onGenerateRoute: (settings) {
             print('Navigating to: ${settings.name}');

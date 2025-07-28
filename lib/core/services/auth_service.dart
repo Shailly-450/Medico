@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'api_service.dart';
-import '../config.dart';
+// import '../config.dart';
+import 'package:medico/core/config.dart';
 
 enum UserRole { patient, doctor, admin }
 
@@ -72,6 +73,7 @@ class AuthService {
       ).timeout(timeout);
 
       final data = jsonDecode(response.body);
+      print('Raw login response: $data');
       
       if (data['success'] == true) {
         // Save tokens
@@ -91,6 +93,7 @@ class AuthService {
           'message': 'Login successful',
           'role': _currentUserRole,
           'user': user,
+          'token': data['data']['token'],
         };
       } else {
         return {
@@ -102,6 +105,30 @@ class AuthService {
       return {
         'success': false,
         'message': 'Login failed: ${e.toString()}',
+      };
+    }
+  }
+
+  // Login with token and userId for biometric login
+  static Future<Map<String, dynamic>> loginWithTokenAndUserId(String token, String userId) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/token-login'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({
+          'token': token,
+          'userId': userId,
+        }),
+      ).timeout(timeout);
+      final data = jsonDecode(response.body);
+      return data;
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Biometric login error:  [31m$e [0m',
       };
     }
   }

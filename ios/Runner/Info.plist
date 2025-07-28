@@ -61,5 +61,11 @@
 	<string>This app needs access to the microphone for voice search.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>This app uses speech recognition for voice search.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>We use Face ID to protect your data.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 </dict>
 </plist>

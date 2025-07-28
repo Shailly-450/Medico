@@ -3,6 +3,8 @@ plugins {
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+    // Note: OneSignal handles Firebase configuration internally
+    // id("com.google.gms.google-services")
 }
 
 android {
@@ -24,7 +26,7 @@ android {
         applicationId = "com.example.medico"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        minSdk = 21 // Required for OneSignal
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -36,6 +38,21 @@ android {
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
         }
+    }
+}
+
+dependencies {
+    // OneSignal handles Firebase dependencies internally
+    // No need to add Firebase dependencies manually
+}
+
+configurations.all {
+    resolutionStrategy {
+        // Force the use of newer Firebase dependencies
+        force("com.google.firebase:firebase-messaging:23.4.0")
+        
+        // Exclude the conflicting firebase-iid dependency
+        exclude(group = "com.google.firebase", module = "firebase-iid")
     }
 }
 

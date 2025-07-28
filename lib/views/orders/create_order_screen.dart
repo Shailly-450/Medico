@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../core/services/auth_service.dart';
 import '../../models/medical_service.dart';
 import '../../models/order.dart';
 import '../../viewmodels/order_view_model.dart';
 import '../../core/theme/app_colors.dart';
 import 'service_selection_screen.dart';
+import '../../auth/auth_provider.dart';
 
 class CreateOrderScreen extends StatefulWidget {
   final String serviceProviderId;
@@ -27,6 +29,24 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   final TextEditingController _notesController = TextEditingController();
   DateTime _selectedDate = DateTime.now().add(const Duration(days: 1));
   TimeOfDay _selectedTime = const TimeOfDay(hour: 9, minute: 0);
+
+  // Provider selection state
+  String? _selectedProviderId;
+  String? _selectedProviderName;
+  final List<Map<String, String>> _providers = [
+    {'id': '687e2068ebeecf6738c30018', 'name': 'Mount Sinai Medical Center'},
+    {'id': '687e2068ebeecf6738c30019', 'name': 'City General Hospital'},
+    // Add more providers as needed
+  ];
+
+  // Payment method selection state
+  String? _selectedPaymentMethod;
+  final List<Map<String, String>> _paymentMethods = [
+    {'value': 'credit_card', 'label': 'Credit Card'},
+    {'value': 'cash', 'label': 'Cash'},
+    {'value': 'insurance', 'label': 'Insurance'},
+    // Add more payment methods as needed
+  ];
 
   @override
   void initState() {
@@ -51,6 +71,49 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Provider selection dropdown
+            DropdownButtonFormField<String>(
+              value: _selectedProviderId,
+              decoration: const InputDecoration(
+                labelText: 'Select Provider',
+                border: OutlineInputBorder(),
+              ),
+              items: _providers.map((provider) {
+                return DropdownMenuItem<String>(
+                  value: provider['id'],
+                  child: Text(provider['name']!),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedProviderId = value;
+                  _selectedProviderName = _providers.firstWhere((p) => p['id'] == value)['name'];
+                });
+              },
+              validator: (value) => value == null ? 'Please select a provider' : null,
+            ),
+            const SizedBox(height: 16),
+            // Payment method selection dropdown
+            DropdownButtonFormField<String>(
+              value: _selectedPaymentMethod,
+              decoration: const InputDecoration(
+                labelText: 'Select Payment Method',
+                border: OutlineInputBorder(),
+              ),
+              items: _paymentMethods.map((method) {
+                return DropdownMenuItem<String>(
+                  value: method['value'],
+                  child: Text(method['label']!),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedPaymentMethod = value;
+                });
+              },
+              validator: (value) => value == null ? 'Please select a payment method' : null,
+            ),
+            const SizedBox(height: 16),
             // Service provider info
             _buildProviderCard(),
             const SizedBox(height: 16),
@@ -72,6 +135,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
             const SizedBox(height: 24),
 
             // Create order button
+
             _buildCreateOrderButton(),
           ],
         ),
@@ -558,6 +622,19 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   }
 
   void _createOrder(OrderViewModel orderViewModel) async {
+    // Block order creation if provider or payment method is not selected
+    if (_selectedProviderId == null || _selectedProviderName == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a provider.')),
+      );
+      return;
+    }
+    if (_selectedPaymentMethod == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a payment method.')),
+      );
+      return;
+    }
     final scheduledDateTime = DateTime(
       _selectedDate.year,
       _selectedDate.month,
@@ -566,20 +643,69 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       _selectedTime.minute,
     );
 
-    final success = await orderViewModel.createOrder(
-      serviceProviderId: widget.serviceProviderId,
-      serviceProviderName: widget.serviceProviderName,
-      services: _selectedServices,
-      scheduledDate: scheduledDateTime,
-      notes: _notesController.text.isNotEmpty ? _notesController.text : null,
-    );
+    // Get userId from AuthService
+    final userId = AuthService.currentUserId;
+    print('userId: $userId');
+    print('serviceProviderId: $_selectedProviderId');
+    print('serviceProviderName: $_selectedProviderName');
+    print('paymentMethod: $_selectedPaymentMethod');
 
+    // Build orderData map for API with required fields
+    final orderData = {
+      'userId': userId,
+      'serviceProviderId': _selectedProviderId,
+      'serviceProviderName': _selectedProviderName,
+      'items': _selectedServices.map((service) => {
+        'serviceId': service.id,
+        'quantity': 1,
+        'notes': null,
+      }).toList(),
+      'scheduledDate': scheduledDateTime.toIso8601String(),
+      'notes': _notesController.text.isNotEmpty ? _notesController.text : null,
+      'shippingAddress': {
+        'street': '123 Main St',
+        'city': 'New York',
+        'state': 'NY',
+        'zipCode': '10001',
+        'country': 'USA',
+      },
+      'billingAddress': {
+        'street': '123 Main St',
+        'city': 'New York',
+        'state': 'NY',
+        'zipCode': '10001',
+        'country': 'USA',
+      },
+      'insuranceInfo': {
+        'provider': 'Blue Cross',
+        'policyNumber': 'BC123456',
+        'groupNumber': 'GRP789',
+        'coverageAmount': 1000,
+      },
+      'paymentMethod': _selectedPaymentMethod,
+    };
+    print('Order payload: $orderData');
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+    final success = await orderViewModel.createOrder(orderData);
+    Navigator.pop(context); // Remove loading dialog
     if (success && mounted) {
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Order created successfully!'),
           backgroundColor: AppColors.success,
+        ),
+      );
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(orderViewModel.errorMessage ?? 'Failed to create order.'),
+          backgroundColor: AppColors.error,
         ),
       );
     }

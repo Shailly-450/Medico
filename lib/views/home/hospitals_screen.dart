@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/views/base_view.dart';
 import '../../viewmodels/home_view_model.dart';
 import '../../core/theme/app_colors.dart';
@@ -12,8 +13,7 @@ class HospitalsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BaseView<HomeViewModel>(
-      viewModelBuilder: () => HomeViewModel(),
+    return Consumer<HomeViewModel>(
       builder: (context, model, child) => Scaffold(
         backgroundColor: Colors.grey[50],
         appBar: AppBar(

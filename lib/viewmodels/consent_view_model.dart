@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/consent.dart';
 import '../core/viewmodels/base_view_model.dart';
 import 'package:uuid/uuid.dart';
+import '../core/services/api_service.dart'; // Added import for ApiService
 
 class ConsentViewModel extends BaseViewModel {
   final List<ConsentItem> _consentItems = [];
@@ -194,6 +195,205 @@ class ConsentViewModel extends BaseViewModel {
     }
   }
 
+  Future<Map<String, dynamic>> giveOrUpdateConsent(Map<String, dynamic> consentData) async {
+    setLoading(true);
+    try {
+      final result = await ApiService.giveOrUpdateConsent(consentData);
+      if (result['success'] == true && result['data'] != null) {
+        // Optionally update local state with new consent data
+        // For example, update _consentSettings or _consentItems if needed
+        setError(null);
+      } else {
+        setError(result['message'] ?? 'Failed to update consent');
+      }
+      return result;
+    } catch (e) {
+      setError('Failed to update consent: $e');
+      return {'success': false, 'message': e.toString()};
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  ConsentType _mapType(String? type) {
+    switch (type) {
+      case 'data_sharing':
+        return ConsentType.dataSharing;
+      case 'data_collection':
+        return ConsentType.dataCollection;
+      case 'marketing':
+        return ConsentType.marketing;
+      case 'analytics':
+        return ConsentType.analytics;
+      case 'location':
+        return ConsentType.location;
+      case 'notifications':
+        return ConsentType.notifications;
+      case 'health_data':
+        return ConsentType.healthData;
+      case 'third_party':
+        return ConsentType.thirdPartyServices;
+      case 'biometric':
+        return ConsentType.biometric;
+      case 'cloud_storage':
+        return ConsentType.cloudStorage;
+      case 'research':
+        return ConsentType.research;
+      case 'personalized_content':
+        return ConsentType.personalizedContent;
+      default:
+        return ConsentType.dataSharing;
+    }
+  }
+
+  String _typeTitle(ConsentType type) {
+    switch (type) {
+      case ConsentType.dataSharing:
+        return 'Data Sharing';
+      case ConsentType.dataCollection:
+        return 'Data Collection';
+      case ConsentType.marketing:
+        return 'Marketing';
+      case ConsentType.analytics:
+        return 'Analytics';
+      case ConsentType.location:
+        return 'Location Services';
+      case ConsentType.notifications:
+        return 'Notifications';
+      case ConsentType.healthData:
+        return 'Health Data';
+      case ConsentType.thirdPartyServices:
+        return 'Third-Party Services';
+      case ConsentType.biometric:
+        return 'Biometric Authentication';
+      case ConsentType.cloudStorage:
+        return 'Cloud Storage';
+      case ConsentType.research:
+        return 'Research Participation';
+      case ConsentType.personalizedContent:
+        return 'Personalized Content';
+      default:
+        return 'Consent';
+    }
+  }
+
+  String _typeDescription(ConsentType type) {
+    switch (type) {
+      case ConsentType.dataSharing:
+        return 'Allow sharing your data for research or service improvement.';
+      case ConsentType.dataCollection:
+        return 'Allow collection of your personal and health data.';
+      case ConsentType.marketing:
+        return 'Receive marketing communications and offers.';
+      case ConsentType.analytics:
+        return 'Help us improve our services with usage analytics.';
+      case ConsentType.location:
+        return 'Allow access to your location for better service.';
+      case ConsentType.notifications:
+        return 'Receive important notifications and reminders.';
+      case ConsentType.healthData:
+        return 'Allow processing of your health and medical data.';
+      case ConsentType.thirdPartyServices:
+        return 'Allow sharing data with trusted third-party providers.';
+      case ConsentType.biometric:
+        return 'Use biometric authentication for secure access.';
+      case ConsentType.cloudStorage:
+        return 'Store your data securely in the cloud.';
+      case ConsentType.research:
+        return 'Participate in anonymized medical research.';
+      case ConsentType.personalizedContent:
+        return 'Receive personalized health recommendations.';
+      default:
+        return 'Consent description.';
+    }
+  }
+
+  IconData typeIcon(ConsentType type) {
+    switch (type) {
+      case ConsentType.dataSharing:
+        return Icons.share;
+      case ConsentType.dataCollection:
+        return Icons.folder_shared;
+      case ConsentType.marketing:
+        return Icons.campaign;
+      case ConsentType.analytics:
+        return Icons.analytics;
+      case ConsentType.location:
+        return Icons.location_on;
+      case ConsentType.notifications:
+        return Icons.notifications;
+      case ConsentType.healthData:
+        return Icons.health_and_safety;
+      case ConsentType.thirdPartyServices:
+        return Icons.business;
+      case ConsentType.biometric:
+        return Icons.fingerprint;
+      case ConsentType.cloudStorage:
+        return Icons.cloud;
+      case ConsentType.research:
+        return Icons.science;
+      case ConsentType.personalizedContent:
+        return Icons.person;
+      default:
+        return Icons.verified_user;
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchConsents() async {
+    setLoading(true);
+    try {
+      final result = await ApiService.getConsents();
+      print('API consent data: ${result['data']}'); // Debug print
+      if (result['success'] == true && result['data'] is List) {
+        _consentItems.clear();
+        for (final data in result['data']) {
+          // Defensive: fallback to dataSharing if type is unknown
+          ConsentType type;
+          try {
+            type = _mapType(data['type']);
+          } catch (_) {
+            type = ConsentType.dataSharing;
+          }
+          _consentItems.add(ConsentItem(
+            id: data['_id']?.toString() ?? '',
+            type: type,
+            title: _typeTitle(type),
+            description: _typeDescription(type),
+            detailedDescription: data['details'] ?? _typeDescription(type),
+            category: ConsentCategory.essential, // Optionally map category
+            status: data['granted'] == true ? ConsentStatus.granted : ConsentStatus.denied,
+            grantedAt: data['grantedAt'] != null ? DateTime.tryParse(data['grantedAt']) : null,
+            revokedAt: null,
+            expiresAt: null,
+            grantedBy: null,
+            revokedBy: null,
+            ipAddress: null,
+            userAgent: null,
+            metadata: null,
+            isRequired: false,
+            canRevoke: true,
+            autoRenew: false,
+            renewalPeriodDays: null,
+            dependencies: null,
+            version: null,
+            createdAt: data['createdAt'] != null ? DateTime.tryParse(data['createdAt']) ?? DateTime.now() : DateTime.now(),
+            updatedAt: data['updatedAt'] != null ? DateTime.tryParse(data['updatedAt']) ?? DateTime.now() : DateTime.now(),
+          ));
+        }
+        setError(null);
+        notifyListeners();
+      } else {
+        setError(result['message'] ?? 'Failed to fetch consents');
+      }
+      return result;
+    } catch (e) {
+      setError('Failed to fetch consents: $e');
+      return {'success': false, 'message': e.toString()};
+    } finally {
+      setLoading(false);
+    }
+  }
+
   List<ConsentItem> getConsentsByCategory(ConsentCategory category) {
     return _consentItems.where((item) => item.category == category).toList();
   }
@@ -218,6 +418,18 @@ class ConsentViewModel extends BaseViewModel {
   void setError(String? error) {
     _error = error;
     notifyListeners();
+  }
+
+  void updateConsentStatus(String id, bool granted) {
+    final idx = _consentItems.indexWhere((c) => c.id == id);
+    if (idx != -1) {
+      final old = _consentItems[idx];
+      _consentItems[idx] = old.copyWith(
+        status: granted ? ConsentStatus.granted : ConsentStatus.denied,
+        grantedAt: granted ? DateTime.now() : null,
+      );
+      notifyListeners();
+    }
   }
 
   // Mock data loading methods

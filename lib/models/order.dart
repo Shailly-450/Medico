@@ -57,18 +57,17 @@ class Order {
 
   factory Order.fromJson(Map<String, dynamic> json) {
     return Order(
-      id: json['id'] ?? '',
+      id: json['id'] ?? json['_id'] ?? '',
       userId: json['userId'] ?? '',
       serviceProviderId: json['serviceProviderId'] ?? '',
       serviceProviderName: json['serviceProviderName'] ?? '',
       items: (json['items'] as List<dynamic>?)
               ?.map((item) => OrderItem.fromJson(item))
-              .toList() ??
-          [],
-      subtotal: (json['subtotal'] ?? 0.0).toDouble(),
-      tax: (json['tax'] ?? 0.0).toDouble(),
-      discount: (json['discount'] ?? 0.0).toDouble(),
-      total: (json['total'] ?? 0.0).toDouble(),
+              .toList() ?? [],
+      subtotal: (json['subtotal'] ?? json['totalAmount'] ?? 0.0).toDouble(),
+      tax: (json['tax'] ?? json['taxAmount'] ?? 0.0).toDouble(),
+      discount: (json['discount'] ?? json['discountAmount'] ?? 0.0).toDouble(),
+      total: (json['total'] ?? json['finalAmount'] ?? 0.0).toDouble(),
       currency: json['currency'] ?? 'INR',
       status: OrderStatus.values.firstWhere(
         (e) => e.toString() == 'OrderStatus.${json['status']}',
@@ -78,7 +77,7 @@ class Order {
         (e) => e.toString() == 'PaymentStatus.${json['paymentStatus']}',
         orElse: () => PaymentStatus.pending,
       ),
-      orderDate: DateTime.parse(json['orderDate']),
+      orderDate: DateTime.parse(json['orderDate'] ?? json['createdAt']),
       scheduledDate: json['scheduledDate'] != null
           ? DateTime.parse(json['scheduledDate'])
           : null,
@@ -169,9 +168,11 @@ class OrderItem {
   });
 
   factory OrderItem.fromJson(Map<String, dynamic> json) {
+    // Support both 'service' and 'serviceId' as the service object
+    final serviceJson = json['service'] ?? json['serviceId'];
     return OrderItem(
-      id: json['id'] ?? '',
-      service: MedicalService.fromJson(json['service']),
+      id: json['id'] ?? json['_id'] ?? '',
+      service: MedicalService.fromJson(serviceJson),
       quantity: json['quantity'] ?? 1,
       unitPrice: (json['unitPrice'] ?? 0.0).toDouble(),
       totalPrice: (json['totalPrice'] ?? 0.0).toDouble(),

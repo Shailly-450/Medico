@@ -33,14 +33,14 @@ class AppointmentViewModel extends BaseViewModel {
     notifyListeners();
 
     try {
-      final result = await AppointmentService.getAppointments(includeCancelled: includeCancelled);
-      
+      final result = await AppointmentService.getAppointments(
+          includeCancelled: includeCancelled);
+
       if (result['success'] == true) {
         final List<dynamic> appointmentsData = result['data'] ?? [];
-        _appointments = appointmentsData
-            .map((json) => Appointment.fromJson(json))
-            .toList();
-        
+        _appointments =
+            appointmentsData.map((json) => Appointment.fromJson(json)).toList();
+
         _categorizeAppointments();
       } else {
         // Handle error - could show snackbar or dialog
@@ -58,17 +58,17 @@ class AppointmentViewModel extends BaseViewModel {
   // Categorize appointments by status
   void _categorizeAppointments() {
     final now = DateTime.now();
-    
+
     _upcomingAppointments = _appointments.where((appointment) {
       final appointmentDateTime = _parseAppointmentDateTime(appointment);
-      return appointmentDateTime.isAfter(now) && 
-             appointment.status != 'cancelled';
+      return appointmentDateTime.isAfter(now) &&
+          appointment.status != 'cancelled';
     }).toList();
 
     _completedAppointments = _appointments.where((appointment) {
       final appointmentDateTime = _parseAppointmentDateTime(appointment);
-      return appointmentDateTime.isBefore(now) && 
-             appointment.status != 'cancelled';
+      return appointmentDateTime.isBefore(now) &&
+          appointment.status != 'cancelled';
     }).toList();
 
     _cancelledAppointments = _appointments.where((appointment) {
@@ -81,21 +81,21 @@ class AppointmentViewModel extends BaseViewModel {
     try {
       final dateParts = appointment.date.split('-');
       final timeParts = appointment.time.split(':');
-      
+
       final year = int.parse(dateParts[0]);
       final month = int.parse(dateParts[1]);
       final day = int.parse(dateParts[2]);
-      
+
       int hour = int.parse(timeParts[0]);
       int minute = int.parse(timeParts[1]);
-      
+
       // Handle AM/PM if present
       if (appointment.time.toLowerCase().contains('pm') && hour != 12) {
         hour += 12;
       } else if (appointment.time.toLowerCase().contains('am') && hour == 12) {
         hour = 0;
       }
-      
+
       return DateTime(year, month, day, hour, minute);
     } catch (e) {
       return DateTime.now();
@@ -156,7 +156,7 @@ class AppointmentViewModel extends BaseViewModel {
 
     try {
       final result = await AppointmentService.getAppointmentById(appointmentId);
-      
+
       if (result['success'] == true && result['data'] != null) {
         _selectedAppointment = Appointment.fromJson(result['data']);
         notifyListeners();
@@ -325,22 +325,24 @@ class AppointmentViewModel extends BaseViewModel {
     final today = DateTime.now();
     final appointmentDate = _parseAppointmentDateTime(appointment);
     return appointmentDate.year == today.year &&
-           appointmentDate.month == today.month &&
-           appointmentDate.day == today.day;
+        appointmentDate.month == today.month &&
+        appointmentDate.day == today.day;
   }
 
   // Check if appointment is upcoming
   bool isAppointmentUpcoming(Appointment appointment) {
     final now = DateTime.now();
     final appointmentDateTime = _parseAppointmentDateTime(appointment);
-    return appointmentDateTime.isAfter(now) && appointment.status != 'cancelled';
+    return appointmentDateTime.isAfter(now) &&
+        appointment.status != 'cancelled';
   }
 
   // Check if appointment is completed
   bool isAppointmentCompleted(Appointment appointment) {
     final now = DateTime.now();
     final appointmentDateTime = _parseAppointmentDateTime(appointment);
-    return appointmentDateTime.isBefore(now) && appointment.status != 'cancelled';
+    return appointmentDateTime.isBefore(now) &&
+        appointment.status != 'cancelled';
   }
 
   // Get appointment status display text
@@ -378,4 +380,4 @@ class AppointmentViewModel extends BaseViewModel {
         return Colors.grey;
     }
   }
-} 
+}

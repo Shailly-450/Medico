@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/blog.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:provider/provider.dart';
+import '../../viewmodels/blog_view_model.dart';
 
 class BlogDetailScreen extends StatefulWidget {
   final Blog blog;
@@ -69,6 +71,8 @@ class _BlogDetailScreenState extends State<BlogDetailScreen>
 
   @override
   Widget build(BuildContext context) {
+    final blogVM = Provider.of<BlogViewModel>(context);
+    final blog = blogVM.blogs.firstWhere((b) => b.id == widget.blog.id, orElse: () => widget.blog);
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Container(
@@ -147,18 +151,17 @@ class _BlogDetailScreenState extends State<BlogDetailScreen>
                           color: Colors.transparent,
                           child: InkWell(
                             borderRadius: BorderRadius.circular(16),
-                            onTap: () {
+                            onTap: () async {
                               HapticFeedback.lightImpact();
-                              setState(() {
-                                _isBookmarked = !_isBookmarked;
-                              });
+                              await Provider.of<BlogViewModel>(context, listen: false).toggleBookmark(blog.id);
+                              setState(() {});
                             },
                             child: Container(
                               width: 44,
                               height: 44,
                               child: Icon(
-                                _isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                                color: _isBookmarked ? const Color(0xFF2E7D32) : AppColors.textSecondary,
+                                blog.isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                                color: blog.isBookmarked ? const Color(0xFF2E7D32) : AppColors.textSecondary,
                                 size: 22,
                               ),
                             ),
@@ -172,10 +175,17 @@ class _BlogDetailScreenState extends State<BlogDetailScreen>
                         fit: StackFit.expand,
                         children: [
                           // Hero Image
-                          Image.network(
-                            widget.blog.imageUrl,
-                            fit: BoxFit.cover,
-                          ),
+                          (widget.blog.imageUrl != null && widget.blog.imageUrl.isNotEmpty)
+                              ? Image.network(
+                                  widget.blog.imageUrl,
+                                  fit: BoxFit.cover,
+                                )
+                              : Container(
+                                  color: Colors.grey[200],
+                                  child: Center(
+                                    child: Icon(Icons.image, color: Colors.grey, size: 64),
+                                  ),
+                                ),
                           // Gradient Overlay
                           Container(
                             decoration: BoxDecoration(
@@ -302,11 +312,19 @@ class _BlogDetailScreenState extends State<BlogDetailScreen>
                                 height: 48,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(24),
-                                  image: DecorationImage(
-                                    image: NetworkImage(widget.blog.authorAvatar),
-                                    fit: BoxFit.cover,
-                                  ),
+                                  color: Colors.grey[200],
                                 ),
+                                child: (widget.blog.authorAvatar != null && widget.blog.authorAvatar.isNotEmpty)
+                                    ? ClipRRect(
+                                        borderRadius: BorderRadius.circular(24),
+                                        child: Image.network(
+                                          widget.blog.authorAvatar,
+                                          width: 48,
+                                          height: 48,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      )
+                                    : Center(child: Icon(Icons.person, color: Colors.grey, size: 28)),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
@@ -391,11 +409,10 @@ class _BlogDetailScreenState extends State<BlogDetailScreen>
                               color: Colors.transparent,
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(20),
-                                onTap: () {
+                                onTap: () async {
                                   HapticFeedback.lightImpact();
-                                  setState(() {
-                                    _likes++;
-                                  });
+                                  await Provider.of<BlogViewModel>(context, listen: false).toggleLike(blog.id);
+                                  setState(() {});
                                 },
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -421,13 +438,13 @@ class _BlogDetailScreenState extends State<BlogDetailScreen>
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Icon(
-                                        Icons.favorite,
-                                        color: Colors.white,
+                                        blog.isLiked ? Icons.favorite : Icons.favorite_border,
+                                        color: blog.isLiked ? Colors.red : Colors.white,
                                         size: 20,
                                       ),
                                       const SizedBox(width: 8),
                                       Text(
-                                        'Like Article',
+                                        blog.isLiked ? 'Liked' : 'Like Article',
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 16,

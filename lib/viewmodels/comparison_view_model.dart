@@ -1,290 +1,434 @@
 import 'package:flutter/material.dart';
-import '../core/viewmodels/base_view_model.dart';
-import '../models/service_provider.dart';
 import '../models/medical_service.dart';
+import '../models/service_provider.dart';
+import '../core/services/services_api_service.dart';
+import '../core/services/services_api_service.dart' show ProviderService;
 
-class ComparisonViewModel extends BaseViewModel {
+class ComparisonViewModel extends ChangeNotifier {
+  List<MedicalService> _allServices = [];
+  List<String> _allCategories = [];
   List<ServiceProvider> _providers = [];
   List<ServiceProvider> _selectedProviders = [];
-  String _selectedServiceCategory = '';
-  List<String> _availableCategories = [];
+  String _selectedServiceCategory = 'All';
+  String _selectedService = '';
+  MedicalService? _selectedServiceDetails;
   bool _isLoading = false;
   String? _errorMessage;
+  
+  // Filter states
+  bool _nearest = false;
+  bool _lowCost = false;
+  bool _topRated = false;
+  bool _insurance = false;
+  bool _availableToday = false;
+  Map<String, double>? _userLocation;
+  List<ProviderService> _providerServices = [];
+  List<ProviderService> get providerServices => _providerServices;
+  List<ProviderService> _providerServicesByProvider = [];
+  List<ProviderService> get providerServicesByProvider => _providerServicesByProvider;
+  List<ProviderService> _providersByService = [];
+  List<ProviderService> get providersByService => _providersByService;
+  Map<String, dynamic> _availableFilters = {};
+  Map<String, dynamic> get availableFilters => _availableFilters;
+  List<Map<String, dynamic>> _providerReviews = [];
+  List<Map<String, dynamic>> get providerReviews => _providerReviews;
+  List<Map<String, dynamic>> _serviceReviews = [];
+  List<Map<String, dynamic>> get serviceReviews => _serviceReviews;
 
   // Getters
+  List<MedicalService> get allServices => _allServices;
+  List<String> get allCategories => _allCategories;
   List<ServiceProvider> get providers => _providers;
   List<ServiceProvider> get selectedProviders => _selectedProviders;
   String get selectedServiceCategory => _selectedServiceCategory;
-  List<String> get availableCategories => _availableCategories;
+  String get selectedService => _selectedService;
+  MedicalService? get selectedServiceDetails => _selectedServiceDetails;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  // Initialize with sample data
-  void initialize() {
-    _loadSampleData();
+  // Filter getters
+  bool get nearest => _nearest;
+  bool get lowCost => _lowCost;
+  bool get topRated => _topRated;
+  bool get insurance => _insurance;
+  bool get availableToday => _availableToday;
+  Map<String, double>? get userLocation => _userLocation;
+
+  // Initialize the view model
+  Future<void> initialize() async {
+    await _loadServicesFromApi();
+    await _loadProvidersFromApi();
+    await _loadProviderServicesFromApi();
+    await fetchAvailableFilters();
   }
 
-  void _loadSampleData() {
-    setBusy(true);
-    
-    // Sample medical services
-    final bloodTestService = MedicalService(
-      id: 'blood_test_1',
-      name: 'Complete Blood Count (CBC)',
-      description: 'Comprehensive blood analysis including red blood cells, white blood cells, and platelets',
-      category: 'Laboratory Tests',
-      price: 45.0,
-      duration: 30,
-      includedTests: ['RBC Count', 'WBC Count', 'Hemoglobin', 'Platelet Count'],
-      requirements: ['Fasting for 8-12 hours', 'No medications 24h before'],
-      rating: 4.5,
-      reviewCount: 128,
-    );
+  // Load services from API
+  Future<void> _loadServicesFromApi() async {
+    _setLoading(true);
+    _clearError();
 
-    final mriService = MedicalService(
-      id: 'mri_1',
-      name: 'MRI Scan - Brain',
-      description: 'Magnetic Resonance Imaging of the brain for detailed neurological assessment',
-      category: 'Imaging',
-      price: 350.0,
-      duration: 45,
-      includedTests: ['Brain MRI', 'Radiologist Report', 'Digital Images'],
-      requirements: ['No metal objects', 'Remove jewelry', 'Comfortable clothing'],
-      rating: 4.8,
-      reviewCount: 89,
-    );
-
-    final consultationService = MedicalService(
-      id: 'consultation_1',
-      name: 'General Consultation',
-      description: 'Comprehensive health consultation with a general practitioner',
-      category: 'Consultation',
-      price: 80.0,
-      duration: 30,
-      includedTests: ['Physical Examination', 'Health Assessment', 'Prescription if needed'],
-      requirements: ['Bring medical history', 'List of current medications'],
-      rating: 4.6,
-      reviewCount: 256,
-    );
-
-    // Sample service providers
-    _providers = [
-      ServiceProvider(
-        id: '1',
-        name: 'City General Hospital',
-        type: 'hospital',
-        location: 'Downtown Medical District',
-        rating: 4.7,
-        reviewCount: 1247,
-        distance: 2.3,
-        isOpen: true,
-        imageUrl: 'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?w=400',
-        description: 'Leading hospital with state-of-the-art facilities',
-        specialties: ['Cardiology', 'Neurology', 'Orthopedics'],
-        services: [bloodTestService, mriService, consultationService],
-        workingHours: '24/7',
-        facilities: ['ICU', 'Emergency Room', 'Laboratory', 'Imaging Center'],
-        averagePrice: 158.33,
-        totalServices: 3,
-      ),
-      ServiceProvider(
-        id: '2',
-        name: 'Community Medical Clinic',
-        type: 'clinic',
-        location: 'Westside Plaza',
-        rating: 4.3,
-        reviewCount: 892,
-        distance: 1.8,
-        isOpen: true,
-        imageUrl: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400',
-        description: 'Family-friendly clinic with personalized care',
-        specialties: ['Family Medicine', 'Pediatrics', 'Preventive Care'],
-        services: [
-          MedicalService(
-            id: 'blood_test_2',
-            name: 'Complete Blood Count (CBC)',
-            description: 'Standard blood analysis with quick results',
-            category: 'Laboratory Tests',
-            price: 35.0,
-            duration: 20,
-            includedTests: ['RBC Count', 'WBC Count', 'Hemoglobin'],
-            requirements: ['Fasting for 8 hours'],
-            rating: 4.2,
-            reviewCount: 95,
-          ),
-          MedicalService(
-            id: 'consultation_2',
-            name: 'General Consultation',
-            description: 'Friendly consultation with family doctor',
-            category: 'Consultation',
-            price: 65.0,
-            duration: 25,
-            includedTests: ['Physical Examination', 'Health Advice'],
-            requirements: ['Medical history'],
-            rating: 4.4,
-            reviewCount: 203,
-          ),
-        ],
-        workingHours: 'Mon-Fri: 8AM-6PM, Sat: 9AM-2PM',
-        facilities: ['Waiting Room', 'Examination Rooms', 'Basic Laboratory'],
-        averagePrice: 50.0,
-        totalServices: 2,
-      ),
-      ServiceProvider(
-        id: '3',
-        name: 'Premium Health Center',
-        type: 'clinic',
-        location: 'Uptown Business District',
-        rating: 4.9,
-        reviewCount: 567,
-        distance: 3.1,
-        isOpen: true,
-        imageUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400',
-        description: 'Premium healthcare with luxury amenities',
-        specialties: ['Executive Health', 'Wellness', 'Preventive Medicine'],
-        services: [
-          MedicalService(
-            id: 'blood_test_3',
-            name: 'Complete Blood Count (CBC)',
-            description: 'Premium blood analysis with comprehensive panel',
-            category: 'Laboratory Tests',
-            price: 75.0,
-            duration: 40,
-            includedTests: ['RBC Count', 'WBC Count', 'Hemoglobin', 'Platelet Count', 'ESR', 'CRP'],
-            requirements: ['Fasting for 12 hours', 'No medications 48h before'],
-            rating: 4.9,
-            reviewCount: 67,
-          ),
-          MedicalService(
-            id: 'mri_3',
-            name: 'MRI Scan - Brain',
-            description: 'High-resolution MRI with 3T technology',
-            category: 'Imaging',
-            price: 450.0,
-            duration: 60,
-            includedTests: ['Brain MRI', 'Specialist Report', '3D Reconstruction', 'Digital Images'],
-            requirements: ['No metal objects', 'Comfortable clothing', 'Arrive 15min early'],
-            rating: 4.9,
-            reviewCount: 34,
-          ),
-          MedicalService(
-            id: 'consultation_3',
-            name: 'Executive Consultation',
-            description: 'Comprehensive health assessment with specialist',
-            category: 'Consultation',
-            price: 150.0,
-            duration: 60,
-            includedTests: ['Comprehensive Physical', 'Health Risk Assessment', 'Lifestyle Consultation'],
-            requirements: ['Complete medical history', 'Current medications list'],
-            rating: 4.8,
-            reviewCount: 89,
-          ),
-        ],
-        workingHours: 'Mon-Fri: 7AM-8PM, Sat: 9AM-5PM',
-        facilities: ['Private Rooms', 'Luxury Waiting Area', 'Advanced Laboratory', 'Imaging Suite'],
-        averagePrice: 225.0,
-        totalServices: 3,
-      ),
-    ];
-
-    // Extract available categories
-    _availableCategories = _providers
-        .expand((provider) => provider.services)
-        .map((service) => service.category)
-        .toSet()
-        .toList();
-
-    if (_availableCategories.isNotEmpty) {
-      _selectedServiceCategory = _availableCategories.first;
-    }
-
-    setBusy(false);
-  }
-
-  void selectProvider(ServiceProvider provider) {
-    if (_selectedProviders.length < 3 && !_selectedProviders.contains(provider)) {
-      _selectedProviders.add(provider);
-      notifyListeners();
+    try {
+      // Load categories first
+      final categories = await ServicesApiService.fetchCategories();
+      
+      // Load all services
+      final services = await ServicesApiService.fetchServices();
+      
+      _allCategories = categories;
+      _allServices = services;
+      
+      // Set default selected service if available
+      if (_allServices.isNotEmpty) {
+        _selectedService = _allServices.first.name;
+        await _loadServiceDetails(_allServices.first.id);
+      }
+      
+      _setLoading(false);
+      print('✅ Loaded ${services.length} services and ${categories.length} categories from API');
+      
+    } catch (e) {
+      _setError('Failed to load services: $e');
+      _setLoading(false);
+      print('❌ Error loading services from API: $e');
+      
+      // Fallback to sample data
+      await _loadSampleData();
     }
   }
 
-  void removeProvider(ServiceProvider provider) {
-    _selectedProviders.remove(provider);
+  // Load providers from API
+  Future<void> _loadProvidersFromApi() async {
+    try {
+      final providers = await ServicesApiService.fetchProviders(
+        location: _userLocation,
+        page: 1,
+        limit: 50,
+      );
+      
+      _providers = providers;
+      print('✅ Loaded ${providers.length} providers from API');
+      
+    } catch (e) {
+      print('❌ Error loading providers from API: $e');
+      // Keep existing providers if API fails
+    }
+  }
+
+  // Load provider services from API
+  Future<void> _loadProviderServicesFromApi() async {
+    try {
+      final services = await ServicesApiService.fetchProviderServices();
+      _providerServices = services;
+      print('✅ Loaded ${services.length} provider services from API');
+    } catch (e) {
+      print('❌ Error loading provider services from API: ${e.toString()}');
+      _providerServices = [];
+    }
     notifyListeners();
   }
 
-  void setServiceCategory(String category) {
+  // Load services for a specific category
+  Future<void> loadServicesForCategory(String category) async {
+    if (category == 'All') {
+      await _loadServicesFromApi();
+      return;
+    }
+
+    _setLoading(true);
+    _clearError();
+
+    try {
+      // Use the dedicated category API
+      final services = await ServicesApiService.fetchServicesByCategory(category);
+      
+      _allServices = services;
+      
+      // Set default selected service if available
+      if (_allServices.isNotEmpty) {
+        _selectedService = _allServices.first.name;
+        await _loadServiceDetails(_allServices.first.id);
+      }
+      
+      _setLoading(false);
+      print('✅ Loaded ${services.length} services for category: $category');
+      
+    } catch (e) {
+      _setError('Failed to load services for category $category: $e');
+      _setLoading(false);
+      print('❌ Error loading services for category $category: $e');
+    }
+  }
+
+  // Load service details using comparison API
+  Future<void> loadServiceDetails(String serviceName) async {
+    final service = _allServices.firstWhere(
+      (s) => s.name == serviceName,
+      orElse: () => throw Exception('Service not found'),
+    );
+    
+    await _loadServiceDetails(service.id);
+  }
+
+  Future<void> _loadServiceDetails(String serviceId) async {
+    try {
+      final comparisonData = await ServicesApiService.fetchServiceComparison(
+        serviceId: serviceId,
+        nearest: _nearest,
+        lowCost: _lowCost,
+        topRated: _topRated,
+        insurance: _insurance,
+        availableToday: _availableToday,
+        location: _userLocation,
+      );
+
+      if (comparisonData.isNotEmpty && comparisonData['service'] != null) {
+        _selectedServiceDetails = MedicalService.fromJson(comparisonData['service']);
+        
+        // Update providers from comparison data if available
+        if (comparisonData['providers'] != null && comparisonData['providers'] is List) {
+          final providersData = comparisonData['providers'] as List;
+          _providers = providersData.map((json) => ServiceProvider.fromJson(json)).toList();
+        }
+        
+        print('✅ Loaded service details for: ${_selectedServiceDetails?.name}');
+      }
+    } catch (e) {
+      print('❌ Error loading service details: $e');
+      // Fallback to local service data
+      final service = _allServices.firstWhere(
+        (s) => s.id == serviceId,
+        orElse: () => throw Exception('Service not found'),
+      );
+      _selectedServiceDetails = service;
+    }
+  }
+
+  // Update filters
+  void updateFilters({
+    bool? nearest,
+    bool? lowCost,
+    bool? topRated,
+    bool? insurance,
+    bool? availableToday,
+    Map<String, double>? location,
+  }) {
+    if (nearest != null) _nearest = nearest;
+    if (lowCost != null) _lowCost = lowCost;
+    if (topRated != null) _topRated = topRated;
+    if (insurance != null) _insurance = insurance;
+    if (availableToday != null) _availableToday = availableToday;
+    if (location != null) _userLocation = location;
+    
+      notifyListeners();
+    
+    // Reload service details with new filters if a service is selected
+    if (_selectedServiceDetails != null) {
+      _loadServiceDetails(_selectedServiceDetails!.id);
+    }
+  }
+
+  // Get services for a specific category
+  List<String> getServicesForCategory(String category) {
+    if (category == 'All') {
+      return _allServices.map((s) => s.name).toList();
+    }
+    return _allServices
+        .where((service) => service.category == category)
+        .map((s) => s.name)
+        .toList();
+  }
+
+  // Set selected service category
+  void setSelectedServiceCategory(String category) {
     _selectedServiceCategory = category;
     notifyListeners();
   }
 
-  List<MedicalService> getServicesForCategory(String category) {
-    return _providers
-        .expand((provider) => provider.services)
-        .where((service) => service.category == category)
-        .toList();
+  // Set selected service
+  void setSelectedService(String service) {
+    _selectedService = service;
+    loadServiceDetails(service);
+    notifyListeners();
   }
 
-  List<MedicalService> getServicesForProviderAndCategory(ServiceProvider provider, String category) {
-    return provider.services.where((service) => service.category == category).toList();
+  // Toggle provider selection
+  void toggleProviderSelection(ServiceProvider provider) {
+    if (_selectedProviders.contains(provider)) {
+      _selectedProviders.remove(provider);
+    } else {
+      if (_selectedProviders.length < 3) {
+        _selectedProviders.add(provider);
+      }
+    }
+    notifyListeners();
   }
 
-  void clearSelection() {
+  // Clear selected providers
+  void clearSelectedProviders() {
     _selectedProviders.clear();
     notifyListeners();
   }
 
-  ServiceProvider? getProviderById(String id) {
+  // Fetch provider services for a specific provider
+  Future<void> fetchProviderServicesByProvider(String providerId) async {
     try {
-      return _providers.firstWhere((provider) => provider.id == id);
+      final services = await ServicesApiService.fetchProviderServicesByProvider(providerId);
+      _providerServicesByProvider = services;
+      print('✅ Loaded ${services.length} provider services for provider $providerId');
     } catch (e) {
-      return null;
+      print('❌ Error loading provider services for provider: $providerId: ${e.toString()}');
+      _providerServicesByProvider = [];
+    }
+    notifyListeners();
+  }
+
+  // Fetch providers for a specific service
+  Future<void> fetchProvidersByService(String serviceId) async {
+    try {
+      final providers = await ServicesApiService.fetchProvidersByService(serviceId);
+      _providersByService = providers;
+      print('✅ Loaded ${providers.length} providers for service $serviceId');
+    } catch (e) {
+      print('❌ Error loading providers for service: $serviceId: ${e.toString()}');
+      _providersByService = [];
+    }
+    notifyListeners();
+  }
+
+  // Fetch available comparison filters
+  Future<void> fetchAvailableFilters() async {
+    try {
+      final filters = await ServicesApiService.fetchAvailableComparisonFilters();
+      _availableFilters = filters;
+      print('✅ Loaded available comparison filters');
+    } catch (e) {
+      print('❌ Error loading available comparison filters: ${e.toString()}');
+      _availableFilters = {};
+    }
+    notifyListeners();
+  }
+
+  // Fetch reviews for a provider
+  Future<void> fetchProviderReviews(String providerId) async {
+    try {
+      final reviews = await ServicesApiService.fetchProviderReviews(providerId);
+      _providerReviews = reviews;
+      print('✅ Loaded ${reviews.length} reviews for provider $providerId');
+    } catch (e) {
+      print('❌ Error loading reviews for provider: $providerId: ${e.toString()}');
+      _providerReviews = [];
+    }
+    notifyListeners();
+  }
+
+  // Fetch reviews for a service
+  Future<void> fetchServiceReviews(String serviceId) async {
+    try {
+      final reviews = await ServicesApiService.fetchServiceReviews(serviceId);
+      _serviceReviews = reviews;
+      print('✅ Loaded ${reviews.length} reviews for service $serviceId');
+    } catch (e) {
+      print('❌ Error loading reviews for service: $serviceId: ${e.toString()}');
+      _serviceReviews = [];
+    }
+    notifyListeners();
+  }
+
+  // Loading state management
+  void _setLoading(bool loading) {
+    _isLoading = loading;
+    notifyListeners();
+  }
+
+  void _setError(String? error) {
+    _errorMessage = error;
+    notifyListeners();
+  }
+
+  void _clearError() {
+    _errorMessage = null;
+    notifyListeners();
+  }
+
+  // Fallback to sample data
+  Future<void> _loadSampleData() async {
+    print('🔄 Loading sample data as fallback...');
+    
+    _allCategories = [
+      'consultation',
+      'emergency', 
+      'imaging',
+      'laboratory_tests',
+      'procedure',
+      'screening',
+      'therapy',
+      'vaccination'
+    ];
+
+    _allServices = [
+      MedicalService(
+        id: '1',
+        name: 'General Consultation',
+        description: 'Basic health consultation with a doctor',
+        category: 'consultation',
+        price: 50.0,
+        duration: 30,
+        provider: 'Medico General Hospital',
+        location: 'Downtown Medical Center',
+        rating: 4.5,
+        reviewCount: 120,
+      ),
+      MedicalService(
+        id: '2', 
+        name: 'Blood Test',
+        description: 'Comprehensive blood analysis',
+        category: 'laboratory_tests',
+        price: 75.0,
+        duration: 15,
+        provider: 'Medico Laboratory',
+        location: 'Medical District',
+        rating: 4.8,
+        reviewCount: 89,
+      ),
+    ];
+
+    if (_allServices.isNotEmpty) {
+      _selectedService = _allServices.first.name;
+      _selectedServiceDetails = _allServices.first;
+    }
+    
+    _setLoading(false);
+  }
+
+  // Provider selection methods
+  void addProvider(ServiceProvider provider) {
+    if (_selectedProviders.length < 3 && !_selectedProviders.contains(provider)) {
+      _selectedProviders.add(provider);
+      notifyListeners();
+      print('✅ Added provider: ${provider.name}');
     }
   }
 
-  List<ServiceProvider> getProvidersByCategory(String category) {
-    return _providers.where((provider) => 
-      provider.services.any((service) => service.category == category)
-    ).toList();
+  void removeProvider(ServiceProvider provider) {
+    if (_selectedProviders.contains(provider)) {
+      _selectedProviders.remove(provider);
+      notifyListeners();
+      print('✅ Removed provider: ${provider.name}');
+    }
   }
 
-  void sortProvidersByPrice({bool ascending = true}) {
-    _selectedProviders.sort((a, b) {
-      final aService = a.services.firstWhere(
-        (s) => s.category == _selectedServiceCategory,
-        orElse: () => MedicalService(
-          id: '', name: '', description: '', category: '', price: 0, duration: 0,
-        ),
-      );
-      final bService = b.services.firstWhere(
-        (s) => s.category == _selectedServiceCategory,
-        orElse: () => MedicalService(
-          id: '', name: '', description: '', category: '', price: 0, duration: 0,
-        ),
-      );
-      
-      return ascending 
-          ? aService.price.compareTo(bService.price)
-          : bService.price.compareTo(aService.price);
-    });
+  void clearAllProviders() {
+    _selectedProviders.clear();
     notifyListeners();
+    print('✅ Cleared all selected providers');
   }
 
-  void sortProvidersByRating({bool ascending = false}) {
-    _selectedProviders.sort((a, b) {
-      return ascending 
-          ? a.rating.compareTo(b.rating)
-          : b.rating.compareTo(a.rating);
-    });
-    notifyListeners();
-  }
-
-  void sortProvidersByDistance({bool ascending = true}) {
-    _selectedProviders.sort((a, b) {
-      return ascending 
-          ? a.distance.compareTo(b.distance)
-          : b.distance.compareTo(a.distance);
-    });
-    notifyListeners();
+  // Get providers that offer the selected service
+  List<ServiceProvider> getProvidersForSelectedService() {
+    if (_selectedService.isEmpty) return [];
+    
+    // For now, return all providers since we don't have service-specific provider mapping
+    // In a real implementation, you would filter providers based on the selected service
+    return _providers;
   }
 } 

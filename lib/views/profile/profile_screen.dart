@@ -11,6 +11,12 @@ import 'help_support_screen.dart';
 import 'privacy_policy_screen.dart';
 import 'consent_management_screen.dart';
 import 'personal_data_screen.dart';
+import 'package:provider/provider.dart';
+import '../../viewmodels/profile_view_model.dart';
+import '../../core/services/auth_service.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -56,6 +62,11 @@ class _ProfileScreenState extends State<ProfileScreen>
 
     _fadeController.forward();
     _slideController.forward();
+
+    // Fetch profile data from API
+    Future.microtask(() {
+      Provider.of<ProfileViewModel>(context, listen: false).fetchProfile();
+    });
   }
 
   @override
@@ -68,9 +79,27 @@ class _ProfileScreenState extends State<ProfileScreen>
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final familyVM = context.watch<FamilyMembersViewModel>();
-    final currentProfile = familyVM.currentProfile;
-    final familyCount = familyVM.members.length;
+    final profileVM = context.watch<ProfileViewModel>();
+    final profileData = profileVM.profileData;
+    final isLoading = profileVM.isLoading;
+    final error = profileVM.error;
+
+    if (isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    if (error != null) {
+      return Scaffold(
+        body: Center(child: Text('Error: ' + error)),
+      );
+    }
+
+    final profile = profileData?['profile'];
+    final doctorProfile = profileData?['doctorProfile'];
+    final email = profileData?['email'];
+    final role = profileData?['role'];
+    // Use these fields in your UI as needed
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -103,7 +132,7 @@ class _ProfileScreenState extends State<ProfileScreen>
 
                   // Profile Card
                   SliverToBoxAdapter(
-                    child: _buildProfileCard(context, currentProfile, familyVM),
+                    child: _buildProfileCard(context, profile, profileVM),
                   ),
 
                   // General Section
@@ -116,18 +145,20 @@ class _ProfileScreenState extends State<ProfileScreen>
                         context,
                         icon: Icons.group,
                         title: 'Family Members',
-                        trailing: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            '$familyCount',
-                            style: textTheme.bodyMedium?.copyWith(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.bold,
+                        trailing: Consumer<FamilyMembersViewModel>(
+                          builder: (context, vm, _) => Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              '${vm.members.length}',
+                              style: textTheme.bodyMedium?.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
@@ -367,15 +398,17 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
-  Widget _buildProfileCard(BuildContext context, FamilyMember? currentProfile,
-      FamilyMembersViewModel familyVM) {
+  Widget _buildProfileCard(
+      BuildContext context, dynamic profile, ProfileViewModel profileVM) {
     final textTheme = Theme.of(context).textTheme;
-
+    final address = profile?['address'] ?? '-';
+    final phone = profile?['phone'] ?? '-';
+    final name = profile?['name'] ?? '-';
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.85),
+        color: Colors.white.withOpacity(0.95),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: Colors.white.withOpacity(0.3),
@@ -395,35 +428,129 @@ class _ProfileScreenState extends State<ProfileScreen>
         ],
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 350),
-            transitionBuilder: (child, anim) =>
-                FadeTransition(opacity: anim, child: child),
+          // Avatar
+          InkWell(
+            borderRadius: BorderRadius.circular(100),
+            onTap: () async {
+              final picker = ImagePicker();
+              final picked = await picker.pickImage(
+                  source: ImageSource.gallery, imageQuality: 80);
+              if (picked != null) {
+                final profileVM =
+                    Provider.of<ProfileViewModel>(context, listen: false);
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (ctx) =>
+                      const Center(child: CircularProgressIndicator()),
+                );
+                final result = await profileVM.updateProfileAvatar(picked.path);
+                Navigator.of(context).pop();
+                if (!mounted) return;
+                if (result['success'] == true) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Profile picture updated!')),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content: Text(result['message'] ??
+                            'Failed to update profile picture')),
+                  );
+                }
+              }
+            },
             child: _ModernProfileAvatar(
-              key: ValueKey(currentProfile?.id),
-              name: currentProfile?.name,
-              imageUrl: currentProfile?.imageUrl,
+              key: ValueKey(profile?['id']),
+              name: name,
+              imageUrl: profile?['imageUrl'],
+              radius: 36,
             ),
           ),
           const SizedBox(width: 20),
+          // Info
           Expanded(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 350),
-              transitionBuilder: (child, anim) =>
-                  FadeTransition(opacity: anim, child: child),
-              child: Column(
-                key: ValueKey(currentProfile?.id),
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    currentProfile?.name ?? '-',
-                    style: textTheme.titleLarge?.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.bold,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        name,
+                        style: textTheme.titleLarge?.copyWith(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
+                    IconButton(
+                      icon: Icon(Icons.edit, color: AppColors.primary),
+                      tooltip: 'Edit Profile',
+                      onPressed: () async {
+                        await showDialog(
+                          context: context,
+                          builder: (ctx) => _EditProfileDialog(
+                            initialProfile: profile,
+                            onSave: (data) async {
+                              final success =
+                                  await profileVM.updateProfile(data);
+                              if (success && ctx.mounted)
+                                Navigator.of(ctx).pop();
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+                if (address.isNotEmpty && address != '-') ...[
+                  const SizedBox(height: 6),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.location_on,
+                          size: 16, color: AppColors.textSecondary),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          address,
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w400,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
+                ],
+                if (phone.isNotEmpty && phone != '-') ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.phone,
+                          size: 16, color: AppColors.textSecondary),
+                      const SizedBox(width: 4),
+                      Text(
+                        phone,
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+                if (profile?['role'] != null) ...[
+                  const SizedBox(height: 8),
                   Container(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -432,7 +559,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      currentProfile?.role ?? '-',
+                      profile?['role'] ?? '-',
                       style: textTheme.bodyMedium?.copyWith(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,
@@ -440,45 +567,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                     ),
                   ),
                 ],
-              ),
-            ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  AppColors.primary.withOpacity(0.1),
-                  AppColors.accent.withOpacity(0.1),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(16),
-                onTap: () async {
-                  final selected = await showModalBottomSheet<FamilyMember>(
-                    context: context,
-                    backgroundColor: Colors.transparent,
-                    builder: (ctx) =>
-                        _buildProfileSwitchModal(ctx, familyVM, currentProfile),
-                  );
-                  if (selected != null) {
-                    familyVM.switchProfile(selected);
-                  }
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Icon(
-                    Icons.switch_account,
-                    color: AppColors.primary,
-                    size: 24,
-                  ),
-                ),
-              ),
+              ],
             ),
           ),
         ],
@@ -486,8 +575,8 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
-  Widget _buildProfileSwitchModal(BuildContext context,
-      FamilyMembersViewModel familyVM, FamilyMember? currentProfile) {
+  Widget _buildProfileSwitchModal(
+      BuildContext context, ProfileViewModel profileVM, dynamic profile) {
     final textTheme = Theme.of(context).textTheme;
 
     return Container(
@@ -539,10 +628,10 @@ class _ProfileScreenState extends State<ProfileScreen>
             child: ListView.builder(
               shrinkWrap: true,
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: familyVM.members.length,
+              itemCount: profileVM.profileData?['members']?.length ?? 0,
               itemBuilder: (context, index) {
-                final member = familyVM.members[index];
-                final isActive = member.id == currentProfile?.id;
+                final member = profileVM.profileData?['members']?[index];
+                final isActive = member?['id'] == profile?['id'];
                 final isMain = index == 0;
 
                 return Container(
@@ -563,8 +652,8 @@ class _ProfileScreenState extends State<ProfileScreen>
                         child: Row(
                           children: [
                             _ModernProfileAvatar(
-                              name: member.name,
-                              imageUrl: member.imageUrl,
+                              name: member?['name'],
+                              imageUrl: member?['imageUrl'],
                               radius: 24,
                             ),
                             const SizedBox(width: 16),
@@ -575,7 +664,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                   Row(
                                     children: [
                                       Text(
-                                        member.name,
+                                        member?['name'] ?? '',
                                         style: textTheme.bodyLarge?.copyWith(
                                           fontWeight: FontWeight.w600,
                                           color: AppColors.textPrimary,
@@ -606,7 +695,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
-                                    member.role,
+                                    member?['role'] ?? '',
                                     style: textTheme.bodySmall?.copyWith(
                                       color: AppColors.primary,
                                     ),
@@ -790,7 +879,22 @@ class _ProfileScreenState extends State<ProfileScreen>
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () {},
+          onTap: () async {
+            // Only clear biometric credentials if biometrics are not enabled
+            final prefs = await SharedPreferences.getInstance();
+            final biometricEnabled =
+                prefs.getBool('biometric_enabled') ?? false;
+            final secureStorage = FlutterSecureStorage();
+            if (!biometricEnabled) {
+              await secureStorage.delete(key: 'auth_token');
+              await secureStorage.delete(key: 'user_id');
+            }
+            final result = await AuthService.logout();
+            if (context.mounted) {
+              Navigator.of(context)
+                  .pushNamedAndRemoveUntil('/login', (route) => false);
+            }
+          },
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
             child: Row(
@@ -912,6 +1016,117 @@ class _ModernProfileAvatar extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+// Add the edit profile dialog widget
+class _EditProfileDialog extends StatefulWidget {
+  final Map<String, dynamic>? initialProfile;
+  final Future<void> Function(Map<String, dynamic>) onSave;
+  const _EditProfileDialog(
+      {Key? key, this.initialProfile, required this.onSave})
+      : super(key: key);
+
+  @override
+  State<_EditProfileDialog> createState() => _EditProfileDialogState();
+}
+
+class _EditProfileDialogState extends State<_EditProfileDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController _firstNameController;
+  late TextEditingController _lastNameController;
+  late TextEditingController _phoneController;
+  late TextEditingController _addressController;
+  bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final name = widget.initialProfile?['name'] ?? '';
+    final nameParts = name.split(' ');
+    _firstNameController = TextEditingController(
+        text: nameParts.isNotEmpty ? nameParts.first : '');
+    _lastNameController = TextEditingController(
+        text: nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '');
+    _phoneController =
+        TextEditingController(text: widget.initialProfile?['phone'] ?? '');
+    _addressController =
+        TextEditingController(text: widget.initialProfile?['address'] ?? '');
+  }
+
+  @override
+  void dispose() {
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _phoneController.dispose();
+    _addressController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Edit Profile'),
+      content: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: _firstNameController,
+                decoration: const InputDecoration(labelText: 'First Name'),
+                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+              ),
+              TextFormField(
+                controller: _lastNameController,
+                decoration: const InputDecoration(labelText: 'Last Name'),
+                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+              ),
+              TextFormField(
+                controller: _phoneController,
+                decoration: const InputDecoration(labelText: 'Phone'),
+                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                keyboardType: TextInputType.phone,
+              ),
+              TextFormField(
+                controller: _addressController,
+                decoration: const InputDecoration(labelText: 'Address'),
+                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: _isSaving
+              ? null
+              : () async {
+                  if (_formKey.currentState?.validate() ?? false) {
+                    setState(() => _isSaving = true);
+                    await widget.onSave({
+                      'firstName': _firstNameController.text.trim(),
+                      'lastName': _lastNameController.text.trim(),
+                      'phone': _phoneController.text.trim(),
+                      'address': _addressController.text.trim(),
+                    });
+                    setState(() => _isSaving = false);
+                  }
+                },
+          child: _isSaving
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2))
+              : const Text('Save'),
+        ),
+      ],
     );
   }
 }

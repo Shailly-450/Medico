@@ -3,6 +3,8 @@ import '../../models/medical_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../viewmodels/order_view_model.dart';
 import 'package:provider/provider.dart';
+import 'package:dio/dio.dart';
+import '../../core/config.dart';
 
 class ServiceSelectionScreen extends StatefulWidget {
   final List<MedicalService> selectedServices;
@@ -22,27 +24,34 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
   bool _isLoading = true;
   String? _errorMessage;
   
-  // Categories for filtering
-  final List<String> _categories = [
-    'All',
-    'Radiology',
-    'Dental',
-    'Ophthalmology',
-    'Orthopedics',
-    'Gynecology',
-    'Dermatology',
-    'Telemedicine',
-    'General Surgery',
-  ];
-  
+  List<String> _categories = ['All'];
   String _selectedCategory = 'All';
+
   String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
     _selectedServices.addAll(widget.selectedServices);
+    _loadCategories();
     _loadServices();
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      final dio = Dio(BaseOptions(baseUrl: AppConfig.apiBaseUrl));
+      final response = await dio.get('/orders/services/categories');
+      if (response.data['success'] == true) {
+        final categories = (response.data['data'] as List)
+            .map((cat) => cat['category'] as String)
+            .toList();
+        setState(() {
+          _categories = ['All', ...categories];
+        });
+      }
+    } catch (e) {
+      // Optionally handle error
+    }
   }
 
   Future<void> _loadServices() async {
@@ -52,13 +61,23 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
         _errorMessage = null;
       });
 
-      final orderViewModel = Provider.of<OrderViewModel>(context, listen: false);
-      final services = await orderViewModel.getServices();
-
-      setState(() {
-        _allServices = services;
-        _isLoading = false;
-      });
+      // Fetch services directly from API
+      final dio = Dio(BaseOptions(baseUrl: AppConfig.apiBaseUrl));
+      final response = await dio.get('/orders/services');
+      if (response.data['success'] == true) {
+        final services = (response.data['data'] as List)
+            .map((json) => MedicalService.fromJson(json))
+            .toList();
+        setState(() {
+          _allServices = services;
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _errorMessage = response.data['message'] ?? 'Failed to load services.';
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       setState(() {
         _errorMessage = 'Failed to load services: ${e.toString()}';

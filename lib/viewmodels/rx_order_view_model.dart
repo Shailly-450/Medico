@@ -1,7 +1,11 @@
-import '../core/viewmodels/base_view_model.dart';
-import '../core/services/rx_order_service.dart';
 import '../models/rx_order.dart';
 import '../models/medicine.dart';
+import '../models/order.dart';
+import '../models/medical_service.dart';
+import '../core/viewmodels/base_view_model.dart';
+import '../core/services/rx_order_service.dart';
+import '../core/services/order_notification_service.dart';
+import '../core/services/auth_service.dart';
 
 class RxOrderViewModel extends BaseViewModel {
   final RxOrderService _rxOrderService = RxOrderService();
@@ -169,12 +173,74 @@ class RxOrderViewModel extends BaseViewModel {
       _selectedItems.clear();
       notifyListeners();
 
+      // Send Rx order confirmation notification
+      final userId = AuthService.currentUserId ?? 'user_123';
+      await OrderNotificationService.sendOrderConfirmation(
+        userId: userId,
+        order: _convertRxOrderToOrder(newOrder),
+      );
+
       return true;
     } catch (e) {
       setError('Failed to create Rx order: ${e.toString()}');
       return false;
     } finally {
       setBusy(false);
+    }
+  }
+
+  // Helper method to convert RxOrder to Order for notifications
+  Order _convertRxOrderToOrder(RxOrder rxOrder) {
+    return Order(
+      id: rxOrder.id,
+      userId: rxOrder.userId,
+      serviceProviderId: rxOrder.pharmacyId,
+      serviceProviderName: rxOrder.pharmacyName,
+      items: rxOrder.items.map((item) => OrderItem(
+        id: item.id,
+        service: MedicalService(
+          id: item.medicine.id,
+          name: item.medicine.name,
+          description: item.medicine.notes ?? item.medicine.name, // Use notes or name as description
+          price: item.unitPrice,
+          category: 'Pharmacy',
+          duration: 0,
+          isAvailable: true,
+        ),
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        totalPrice: item.totalPrice,
+      )).toList(),
+      subtotal: rxOrder.subtotal,
+      tax: rxOrder.tax,
+      discount: rxOrder.discount,
+      total: rxOrder.total,
+      currency: rxOrder.currency,
+      status: _convertRxOrderStatus(rxOrder.status),
+      paymentStatus: PaymentStatus.pending,
+      orderDate: rxOrder.orderDate,
+      scheduledDate: rxOrder.expectedReadyDate,
+      notes: rxOrder.patientNotes,
+    );
+  }
+
+  // Helper method to convert RxOrderStatus to OrderStatus
+  OrderStatus _convertRxOrderStatus(RxOrderStatus status) {
+    switch (status) {
+      case RxOrderStatus.pending:
+        return OrderStatus.pending;
+      case RxOrderStatus.confirmed:
+        return OrderStatus.confirmed;
+      case RxOrderStatus.processing:
+        return OrderStatus.inProgress;
+      case RxOrderStatus.readyForPickup:
+        return OrderStatus.completed;
+      case RxOrderStatus.delivered:
+        return OrderStatus.completed;
+      case RxOrderStatus.cancelled:
+        return OrderStatus.cancelled;
+      case RxOrderStatus.expired:
+        return OrderStatus.cancelled;
     }
   }
 

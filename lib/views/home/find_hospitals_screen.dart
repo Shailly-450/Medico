@@ -23,17 +23,58 @@ class _FindHospitalsScreenState extends State<FindHospitalsScreen> {
   void initState() {
     super.initState();
     _mapController = MapController();
+    // Optionally trigger refreshHospitals here if needed
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   Provider.of<HomeViewModel>(context, listen: false).refreshHospitals();
+    // });
   }
 
   @override
   Widget build(BuildContext context) {
-    final hospitals = Provider.of<HomeViewModel>(context).hospitals;
-    _filteredHospitals = hospitals.where((h) {
+    return Consumer<HomeViewModel>(
+      builder: (context, homeVM, child) {
+        if (homeVM.isBusy) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('Find Hospitals')),
+            body: const Center(child: CircularProgressIndicator()),
+          );
+        }
+        if (homeVM.hospitalsError != null) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('Find Hospitals')),
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(homeVM.hospitalsError!, style: const TextStyle(color: Colors.red)),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: homeVM.refreshHospitals,
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+        final hospitals = homeVM.hospitals;
+        print('DEBUG: _searchQuery = "$_searchQuery"');
+        print('DEBUG: homeVM.hospitals.length = ${homeVM.hospitals.length}');
+        _filteredHospitals = _searchQuery.trim().isEmpty
+            ? hospitals
+            : hospitals.where((h) {
       final q = _searchQuery.toLowerCase();
+                final address = h.contactInfo ?? {};
+                // If you have h.address, use that instead of h.contactInfo
       return h.name.toLowerCase().contains(q) ||
           h.location.toLowerCase().contains(q) ||
-          h.specialties.any((s) => s.toLowerCase().contains(q));
+                    h.specialties.any((s) => s.toLowerCase().contains(q)) ||
+                    (address['country']?.toLowerCase().contains(q) ?? false) ||
+                    (address['city']?.toLowerCase().contains(q) ?? false) ||
+                    (address['state']?.toLowerCase().contains(q) ?? false) ||
+                    (address['zipCode']?.toLowerCase().contains(q) ?? false);
     }).toList();
+        print('DEBUG: _filteredHospitals.length = ${_filteredHospitals.length}');
 
     // Center map on first hospital or default to New York
     final double defaultLat = _filteredHospitals.isNotEmpty
@@ -151,6 +192,8 @@ class _FindHospitalsScreenState extends State<FindHospitalsScreen> {
           ),
         ],
       ),
+        );
+      },
     );
   }
 } 

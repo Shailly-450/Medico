@@ -24,13 +24,7 @@ class AppointmentCard extends StatelessWidget {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => AppointmentDetailScreen(
-              appointment: appointment,
-              appointmentId: '1680', // You can generate or pass real ID
-              patientName: 'Abdullah Alshahrani',
-              gender: 'Male',
-              age: 28,
-              problem:
-                  'Hey, I have a problem with my stomach and I need to see a doctor.',
+              appointmentId: appointment.id, // Pass the real appointment ID here
             ),
           ),
         );

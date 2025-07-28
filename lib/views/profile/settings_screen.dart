@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import 'change_password_dialog.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../../core/services/auth_service.dart';
+import '../../core/services/api_service.dart';
+import '../../core/services/notification_manager.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -18,6 +24,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _healthTips = true;
   bool _biometricAuth = false;
   bool _locationServices = true;
+
+  final LocalAuthentication _localAuth = LocalAuthentication();
+
+  Future<bool> _authenticateWithBiometrics() async {
+    try {
+      bool canCheckBiometrics = await _localAuth.canCheckBiometrics;
+      if (!canCheckBiometrics) return false;
+      bool authenticated = await _localAuth.authenticate(
+        localizedReason: 'Please authenticate to enable biometrics',
+        options: const AuthenticationOptions(
+          biometricOnly: true,
+          stickyAuth: true,
+        ),
+      );
+      return authenticated;
+    } catch (e) {
+      print(e);
+      return false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +72,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     title: 'Push Notifications',
                     trailing: Switch(
                       value: _pushNotifications,
-                      onChanged: (value) => setState(() => _pushNotifications = value),
+                      onChanged: (value) async {
+                        setState(() => _pushNotifications = value);
+                        await NotificationManager.instance.updateNotificationSettings({
+                          'notifications_enabled': value,
+                        });
+                      },
                       activeColor: AppColors.primary,
                     ),
                   ),
@@ -118,7 +149,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     subtitle: 'Use fingerprint or face ID',
                     trailing: Switch(
                       value: _biometricAuth,
-                      onChanged: (value) => setState(() => _biometricAuth = value),
+                      onChanged: (value) async {
+                        final prefs = await SharedPreferences.getInstance();
+                        final secureStorage = FlutterSecureStorage();
+                        if (value) {
+                          bool success = await _authenticateWithBiometrics();
+                          if (success) {
+                            setState(() => _biometricAuth = true);
+                            await prefs.setBool('biometric_enabled', true);
+                            // Store current session token/userId for biometric login
+                            // Try to get from AuthService or ApiService
+                            final token = AuthService.accessToken ?? ApiService.accessToken;
+                            final userId = AuthService.currentUserId;
+                            if (token != null && userId != null) {
+                              await secureStorage.write(key: 'auth_token', value: token);
+                              await secureStorage.write(key: 'user_id', value: userId);
+                            }
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Biometric authentication enabled!')),
+                            );
+                          } else {
+                            setState(() => _biometricAuth = false);
+                            await prefs.setBool('biometric_enabled', false);
+                            await secureStorage.delete(key: 'auth_token');
+                            await secureStorage.delete(key: 'user_id');
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Biometric authentication failed or unavailable.')),
+                            );
+                          }
+                        } else {
+                          setState(() => _biometricAuth = false);
+                          await prefs.setBool('biometric_enabled', false);
+                          await secureStorage.delete(key: 'auth_token');
+                          await secureStorage.delete(key: 'user_id');
+                        }
+                      },
                       activeColor: AppColors.primary,
                     ),
                   ),

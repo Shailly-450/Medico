@@ -148,3 +148,25 @@ class Appointment {
     };
   }
 }
+
+/// Returns the preferred time slot string for a given time (24-hour format).
+/// Enum values must match your backend: e.g. 'morning', 'afternoon', 'evening', 'night'.
+String getPreferredTimeSlot(String time) {
+  // Expects time in "HH:mm" or "HH:mm:ss" format
+  final parts = time.split(':');
+  if (parts.length < 2) return 'morning'; // fallback
+
+  final hour = int.tryParse(parts[0]) ?? 0;
+  final minute = int.tryParse(parts[1]) ?? 0;
+  final totalMinutes = hour * 60 + minute;
+
+  if (totalMinutes >= 360 && totalMinutes < 720) {
+    return 'morning'; // 06:00 - 12:00
+  } else if (totalMinutes >= 720 && totalMinutes < 1020) {
+    return 'afternoon'; // 12:00 - 17:00
+  } else if (totalMinutes >= 1020 && totalMinutes < 1260) {
+    return 'evening'; // 17:00 - 21:00
+  } else {
+    return 'night'; // 21:00 - 06:00
+  }
+}
