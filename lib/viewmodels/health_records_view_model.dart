@@ -254,6 +254,115 @@ class HealthRecordsViewModel extends ChangeNotifier {
     developer.log('  - Error: $_error', name: 'HealthRecordsViewModel');
   }
 
+  // Test method to create a sample health record for debugging
+  Future<void> testCreateHealthRecord() async {
+    developer.log(
+        '🔍 HealthRecordsViewModel: ===== TEST CREATE RECORD START =====',
+        name: 'HealthRecordsViewModel');
+
+    if (_healthRecordService == null) {
+      developer.log('❌ HealthRecordsViewModel: Service not initialized',
+          name: 'HealthRecordsViewModel');
+      return;
+    }
+
+    try {
+      // Create a test health record with all fields
+      final testRecord = HealthRecord.create(
+        patientId: 'test-patient-id',
+        recordType: 'medical_history',
+        title: 'Diabetes Diagnosis - ${DateTime.now().millisecondsSinceEpoch}',
+        description: 'Initial diagnosis of Type 2 Diabetes',
+        date: DateTime.now(),
+        medicalHistory: {
+          'condition': 'Type 2 Diabetes',
+          'severity': 'moderate',
+          'status': 'active',
+          'treatment': 'Metformin and lifestyle changes',
+          'notes': 'Patient shows early signs of diabetes'
+        },
+        medications: {
+          'name': 'Metformin',
+          'dosage': '500mg',
+          'frequency': 'twice daily',
+          'startDate': DateTime.now().toIso8601String(),
+          'reason': 'Blood sugar control',
+          'sideEffects': ['Nausea', 'Diarrhea']
+        },
+        allergies: {
+          'allergen': 'Penicillin',
+          'reaction': 'Rash',
+          'severity': 'moderate',
+          'medications': ['Amoxicillin', 'Penicillin V']
+        },
+        labResults: {
+          'testName': 'Blood Glucose',
+          'result': '180',
+          'unit': 'mg/dL',
+          'referenceRange': '70-100 mg/dL',
+          'labName': 'City Lab'
+        },
+        imaging: {
+          'type': 'X-ray',
+          'bodyPart': 'Chest',
+          'findings': 'Normal chest X-ray',
+          'radiologist': 'Dr. Smith'
+        },
+        surgery: {
+          'procedure': 'Appendectomy',
+          'surgeon': 'Dr. Johnson',
+          'hospital': 'City Hospital',
+          'complications': 'None',
+          'recoveryNotes': 'Recovery was uneventful'
+        },
+        familyHistory: {
+          'relation': 'Father',
+          'condition': 'Diabetes',
+          'ageOfOnset': 45
+        },
+        isPrivate: false,
+        isImportant: true,
+        provider: 'Test Doctor',
+        createdBy: 'test-user-id',
+        notes:
+            'Patient shows early signs of diabetes. Lifestyle modifications recommended.',
+      );
+
+      developer.log(
+          '🔍 HealthRecordsViewModel: Test record created: ${testRecord.toJson()}',
+          name: 'HealthRecordsViewModel');
+
+      // Add the test record
+      final createdRecord =
+          await _healthRecordService!.addHealthRecord(testRecord);
+
+      developer.log(
+          '🔍 HealthRecordsViewModel: ✅ Test record created successfully!',
+          name: 'HealthRecordsViewModel');
+      developer.log(
+          '🔍 HealthRecordsViewModel: Created record ID: ${createdRecord.id}',
+          name: 'HealthRecordsViewModel');
+      developer.log(
+          '🔍 HealthRecordsViewModel: Created record title: ${createdRecord.title}',
+          name: 'HealthRecordsViewModel');
+
+      // Add to local list
+      _allRecords.add(createdRecord);
+      _applyFilters();
+      notifyListeners();
+
+      developer.log(
+          '🔍 HealthRecordsViewModel: ===== TEST CREATE RECORD END =====',
+          name: 'HealthRecordsViewModel');
+    } catch (e) {
+      developer.log('❌ HealthRecordsViewModel: Test create record failed: $e',
+          name: 'HealthRecordsViewModel');
+      developer.log(
+          '🔍 HealthRecordsViewModel: ===== TEST CREATE RECORD END =====',
+          name: 'HealthRecordsViewModel');
+    }
+  }
+
   Color getStatusColor(String? status) {
     switch (status?.toLowerCase()) {
       case 'normal':

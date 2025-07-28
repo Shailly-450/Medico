@@ -21,6 +21,10 @@ class HealthRecord {
   final String? providerImage;
   final String? status;
   final bool isImportant;
+  final String? createdBy;
+  final String? updatedBy;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   HealthRecord({
     required this.id,
@@ -43,6 +47,10 @@ class HealthRecord {
     this.providerImage,
     this.status,
     this.isImportant = false,
+    this.createdBy,
+    this.updatedBy,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory HealthRecord.fromJson(Map<String, dynamic> json) {
@@ -67,6 +75,12 @@ class HealthRecord {
       providerImage: json['providerImage'],
       status: json['status'],
       isImportant: json['isImportant'] ?? false,
+      createdBy: json['createdBy'],
+      updatedBy: json['updatedBy'],
+      createdAt:
+          json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
+      updatedAt:
+          json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
     );
   }
 
@@ -91,6 +105,10 @@ class HealthRecord {
       'providerImage': providerImage,
       'status': status,
       'isImportant': isImportant,
+      'createdBy': createdBy,
+      'updatedBy': updatedBy,
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
     };
   }
 
@@ -115,6 +133,111 @@ class HealthRecord {
       default:
         return 'Other';
     }
+  }
+
+  // Factory constructor for creating new records
+  factory HealthRecord.create({
+    required String patientId,
+    required String recordType,
+    required String title,
+    String? description,
+    DateTime? date,
+    Map<String, dynamic>? medicalHistory,
+    Map<String, dynamic>? allergies,
+    Map<String, dynamic>? medications,
+    Map<String, dynamic>? labResults,
+    Map<String, dynamic>? imaging,
+    Map<String, dynamic>? surgery,
+    Map<String, dynamic>? familyHistory,
+    List<dynamic>? attachments,
+    bool isPrivate = false,
+    String? familyMemberId,
+    String? provider,
+    String? providerImage,
+    String? status,
+    bool isImportant = false,
+    String? createdBy,
+    String? notes,
+  }) {
+    return HealthRecord(
+      id: '', // Will be set by the server
+      patientId: patientId,
+      recordType: recordType,
+      title: title,
+      description: description,
+      date: date ?? DateTime.now(),
+      medicalHistory: medicalHistory,
+      allergies: allergies,
+      medications: medications,
+      labResults: labResults,
+      imaging: imaging,
+      surgery: surgery,
+      familyHistory: familyHistory,
+      attachments: attachments,
+      isPrivate: isPrivate,
+      familyMemberId: familyMemberId,
+      provider: provider,
+      providerImage: providerImage,
+      status: status,
+      isImportant: isImportant,
+      createdBy: createdBy,
+      createdAt: DateTime.now(),
+    );
+  }
+
+  // Copy with method for updating records
+  HealthRecord copyWith({
+    String? id,
+    String? patientId,
+    String? recordType,
+    String? title,
+    String? description,
+    DateTime? date,
+    Map<String, dynamic>? medicalHistory,
+    Map<String, dynamic>? allergies,
+    Map<String, dynamic>? medications,
+    Map<String, dynamic>? labResults,
+    Map<String, dynamic>? imaging,
+    Map<String, dynamic>? surgery,
+    Map<String, dynamic>? familyHistory,
+    List<dynamic>? attachments,
+    bool? isPrivate,
+    String? familyMemberId,
+    String? provider,
+    String? providerImage,
+    String? status,
+    bool? isImportant,
+    String? createdBy,
+    String? updatedBy,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return HealthRecord(
+      id: id ?? this.id,
+      patientId: patientId ?? this.patientId,
+      recordType: recordType ?? this.recordType,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      date: date ?? this.date,
+      medicalHistory: medicalHistory ?? this.medicalHistory,
+      allergies: allergies ?? this.allergies,
+      medications: medications ?? this.medications,
+      labResults: labResults ?? this.labResults,
+      imaging: imaging ?? this.imaging,
+      surgery: surgery ?? this.surgery,
+      familyHistory: familyHistory ?? this.familyHistory,
+      attachments: attachments ?? this.attachments,
+      isPrivate: isPrivate ?? this.isPrivate,
+      familyMemberId: familyMemberId ?? this.familyMemberId,
+      provider: provider ?? this.provider,
+      providerImage: providerImage ?? this.providerImage,
+      status: status ?? this.status,
+      isImportant: isImportant ?? this.isImportant,
+      createdBy: createdBy ?? this.createdBy,
+      updatedBy: updatedBy ?? this.updatedBy,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
   }
 
   // For dummy data (can be removed in production)
