@@ -38,23 +38,56 @@ class HealthRecordService {
           name: 'HealthRecordService');
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        developer.log(
-            '🔍 HealthRecordService: Parsed data length: ${data.length}',
-            name: 'HealthRecordService');
-        developer.log('🔍 HealthRecordService: Parsed data: $data',
-            name: 'HealthRecordService');
+        try {
+          final Map<String, dynamic> responseData = json.decode(response.body);
+          developer.log(
+              '🔍 HealthRecordService: Response structure: $responseData',
+              name: 'HealthRecordService');
 
-        final records =
-            data.map((json) => HealthRecord.fromJson(json)).toList();
-        developer.log(
-            '🔍 HealthRecordService: Created ${records.length} HealthRecord objects',
-            name: 'HealthRecordService');
-        return records;
+          // Check if response has success field and data field
+          if (responseData.containsKey('success') &&
+              responseData.containsKey('data')) {
+            final List<dynamic> data = responseData['data'];
+            developer.log(
+                '🔍 HealthRecordService: Parsed data length: ${data.length}',
+                name: 'HealthRecordService');
+            developer.log('🔍 HealthRecordService: Parsed data: $data',
+                name: 'HealthRecordService');
+
+            final records =
+                data.map((json) => HealthRecord.fromJson(json)).toList();
+            developer.log(
+                '🔍 HealthRecordService: Created ${records.length} HealthRecord objects',
+                name: 'HealthRecordService');
+            return records;
+          } else {
+            // If response doesn't have the expected structure, throw an error
+            throw Exception(
+                'Unexpected response format: missing success or data fields');
+          }
+        } catch (parseError) {
+          developer.log('❌ HealthRecordService: JSON Parse Error: $parseError',
+              name: 'HealthRecordService');
+          developer.log(
+              '❌ HealthRecordService: Raw Response Body: ${response.body}',
+              name: 'HealthRecordService');
+          throw Exception('Failed to parse response: $parseError');
+        }
       } else {
         developer.log(
             '❌ HealthRecordService: API error - Status: ${response.statusCode}, Body: ${response.body}',
             name: 'HealthRecordService');
+
+        // Try to parse error response
+        try {
+          final errorData = json.decode(response.body);
+          developer.log('❌ HealthRecordService: Parsed Error: $errorData',
+              name: 'HealthRecordService');
+        } catch (e) {
+          developer.log('❌ HealthRecordService: Could not parse error response',
+              name: 'HealthRecordService');
+        }
+
         throw Exception(
             'Failed to load health records: ${response.statusCode} - ${response.body}');
       }
@@ -254,6 +287,40 @@ class HealthRecordService {
       return data.map((json) => HealthRecord.fromJson(json)).toList();
     } else {
       throw Exception('Failed to load records by type');
+    }
+  }
+
+  // Test method to check backend connectivity
+  Future<Map<String, dynamic>> testBackendConnection() async {
+    developer.log('🔍 HealthRecordService: Testing backend connection...',
+        name: 'HealthRecordService');
+
+    try {
+      final response = await http.get(
+        Uri.parse('${AppConfig.apiBaseUrl}/health-records'),
+        headers: {'Authorization': 'Bearer $authToken'},
+      );
+
+      developer.log(
+          '🔍 HealthRecordService: Test response status: ${response.statusCode}',
+          name: 'HealthRecordService');
+      developer.log(
+          '🔍 HealthRecordService: Test response body: ${response.body}',
+          name: 'HealthRecordService');
+
+      return {
+        'statusCode': response.statusCode,
+        'body': response.body,
+        'headers': response.headers.toString(),
+        'success': response.statusCode == 200,
+      };
+    } catch (e) {
+      developer.log('❌ HealthRecordService: Connection test failed: $e',
+          name: 'HealthRecordService');
+      return {
+        'error': e.toString(),
+        'success': false,
+      };
     }
   }
 }

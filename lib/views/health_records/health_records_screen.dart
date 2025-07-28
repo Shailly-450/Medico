@@ -67,6 +67,17 @@ class _HealthRecordsScreenState extends State<HealthRecordsScreen> {
         title: const Text('Health Records'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.wifi),
+            onPressed: () async {
+              final viewModel = context.read<HealthRecordsViewModel>();
+              await viewModel.testBackendConnection();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Text('Backend connection test - check console')),
+              );
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.science),
             onPressed: () async {
               final viewModel = context.read<HealthRecordsViewModel>();

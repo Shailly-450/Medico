@@ -269,7 +269,8 @@ class HealthRecordsViewModel extends ChangeNotifier {
     try {
       // Create a test health record with all fields
       final testRecord = HealthRecord.create(
-        patientId: 'test-patient-id',
+        patientId:
+            '6881c4b9645c7fbda466068f', // Use the actual patient ID from the response
         recordType: 'medical_history',
         title: 'Diabetes Diagnosis - ${DateTime.now().millisecondsSinceEpoch}',
         description: 'Initial diagnosis of Type 2 Diabetes',
@@ -396,5 +397,43 @@ class HealthRecordsViewModel extends ChangeNotifier {
       default:
         return Icons.medical_information;
     }
+  }
+
+  // Test method to check backend connectivity
+  Future<void> testBackendConnection() async {
+    developer.log(
+        '🔍 HealthRecordsViewModel: ===== TEST BACKEND CONNECTION START =====',
+        name: 'HealthRecordsViewModel');
+
+    if (_healthRecordService == null) {
+      developer.log('❌ HealthRecordsViewModel: Service not initialized',
+          name: 'HealthRecordsViewModel');
+      return;
+    }
+
+    try {
+      final result = await _healthRecordService!.testBackendConnection();
+
+      developer.log('🔍 HealthRecordsViewModel: Backend test result: $result',
+          name: 'HealthRecordsViewModel');
+
+      if (result['success'] == true) {
+        developer.log(
+            '✅ HealthRecordsViewModel: Backend connection successful!',
+            name: 'HealthRecordsViewModel');
+      } else {
+        developer.log('❌ HealthRecordsViewModel: Backend connection failed',
+            name: 'HealthRecordsViewModel');
+        developer.log('❌ HealthRecordsViewModel: Error: ${result['error']}',
+            name: 'HealthRecordsViewModel');
+      }
+    } catch (e) {
+      developer.log('❌ HealthRecordsViewModel: Backend test exception: $e',
+          name: 'HealthRecordsViewModel');
+    }
+
+    developer.log(
+        '🔍 HealthRecordsViewModel: ===== TEST BACKEND CONNECTION END =====',
+        name: 'HealthRecordsViewModel');
   }
 }

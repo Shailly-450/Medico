@@ -32,12 +32,23 @@ class PrescriptionService {
       debugPrint('📦 Response body: ${response.body}');
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        final prescriptions =
-            data.map((json) => Prescription.fromJson(json)).toList();
-        debugPrint(
-            '✅ Successfully fetched ${prescriptions.length} prescriptions');
-        return prescriptions;
+        final Map<String, dynamic> responseData = json.decode(response.body);
+        debugPrint('📦 Response structure: $responseData');
+
+        // Check if response has success field and data field
+        if (responseData.containsKey('success') &&
+            responseData.containsKey('data')) {
+          final List<dynamic> data = responseData['data'];
+          final prescriptions =
+              data.map((json) => Prescription.fromJson(json)).toList();
+          debugPrint(
+              '✅ Successfully fetched ${prescriptions.length} prescriptions');
+          return prescriptions;
+        } else {
+          // If response doesn't have the expected structure, throw an error
+          throw Exception(
+              'Unexpected response format: missing success or data fields');
+        }
       }
 
       debugPrint(

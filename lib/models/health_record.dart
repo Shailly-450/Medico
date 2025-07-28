@@ -54,34 +54,60 @@ class HealthRecord {
   });
 
   factory HealthRecord.fromJson(Map<String, dynamic> json) {
-    return HealthRecord(
-      id: json['_id'] ?? '',
-      patientId: json['patientId'] ?? '',
-      recordType: json['recordType'] ?? '',
-      title: json['title'] ?? '',
-      description: json['description'],
-      date: DateTime.parse(json['date']),
-      medicalHistory: json['medicalHistory'],
-      allergies: json['allergies'],
-      medications: json['medications'],
-      labResults: json['labResults'],
-      imaging: json['imaging'],
-      surgery: json['surgery'],
-      familyHistory: json['familyHistory'],
-      attachments: json['attachments'],
-      isPrivate: json['isPrivate'] ?? false,
-      familyMemberId: json['familyMemberId'],
-      provider: json['provider'],
-      providerImage: json['providerImage'],
-      status: json['status'],
-      isImportant: json['isImportant'] ?? false,
-      createdBy: json['createdBy'],
-      updatedBy: json['updatedBy'],
-      createdAt:
-          json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
-      updatedAt:
-          json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
-    );
+    try {
+      return HealthRecord(
+        id: json['_id']?.toString() ?? '',
+        patientId: json['patientId']?.toString() ?? '',
+        recordType: json['recordType']?.toString() ?? '',
+        title: json['title']?.toString() ?? '',
+        description: json['description']?.toString(),
+        date: json['date'] != null
+            ? DateTime.parse(json['date'].toString())
+            : DateTime.now(),
+        medicalHistory: json['medicalHistory'] != null
+            ? Map<String, dynamic>.from(json['medicalHistory'])
+            : null,
+        allergies: json['allergies'] != null
+            ? Map<String, dynamic>.from(json['allergies'])
+            : null,
+        medications: json['medications'] != null
+            ? Map<String, dynamic>.from(json['medications'])
+            : null,
+        labResults: json['labResults'] != null
+            ? Map<String, dynamic>.from(json['labResults'])
+            : null,
+        imaging: json['imaging'] != null
+            ? Map<String, dynamic>.from(json['imaging'])
+            : null,
+        surgery: json['surgery'] != null
+            ? Map<String, dynamic>.from(json['surgery'])
+            : null,
+        familyHistory: json['familyHistory'] != null
+            ? Map<String, dynamic>.from(json['familyHistory'])
+            : null,
+        attachments: json['attachments'] != null
+            ? List<dynamic>.from(json['attachments'])
+            : null,
+        isPrivate: json['isPrivate'] == true,
+        familyMemberId: json['familyMemberId']?.toString(),
+        provider: json['provider']?.toString(),
+        providerImage: json['providerImage']?.toString(),
+        status: json['status']?.toString(),
+        isImportant: json['isImportant'] == true,
+        createdBy: json['createdBy']?.toString(),
+        updatedBy: json['updatedBy']?.toString(),
+        createdAt: json['createdAt'] != null
+            ? DateTime.parse(json['createdAt'].toString())
+            : null,
+        updatedAt: json['updatedAt'] != null
+            ? DateTime.parse(json['updatedAt'].toString())
+            : null,
+      );
+    } catch (e) {
+      print('Error parsing HealthRecord from JSON: $e');
+      print('JSON data: $json');
+      rethrow;
+    }
   }
 
   Map<String, dynamic> toJson() {
