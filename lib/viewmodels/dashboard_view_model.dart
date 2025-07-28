@@ -13,6 +13,7 @@ import '../views/journey_tracker/journey_tracker_screen.dart';
 import '../views/workflow/medical_workflow_screen.dart';
 import '../views/invoices/invoices_screen.dart';
 import '../views/appointments/book_appointment_screen.dart';
+import '../views/prescriptions/prescription_screen.dart';
 
 class DashboardViewModel extends BaseViewModel {
   String userName = 'John Doe';
@@ -312,6 +313,13 @@ class DashboardViewModel extends BaseViewModel {
           icon: Icons.health_and_safety,
           color: Colors.green,
           screen: const InsuranceScreen(),
+        ),
+        QuickAction(
+          title: 'E-Prescriptions',
+          subtitle: 'Get your prescriptions',
+          icon: Icons.receipt,
+          color: Colors.red,
+          screen: const PrescriptionsScreen(),
         ),
         QuickAction(
           title: 'Invoices',
