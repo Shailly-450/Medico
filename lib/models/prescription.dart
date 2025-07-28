@@ -45,7 +45,7 @@ class PrescriptionMedicine {
       duration: json['duration'] ?? '',
       instructions: json['instructions'],
       quantity: json['quantity'] ?? 1,
-      refills: json['refills'] ?? '0',
+      refills: json['refills']?.toString() ?? '0',
       genericName: json['genericName'],
       brandName: json['brandName'],
       strength: json['strength'],
@@ -142,26 +142,80 @@ class Prescription {
   }
 
   factory Prescription.fromJson(Map<String, dynamic> json) {
-    return Prescription(
-      id: json['id'],
-      patientId: json['patientId'],
-      patientName: json['patientName'],
-      patientAge: json['patientAge'],
-      doctorId: json['doctorId'],
-      doctorName: json['doctorName'],
-      doctorSpecialty: json['doctorSpecialty'],
-      prescriptionDate: DateTime.parse(json['prescriptionDate']),
-      expirationDate: json['expirationDate'] != null
-          ? DateTime.parse(json['expirationDate'])
-          : null,
-      diagnosis: json['diagnosis'],
-      medications: (json['medications'] as List)
-          .map((med) => PrescriptionMedicine.fromJson(med))
-          .toList(),
-      notes: json['notes'],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
-    );
+    try {
+      // Handle the actual API structure
+      final String id = json['_id']?.toString() ?? json['id']?.toString() ?? '';
+
+      // Extract patientId from object or string
+      String patientId = '';
+      if (json['patientId'] is Map) {
+        patientId = json['patientId']['_id']?.toString() ?? '';
+      } else {
+        patientId = json['patientId']?.toString() ?? '';
+      }
+
+      // Extract doctorId from object or string
+      String doctorId = '';
+      if (json['doctorId'] is Map) {
+        doctorId = json['doctorId']['_id']?.toString() ?? '';
+      } else {
+        doctorId = json['doctorId']?.toString() ?? '';
+      }
+
+      // Extract patient name from patientId object if available
+      String patientName = '';
+      if (json['patientId'] is Map && json['patientId']['profile'] != null) {
+        patientName = json['patientId']['profile']['name']?.toString() ?? '';
+      } else {
+        patientName = json['patientName']?.toString() ?? 'Unknown Patient';
+      }
+
+      // Extract doctor name from doctorId object if available
+      String doctorName = '';
+      if (json['doctorId'] is Map && json['doctorId']['profile'] != null) {
+        doctorName = json['doctorId']['profile']['name']?.toString() ?? '';
+      } else {
+        doctorName = json['doctorName']?.toString() ?? 'Unknown Doctor';
+      }
+
+      // Default values for missing fields
+      final int patientAge = json['patientAge'] ?? 0;
+      final String doctorSpecialty =
+          json['doctorSpecialty']?.toString() ?? 'General Medicine';
+
+      return Prescription(
+        id: id,
+        patientId: patientId,
+        patientName: patientName,
+        patientAge: patientAge,
+        doctorId: doctorId,
+        doctorName: doctorName,
+        doctorSpecialty: doctorSpecialty,
+        prescriptionDate: json['prescriptionDate'] != null
+            ? DateTime.parse(json['prescriptionDate'].toString())
+            : DateTime.now(),
+        expirationDate: json['expirationDate'] != null
+            ? DateTime.parse(json['expirationDate'].toString())
+            : null,
+        diagnosis: json['diagnosis']?.toString() ?? '',
+        medications: json['medications'] != null
+            ? (json['medications'] as List)
+                .map((med) => PrescriptionMedicine.fromJson(med))
+                .toList()
+            : [],
+        notes: json['notes']?.toString(),
+        createdAt: json['createdAt'] != null
+            ? DateTime.parse(json['createdAt'].toString())
+            : DateTime.now(),
+        updatedAt: json['updatedAt'] != null
+            ? DateTime.parse(json['updatedAt'].toString())
+            : DateTime.now(),
+      );
+    } catch (e) {
+      print('❌ Error parsing Prescription from JSON: $e');
+      print('❌ JSON data: $json');
+      rethrow;
+    }
   }
 
   Map<String, dynamic> toJson() {
