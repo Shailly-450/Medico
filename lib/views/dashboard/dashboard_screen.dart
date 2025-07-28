@@ -34,6 +34,9 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BaseView<DashboardViewModel>(
       viewModelBuilder: () => DashboardViewModel(),
+      onModelReady: (model) async {
+        await model.initialize();
+      },
       builder: (context, model, child) => Scaffold(
         backgroundColor: Colors.transparent,
         appBar: null,
@@ -57,7 +60,7 @@ class DashboardScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Modern Custom App Bar
-                  _buildModernDashboardAppBar(context),
+                  _buildModernDashboardAppBar(context, model),
                   // Profile Header with Welcome Message
                   _buildWelcomeHeader(context, model),
 
@@ -105,7 +108,8 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildModernDashboardAppBar(BuildContext context) {
+  Widget _buildModernDashboardAppBar(
+      BuildContext context, DashboardViewModel model) {
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
@@ -181,6 +185,26 @@ class DashboardScreen extends StatelessWidget {
           // Actions
           Row(
             children: [
+              IconButton(
+                icon: const Icon(
+                  Icons.bug_report,
+                  color: AppColors.primary,
+                ),
+                tooltip: 'Debug Info',
+                onPressed: () {
+                  _showDebugInfo(context, model);
+                },
+              ),
+              IconButton(
+                icon: const Icon(
+                  Icons.refresh,
+                  color: AppColors.primary,
+                ),
+                tooltip: 'Refresh Dashboard',
+                onPressed: () async {
+                  await model.loadDashboardData();
+                },
+              ),
               IconButton(
                 icon: const Icon(
                   Icons.medical_information,
@@ -360,7 +384,7 @@ class DashboardScreen extends StatelessWidget {
               Expanded(
                 child: HealthOverviewCard(
                   title: 'Total Savings',
-                  value: model.formatCurrency(model.totalSavings),
+                  value: '\$${model.totalSavings.toStringAsFixed(2)}',
                   subtitle: 'This year',
                   icon: Icons.savings,
                   color: AppColors.accent,
@@ -483,7 +507,7 @@ class DashboardScreen extends StatelessWidget {
                         ),
                         const Spacer(),
                         Text(
-                          model.formatDate(model.latestVitals!.date),
+                          model.formatDate(model.latestVitals!.timestamp),
                           style: TextStyle(
                             color: Colors.grey[600],
                             fontSize: 12,
@@ -502,7 +526,7 @@ class DashboardScreen extends StatelessWidget {
                               child: _buildVitalSignCard(
                                 context,
                                 'Blood Pressure',
-                                '${model.latestVitals!.bloodPressureSystolic}/${model.latestVitals!.bloodPressureDiastolic}',
+                                '${model.latestVitals!.bloodPressureSystolic.toInt()}/${model.latestVitals!.bloodPressureDiastolic.toInt()}',
                                 'mmHg',
                                 model.getVitalSignStatus('bloodPressure', {
                                   'systolic':
@@ -523,7 +547,7 @@ class DashboardScreen extends StatelessWidget {
                                 'bpm',
                                 model.getVitalSignStatus(
                                   'heartRate',
-                                  model.latestVitals!.heartRate,
+                                  {'rate': model.latestVitals!.heartRate},
                                 ),
                                 Icons.favorite,
                                 Colors.pink,
@@ -538,11 +562,11 @@ class DashboardScreen extends StatelessWidget {
                               child: _buildVitalSignCard(
                                 context,
                                 'Temperature',
-                                '${model.latestVitals!.temperature}',
+                                '${model.latestVitals!.temperature.toStringAsFixed(1)}',
                                 '°F',
                                 model.getVitalSignStatus(
                                   'temperature',
-                                  model.latestVitals!.temperature,
+                                  {'temp': model.latestVitals!.temperature},
                                 ),
                                 Icons.thermostat,
                                 Colors.orange,
@@ -553,12 +577,9 @@ class DashboardScreen extends StatelessWidget {
                               child: _buildVitalSignCard(
                                 context,
                                 'O₂ Saturation',
-                                '${model.latestVitals!.oxygenSaturation}',
+                                '${model.latestVitals!.oxygenSaturation.toInt()}',
                                 '%',
-                                model.getVitalSignStatus(
-                                  'oxygenSaturation',
-                                  model.latestVitals!.oxygenSaturation,
-                                ),
+                                'Normal', // Simplified status for O2
                                 Icons.air,
                                 Colors.blue,
                               ),
@@ -572,9 +593,9 @@ class DashboardScreen extends StatelessWidget {
                               child: _buildVitalSignCard(
                                 context,
                                 'Weight',
-                                '${model.latestVitals!.weight}',
+                                '${model.latestVitals!.weight.toStringAsFixed(1)}',
                                 'kg',
-                                'normal',
+                                'Normal', // Simplified status for weight
                                 Icons.monitor_weight,
                                 Colors.green,
                               ),
@@ -583,11 +604,11 @@ class DashboardScreen extends StatelessWidget {
                             Expanded(
                               child: _buildVitalSignCard(
                                 context,
-                                'Height',
-                                '${model.latestVitals!.height}',
-                                'cm',
-                                'normal',
-                                Icons.height,
+                                'Blood Sugar',
+                                '${model.latestVitals!.bloodSugar.toInt()}',
+                                'mg/dL',
+                                'Normal', // Simplified status for blood sugar
+                                Icons.water_drop,
                                 Colors.purple,
                               ),
                             ),
@@ -600,7 +621,49 @@ class DashboardScreen extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+          ] else ...[
+            // Show placeholder when no vitals data
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    spreadRadius: 1,
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.health_and_safety,
+                    color: Colors.grey[400],
+                    size: 48,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'No Vital Signs Data',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Add your latest vital signs to track your health',
+                    style: TextStyle(
+                      color: Colors.grey[500],
+                      fontSize: 12,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
           ],
 
           // Health Metrics Section
@@ -769,19 +832,21 @@ class DashboardScreen extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: (metric['color'] as Color?)?.withOpacity(0.1) ??
+            Colors.grey.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[200]!),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: metric['color'].withOpacity(0.1),
+              color: (metric['color'] as Color?)?.withOpacity(0.1) ??
+                  Colors.grey.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(metric['icon'], color: metric['color'], size: 20),
+            child: Icon(metric['icon'] as IconData?,
+                color: metric['color'] as Color?, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -789,7 +854,7 @@ class DashboardScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  metric['name'],
+                  (metric['name'] as String?) ?? 'Unknown Metric',
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
@@ -800,25 +865,26 @@ class DashboardScreen extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      '${metric['value']} ${metric['unit']}',
+                      '${(metric['value'] as num?) ?? 0} ${(metric['unit'] as String?) ?? ''}',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
-                        color: metric['color'],
+                        color: metric['color'] as Color?,
                       ),
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'of ${metric['target']}',
+                      'of ${(metric['target'] as num?) ?? 0}',
                       style: TextStyle(color: Colors.grey[600], fontSize: 12),
                     ),
                   ],
                 ),
                 const SizedBox(height: 6),
                 LinearProgressIndicator(
-                  value: metric['progress'],
+                  value: (metric['progress'] as num?)?.toDouble() ?? 0.0,
                   backgroundColor: Colors.grey[300],
-                  valueColor: AlwaysStoppedAnimation<Color>(metric['color']),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                      (metric['color'] as Color?) ?? Colors.grey),
                 ),
               ],
             ),
@@ -832,7 +898,7 @@ class DashboardScreen extends StatelessWidget {
               border: Border.all(color: statusColor.withOpacity(0.3)),
             ),
             child: Text(
-              metric['status'].toUpperCase(),
+              (metric['status'] as String?)?.toUpperCase() ?? 'UNKNOWN',
               style: TextStyle(
                 color: statusColor,
                 fontSize: 10,
@@ -960,7 +1026,7 @@ class DashboardScreen extends StatelessWidget {
                   return MedicationCard(
                     medication: medication,
                     onRefill: () => model.refillMedication(
-                      model.activeMedications.indexOf(medication),
+                      (medication['name'] as String?) ?? 'Unknown Medication',
                     ),
                   );
                 }).toList(),
@@ -1180,7 +1246,8 @@ class DashboardScreen extends StatelessWidget {
                           return MedicationCard(
                             medication: medication,
                             onRefill: () => model.refillMedication(
-                              model.activeMedications.indexOf(medication),
+                              (medication['name'] as String?) ??
+                                  'Unknown Medication',
                             ),
                           );
                         }).toList(),
@@ -1225,7 +1292,8 @@ class DashboardScreen extends StatelessWidget {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        treatment['type'],
+                                        (treatment['type'] as String?) ??
+                                            'Unknown Treatment',
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 14,
@@ -1245,7 +1313,8 @@ class DashboardScreen extends StatelessWidget {
                                           ),
                                         ),
                                         child: Text(
-                                          treatment['sessions'],
+                                          (treatment['sessions'] as String?) ??
+                                              '0/0',
                                           style: TextStyle(
                                             color: AppColors.primary,
                                             fontWeight: FontWeight.w600,
@@ -1257,7 +1326,9 @@ class DashboardScreen extends StatelessWidget {
                                   ),
                                   const SizedBox(height: 8),
                                   LinearProgressIndicator(
-                                    value: treatment['progress'],
+                                    value: (treatment['progress'] as num?)
+                                            ?.toDouble() ??
+                                        0.0,
                                     backgroundColor: Colors.grey[300],
                                     valueColor: AlwaysStoppedAnimation<Color>(
                                       AppColors.primary,
@@ -1265,7 +1336,7 @@ class DashboardScreen extends StatelessWidget {
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
-                                    'Next: ${treatment['nextSession']}',
+                                    'Next: ${(treatment['nextSession'] as String?) ?? 'Not scheduled'}',
                                     style: TextStyle(
                                       color: Colors.grey[600],
                                       fontSize: 12,
@@ -1623,6 +1694,77 @@ class DashboardScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _showDebugInfo(BuildContext context, DashboardViewModel model) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Dashboard Debug Info'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Dashboard Data Loaded: ${model.dashboardData != null}'),
+                Text(
+                    'Total Savings: \$${model.totalSavings.toStringAsFixed(2)}'),
+                Text('Health Score: ${model.healthScore.toInt()}%'),
+                Text('Visits This Month: ${model.visitsThisMonth}'),
+                Text('Visits This Year: ${model.visitsThisYear}'),
+                Text('Has Insurance: ${model.hasInsurance}'),
+                Text('Recent Visits Count: ${model.recentVisits.length}'),
+                Text(
+                    'Active Medications Count: ${model.activeMedications.length}'),
+                Text(
+                    'Ongoing Treatments Count: ${model.ongoingTreatments.length}'),
+                Text('Notifications Count: ${model.notifications.length}'),
+                const SizedBox(height: 16),
+                const Text('Test Checkups:',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                Text('  All: ${model.testCheckupsData['all']}'),
+                Text('  Today: ${model.testCheckupsData['today']}'),
+                Text('  Upcoming: ${model.testCheckupsData['upcoming']}'),
+                Text('  Completed: ${model.testCheckupsData['completed']}'),
+                const SizedBox(height: 16),
+                const Text('Pre-approval Status:',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                Text('  Pending: ${model.preApprovalData['pending']}'),
+                Text('  Approved: ${model.preApprovalData['approved']}'),
+                Text('  Rejected: ${model.preApprovalData['rejected']}'),
+                const SizedBox(height: 16),
+                const Text('Policy Documents:',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                Text('  Insurance: ${model.policyDocumentsData['insurance']}'),
+                Text('  Medical: ${model.policyDocumentsData['medical']}'),
+                Text('  ID Cards: ${model.policyDocumentsData['idCards']}'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Test Connection'),
+              onPressed: () async {
+                final isConnected = await model.testBackendConnection();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(isConnected
+                        ? 'Backend connected!'
+                        : 'Backend connection failed'),
+                    backgroundColor: isConnected ? Colors.green : Colors.red,
+                  ),
+                );
+              },
+            ),
+            TextButton(
+              child: const Text('Close'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

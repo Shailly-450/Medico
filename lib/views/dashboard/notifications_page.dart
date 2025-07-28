@@ -12,13 +12,10 @@ class NotificationsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Notifications'),
-
         actions: [
           TextButton(
             onPressed: () {
-              for (int i = 0; i < model.notifications.length; i++) {
-                model.markNotificationAsRead(i);
-              }
+              model.markAllNotificationsAsRead();
             },
             child: Text(
               'Mark All Read',
@@ -44,4 +41,4 @@ class NotificationsPage extends StatelessWidget {
       ),
     );
   }
-} 
+}

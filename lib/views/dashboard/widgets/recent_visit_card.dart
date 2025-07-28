@@ -74,7 +74,7 @@ class RecentVisitCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Rs. ${visit['cost'].toStringAsFixed(0)}',
+                      'Rs. ${((visit['cost'] as num?) ?? 0).toStringAsFixed(0)}',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -97,7 +97,7 @@ class RecentVisitCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Rs. ${visit['marketCost'].toStringAsFixed(0)}',
+                      'Rs. ${((visit['marketCost'] as num?) ?? 0).toStringAsFixed(0)}',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -121,7 +121,7 @@ class RecentVisitCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Rs. ${visit['savings'].toStringAsFixed(0)}',
+                      'Rs. ${((visit['savings'] as num?) ?? 0).toStringAsFixed(0)}',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -143,7 +143,7 @@ class RecentVisitCard extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               Text(
-                visit['date'],
+                (visit['date'] as String?) ?? 'No date',
                 style: TextStyle(
                   color: Colors.grey[500],
                   fontSize: 12,
@@ -157,7 +157,7 @@ class RecentVisitCard extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               Text(
-                visit['outcome'],
+                (visit['outcome'] as String?) ?? 'Completed',
                 style: TextStyle(
                   color: AppColors.accent,
                   fontSize: 12,
@@ -170,4 +170,4 @@ class RecentVisitCard extends StatelessWidget {
       ),
     );
   }
-} 
+}

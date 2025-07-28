@@ -10,7 +10,7 @@ class RecommendationCard extends StatelessWidget {
   }) : super(key: key);
 
   Color _getPriorityColor() {
-    switch (recommendation['priority']) {
+    switch (recommendation['priority'] as String?) {
       case 'high':
         return Colors.red;
       case 'medium':
@@ -23,7 +23,7 @@ class RecommendationCard extends StatelessWidget {
   }
 
   IconData _getTypeIcon() {
-    switch (recommendation['type']) {
+    switch (recommendation['type'] as String?) {
       case 'preventive':
         return Icons.health_and_safety;
       case 'cost_saving':
@@ -68,7 +68,7 @@ class RecommendationCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        recommendation['title'],
+                        (recommendation['title'] as String?) ?? 'No Title',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -76,7 +76,8 @@ class RecommendationCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        recommendation['description'],
+                        (recommendation['description'] as String?) ??
+                            'No description available',
                         style: TextStyle(
                           color: Colors.grey[600],
                           fontSize: 14,
@@ -86,13 +87,15 @@ class RecommendationCard extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
                     color: _getPriorityColor().withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    recommendation['priority'].toUpperCase(),
+                    (recommendation['priority'] as String?)?.toUpperCase() ??
+                        'UNKNOWN',
                     style: TextStyle(
                       color: _getPriorityColor(),
                       fontWeight: FontWeight.w600,
@@ -118,7 +121,7 @@ class RecommendationCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Rs. ${recommendation['estimatedCost'].toStringAsFixed(0)}',
+                        'Rs. ${((recommendation['estimatedCost'] as num?) ?? 0).toStringAsFixed(0)}',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -141,7 +144,7 @@ class RecommendationCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Rs. ${recommendation['marketCost'].toStringAsFixed(0)}',
+                        'Rs. ${((recommendation['marketCost'] as num?) ?? 0).toStringAsFixed(0)}',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -165,7 +168,7 @@ class RecommendationCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Rs. ${(recommendation['marketCost'] - recommendation['estimatedCost']).toStringAsFixed(0)}',
+                        'Rs. ${(((recommendation['marketCost'] as num?) ?? 0) - ((recommendation['estimatedCost'] as num?) ?? 0)).toStringAsFixed(0)}',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -203,4 +206,4 @@ class RecommendationCard extends StatelessWidget {
       ),
     );
   }
-} 
+}
