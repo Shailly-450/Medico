@@ -24,6 +24,7 @@ import 'views/profile/profile_screen.dart';
 import 'viewmodels/family_members_view_model.dart';
 import 'viewmodels/consent_view_model.dart';
 import 'viewmodels/appointment_view_model.dart';
+import 'viewmodels/health_records_view_model.dart';
 
 import 'views/workflow/medical_workflow_screen.dart';
 import 'views/workflow/workflow_demo_screen.dart';
@@ -58,6 +59,8 @@ class MyApp extends StatelessWidget {
             create: (_) => ConsentViewModel()),
         ChangeNotifierProvider<AppointmentViewModel>(
             create: (_) => AppointmentViewModel()),
+        ChangeNotifierProvider<HealthRecordsViewModel>(
+            create: (_) => HealthRecordsViewModel()),
       ],
       child: Builder(
         builder: (context) => MaterialApp(

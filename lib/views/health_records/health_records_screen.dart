@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:developer' as developer;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/health_record.dart';
@@ -22,10 +23,20 @@ class _HealthRecordsScreenState extends State<HealthRecordsScreen> {
   }
 
   Future<void> _initializeViewModel() async {
+    developer.log('🔍 HealthRecordsScreen: _initializeViewModel called',
+        name: 'HealthRecordsScreen');
+
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('accessToken');
 
+    developer.log(
+        '🔍 HealthRecordsScreen: Token from SharedPreferences: ${token != null ? '${token.substring(0, 10)}...' : 'null'}',
+        name: 'HealthRecordsScreen');
+
     if (token == null) {
+      developer.log(
+          '❌ HealthRecordsScreen: No token found, showing authentication error',
+          name: 'HealthRecordsScreen');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Authentication required')));
@@ -34,9 +45,18 @@ class _HealthRecordsScreenState extends State<HealthRecordsScreen> {
     }
 
     if (mounted) {
+      developer.log(
+          '🔍 HealthRecordsScreen: Initializing HealthRecordService with token',
+          name: 'HealthRecordsScreen');
       final viewModel = context.read<HealthRecordsViewModel>();
       viewModel.init(HealthRecordService(token));
+      developer.log('🔍 HealthRecordsScreen: Calling loadHealthRecords',
+          name: 'HealthRecordsScreen');
       viewModel.loadHealthRecords();
+    } else {
+      developer.log(
+          '❌ HealthRecordsScreen: Widget not mounted, cannot initialize',
+          name: 'HealthRecordsScreen');
     }
   }
 
@@ -47,6 +67,16 @@ class _HealthRecordsScreenState extends State<HealthRecordsScreen> {
         title: const Text('Health Records'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.bug_report),
+            onPressed: () {
+              final viewModel = context.read<HealthRecordsViewModel>();
+              viewModel.debugPrintState();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Debug info printed to console')),
+              );
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.add),
             onPressed: () => _showAddRecordDialog(context),
           ),
@@ -54,6 +84,10 @@ class _HealthRecordsScreenState extends State<HealthRecordsScreen> {
       ),
       body: Consumer<HealthRecordsViewModel>(
         builder: (context, viewModel, child) {
+          developer.log(
+              '🔍 HealthRecordsScreen: Consumer rebuild - isLoading: ${viewModel.isLoading}, error: ${viewModel.error}, records: ${viewModel.filteredRecords.length}',
+              name: 'HealthRecordsScreen');
+
           return Column(
             children: [
               Padding(

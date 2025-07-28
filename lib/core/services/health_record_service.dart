@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' as developer;
 import 'package:http/http.dart' as http;
 import '../config.dart';
 import '../../models/health_record.dart';
@@ -13,16 +14,54 @@ class HealthRecordService {
         ? '${AppConfig.apiBaseUrl}/health-records?familyMemberId=$familyMemberId'
         : '${AppConfig.apiBaseUrl}/health-records';
 
-    final response = await http.get(
-      Uri.parse(url),
-      headers: {'Authorization': 'Bearer $authToken'},
-    );
+    developer.log('🔍 HealthRecordService: Making GET request to $url',
+        name: 'HealthRecordService');
+    developer.log(
+        '🔍 HealthRecordService: Auth token: ${authToken.substring(0, 10)}...',
+        name: 'HealthRecordService');
+    developer.log('🔍 HealthRecordService: Family member ID: $familyMemberId',
+        name: 'HealthRecordService');
 
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
-      return data.map((json) => HealthRecord.fromJson(json)).toList();
-    } else {
-      throw Exception('Failed to load health records');
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {'Authorization': 'Bearer $authToken'},
+      );
+
+      developer.log(
+          '🔍 HealthRecordService: Response status: ${response.statusCode}',
+          name: 'HealthRecordService');
+      developer.log(
+          '🔍 HealthRecordService: Response headers: ${response.headers}',
+          name: 'HealthRecordService');
+      developer.log('🔍 HealthRecordService: Response body: ${response.body}',
+          name: 'HealthRecordService');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        developer.log(
+            '🔍 HealthRecordService: Parsed data length: ${data.length}',
+            name: 'HealthRecordService');
+        developer.log('🔍 HealthRecordService: Parsed data: $data',
+            name: 'HealthRecordService');
+
+        final records =
+            data.map((json) => HealthRecord.fromJson(json)).toList();
+        developer.log(
+            '🔍 HealthRecordService: Created ${records.length} HealthRecord objects',
+            name: 'HealthRecordService');
+        return records;
+      } else {
+        developer.log(
+            '❌ HealthRecordService: API error - Status: ${response.statusCode}, Body: ${response.body}',
+            name: 'HealthRecordService');
+        throw Exception(
+            'Failed to load health records: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      developer.log('❌ HealthRecordService: Exception occurred: $e',
+          name: 'HealthRecordService');
+      rethrow;
     }
   }
 

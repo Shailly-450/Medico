@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:developer' as developer;
 import '../core/services/health_record_service.dart';
 import '../models/health_record.dart';
 
@@ -40,25 +41,56 @@ class HealthRecordsViewModel extends ChangeNotifier {
       ];
 
   Future<void> loadHealthRecords() async {
+    developer.log('🔍 HealthRecordsViewModel: loadHealthRecords called',
+        name: 'HealthRecordsViewModel');
+    developer.log(
+        '🔍 HealthRecordsViewModel: Service is null: ${_healthRecordService == null}',
+        name: 'HealthRecordsViewModel');
+    developer.log(
+        '🔍 HealthRecordsViewModel: Current family member ID: $_currentFamilyMemberId',
+        name: 'HealthRecordsViewModel');
+
     if (_healthRecordService == null) {
+      developer.log(
+          '❌ HealthRecordsViewModel: Authentication required - service is null',
+          name: 'HealthRecordsViewModel');
       _error = 'Authentication required';
       notifyListeners();
       return;
     }
 
     try {
+      developer.log(
+          '🔍 HealthRecordsViewModel: Starting to load health records...',
+          name: 'HealthRecordsViewModel');
       _isLoading = true;
       notifyListeners();
 
       _allRecords =
           await _healthRecordService!.getHealthRecords(_currentFamilyMemberId);
+
+      developer.log(
+          '🔍 HealthRecordsViewModel: Successfully loaded ${_allRecords.length} records',
+          name: 'HealthRecordsViewModel');
+      developer.log(
+          '🔍 HealthRecordsViewModel: Records: ${_allRecords.map((r) => '${r.title} (${r.id})').toList()}',
+          name: 'HealthRecordsViewModel');
+
       _error = null;
       _applyFilters();
+      developer.log(
+          '🔍 HealthRecordsViewModel: Applied filters, filtered records: ${_filteredRecords.length}',
+          name: 'HealthRecordsViewModel');
     } catch (e) {
+      developer.log(
+          '❌ HealthRecordsViewModel: Error loading health records: $e',
+          name: 'HealthRecordsViewModel');
       _error = 'Failed to load health records: $e';
     } finally {
       _isLoading = false;
       notifyListeners();
+      developer.log('🔍 HealthRecordsViewModel: loadHealthRecords completed',
+          name: 'HealthRecordsViewModel');
     }
   }
 
@@ -197,6 +229,29 @@ class HealthRecordsViewModel extends ChangeNotifier {
     if (difference == 1) return 'Yesterday';
     if (difference < 7) return '$difference days ago';
     return '${date.day}/${date.month}/${date.year}';
+  }
+
+  // Debug method to print current state
+  void debugPrintState() {
+    developer.log('🔍 HealthRecordsViewModel Debug State:',
+        name: 'HealthRecordsViewModel');
+    developer.log('  - Service initialized: ${_healthRecordService != null}',
+        name: 'HealthRecordsViewModel');
+    developer.log('  - All records count: ${_allRecords.length}',
+        name: 'HealthRecordsViewModel');
+    developer.log('  - Filtered records count: ${_filteredRecords.length}',
+        name: 'HealthRecordsViewModel');
+    developer.log('  - Current family member ID: $_currentFamilyMemberId',
+        name: 'HealthRecordsViewModel');
+    developer.log('  - Selected category: $_selectedCategory',
+        name: 'HealthRecordsViewModel');
+    developer.log('  - Search query: $_searchQuery',
+        name: 'HealthRecordsViewModel');
+    developer.log('  - Show important only: $_showImportantOnly',
+        name: 'HealthRecordsViewModel');
+    developer.log('  - Is loading: $_isLoading',
+        name: 'HealthRecordsViewModel');
+    developer.log('  - Error: $_error', name: 'HealthRecordsViewModel');
   }
 
   Color getStatusColor(String? status) {
