@@ -8,10 +8,13 @@ class AppointmentService {
   static const Duration timeout = Duration(seconds: 30);
 
   // Get all appointments for the authenticated user
-  static Future<Map<String, dynamic>> getAppointments({bool includeCancelled = false}) async {
+  static Future<Map<String, dynamic>> getAppointments(
+      {bool includeCancelled = false}) async {
     try {
+      print('🌐 AppointmentService: Fetching appointments from API');
       final token = AuthService.accessToken;
       if (token == null) {
+        print('❌ AppointmentService: Not authenticated');
         return {
           'success': false,
           'message': 'Not authenticated',
@@ -19,8 +22,12 @@ class AppointmentService {
       }
 
       final queryParams = includeCancelled ? '?includeCancelled=true' : '';
+      final url = '$baseUrl/appointments$queryParams';
+      print('🌐 AppointmentService: Making GET request to $url');
+      print('🔑 AppointmentService: Auth token: ${token.substring(0, 10)}...');
+
       final response = await http.get(
-        Uri.parse('$baseUrl/appointments$queryParams'),
+        Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -28,13 +35,21 @@ class AppointmentService {
         },
       ).timeout(timeout);
 
+      print('📥 AppointmentService: Response status: ${response.statusCode}');
+      print('📦 AppointmentService: Response body: ${response.body}');
+
       final data = jsonDecode(response.body);
-      return {
+      final result = {
         'success': data['success'] ?? false,
         'message': data['message'] ?? 'Failed to fetch appointments',
         'data': data['data'] ?? [],
       };
+
+      print(
+          '✅ AppointmentService: Parsed ${result['data'].length} appointments');
+      return result;
     } catch (e) {
+      print('❌ AppointmentService: Error fetching appointments: $e');
       return {
         'success': false,
         'message': 'Failed to fetch appointments: ${e.toString()}',
@@ -64,26 +79,28 @@ class AppointmentService {
         };
       }
 
-      final response = await http.post(
-        Uri.parse('$baseUrl/appointments'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          'doctorId': doctorId,
-          'hospitalId': hospitalId,
-          'appointmentDate': appointmentDate.toIso8601String(),
-          'appointmentType': appointmentType,
-          'reason': reason,
-          'symptoms': symptoms,
-          'insuranceProvider': insuranceProvider,
-          'insuranceNumber': insuranceNumber,
-          'preferredTimeSlot': preferredTimeSlot,
-          'notes': notes,
-        }),
-      ).timeout(timeout);
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/appointments'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+            body: jsonEncode({
+              'doctorId': doctorId,
+              'hospitalId': hospitalId,
+              'appointmentDate': appointmentDate.toIso8601String(),
+              'appointmentType': appointmentType,
+              'reason': reason,
+              'symptoms': symptoms,
+              'insuranceProvider': insuranceProvider,
+              'insuranceNumber': insuranceNumber,
+              'preferredTimeSlot': preferredTimeSlot,
+              'notes': notes,
+            }),
+          )
+          .timeout(timeout);
 
       final data = jsonDecode(response.body);
       return {
@@ -100,7 +117,8 @@ class AppointmentService {
   }
 
   // Get appointment by ID
-  static Future<Map<String, dynamic>> getAppointmentById(String appointmentId) async {
+  static Future<Map<String, dynamic>> getAppointmentById(
+      String appointmentId) async {
     try {
       final token = AuthService.accessToken;
       if (token == null) {
@@ -156,15 +174,17 @@ class AppointmentService {
       if (reason != null) updateData['reason'] = reason;
       if (status != null) updateData['status'] = status;
 
-      final response = await http.put(
-        Uri.parse('$baseUrl/appointments/$appointmentId'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode(updateData),
-      ).timeout(timeout);
+      final response = await http
+          .put(
+            Uri.parse('$baseUrl/appointments/$appointmentId'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+            body: jsonEncode(updateData),
+          )
+          .timeout(timeout);
 
       final data = jsonDecode(response.body);
       return {
@@ -181,7 +201,8 @@ class AppointmentService {
   }
 
   // Cancel appointment
-  static Future<Map<String, dynamic>> cancelAppointment(String appointmentId) async {
+  static Future<Map<String, dynamic>> cancelAppointment(
+      String appointmentId) async {
     try {
       final token = AuthService.accessToken;
       if (token == null) {
@@ -214,7 +235,8 @@ class AppointmentService {
   }
 
   // Delete appointment
-  static Future<Map<String, dynamic>> deleteAppointment(String appointmentId) async {
+  static Future<Map<String, dynamic>> deleteAppointment(
+      String appointmentId) async {
     try {
       final token = AuthService.accessToken;
       if (token == null) {
@@ -261,18 +283,20 @@ class AppointmentService {
         };
       }
 
-      final response = await http.post(
-        Uri.parse('$baseUrl/appointments/$appointmentId/pre-approval'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          'symptoms': symptoms,
-          'medicalHistory': medicalHistory,
-        }),
-      ).timeout(timeout);
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/appointments/$appointmentId/pre-approval'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+            body: jsonEncode({
+              'symptoms': symptoms,
+              'medicalHistory': medicalHistory,
+            }),
+          )
+          .timeout(timeout);
 
       final data = jsonDecode(response.body);
       return {
@@ -286,4 +310,4 @@ class AppointmentService {
       };
     }
   }
-} 
+}

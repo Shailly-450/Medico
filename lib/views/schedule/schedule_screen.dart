@@ -20,7 +20,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
   Map<DateTime, List<Appointment>> _events = {};
   ScheduleViewModel? _viewModel;
   bool _isLoading = true;
-  
+
   late AnimationController _fadeController;
   late AnimationController _slideController;
   late Animation<double> _fadeAnimation;
@@ -30,7 +30,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
   void initState() {
     super.initState();
     _selectedDay = _focusedDay;
-    
+
     // Initialize animations
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 800),
@@ -59,7 +59,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
 
     _fadeController.forward();
     _slideController.forward();
-    
+
     print('ScheduleScreen initState called');
     _initializeData();
   }
@@ -75,14 +75,29 @@ class _ScheduleScreenState extends State<ScheduleScreen>
     print('Starting _initializeData');
     _viewModel = ScheduleViewModel();
     print('ScheduleViewModel created');
-    await _viewModel!.loadAppointments();
-    print(
-        'loadAppointments completed, appointments count: ${_viewModel!.appointments.length}');
-    setState(() {
-      _loadEvents(_viewModel!.appointments);
-      _isLoading = false;
-    });
-    print('setState called, _isLoading set to false');
+
+    try {
+      await _viewModel!.loadAppointments();
+      print(
+          '✅ loadAppointments completed, appointments count: ${_viewModel!.appointments.length}');
+
+      // Log each appointment for debugging
+      for (final appointment in _viewModel!.appointments) {
+        print(
+            '📅 Appointment: ${appointment.doctorName} on ${appointment.date} at ${appointment.time}');
+      }
+
+      setState(() {
+        _loadEvents(_viewModel!.appointments);
+        _isLoading = false;
+      });
+      print('✅ setState called, _isLoading set to false');
+    } catch (e) {
+      print('❌ Error in _initializeData: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   void _loadEvents(List<Appointment> appointments) {
@@ -90,29 +105,54 @@ class _ScheduleScreenState extends State<ScheduleScreen>
     for (final appointment in appointments) {
       try {
         final dateString = appointment.date;
-        // Expecting format "YYYY-MM-DD"
-        final parts = dateString.split('-');
-        if (parts.length == 3) {
-          final year = int.parse(parts[0]);
-          final month = int.parse(parts[1]);
-          final day = int.parse(parts[2]);
-          final date = DateTime(year, month, day);
+        print('🔍 Processing appointment date: $dateString');
 
-          if (_events[date] != null) {
-            _events[date]!.add(appointment);
+        DateTime date;
+        if (dateString.contains('T')) {
+          // ISO format: "2025-07-30T18:30:00.000Z" or "2025-07-30"
+          date = DateTime.parse(dateString);
+        } else {
+          // Simple format: "YYYY-MM-DD"
+          final parts = dateString.split('-');
+          if (parts.length == 3) {
+            final year = int.parse(parts[0]);
+            final month = int.parse(parts[1]);
+            final day = int.parse(parts[2]);
+            date = DateTime(year, month, day);
           } else {
-            _events[date] = [appointment];
+            print('❌ Invalid date format: $dateString');
+            continue;
           }
         }
+
+        // Create a date key without time (just year, month, day)
+        final dateKey = DateTime(date.year, date.month, date.day);
+
+        if (_events[dateKey] != null) {
+          _events[dateKey]!.add(appointment);
+        } else {
+          _events[dateKey] = [appointment];
+        }
+
+        print(
+            '✅ Added appointment for date: ${dateKey.toIso8601String().split('T')[0]}');
       } catch (e) {
-        print('Error parsing date ${appointment.date}: $e');
+        print('❌ Error parsing date ${appointment.date}: $e');
       }
     }
-    print('Events loaded: ${_events.keys.length} dates with appointments');
+    print('📅 Events loaded: ${_events.keys.length} dates with appointments');
+    _events.forEach((date, appointments) {
+      print(
+          '📅 ${date.toIso8601String().split('T')[0]}: ${appointments.length} appointments');
+    });
   }
 
   List<Appointment> _getEventsForDay(DateTime day) {
-    return _events[day] ?? [];
+    final dateKey = DateTime(day.year, day.month, day.day);
+    final events = _events[dateKey] ?? [];
+    print(
+        '🔍 Getting events for ${dateKey.toIso8601String().split('T')[0]}: ${events.length} appointments');
+    return events;
   }
 
   @override
@@ -138,6 +178,31 @@ class _ScheduleScreenState extends State<ScheduleScreen>
           ),
         ),
         actions: [
+          IconButton(
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              _showDebugInfo();
+            },
+            icon: const Icon(Icons.bug_report),
+            tooltip: 'Debug Info',
+          ),
+          IconButton(
+            onPressed: () async {
+              HapticFeedback.lightImpact();
+              print('🔄 Refreshing appointments...');
+              setState(() {
+                _isLoading = true;
+              });
+              await _viewModel?.loadAppointments();
+              setState(() {
+                _loadEvents(_viewModel?.appointments ?? []);
+                _isLoading = false;
+              });
+              print('✅ Appointments refreshed');
+            },
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Refresh Appointments',
+          ),
           IconButton(
             onPressed: () {
               HapticFeedback.lightImpact();
@@ -168,7 +233,8 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(AppColors.primary),
                     ),
                     SizedBox(height: 16),
                     Text(
@@ -236,10 +302,14 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                           },
                           onDaySelected: (selectedDay, focusedDay) {
                             HapticFeedback.lightImpact();
+                            print(
+                                '📅 Date selected: ${selectedDay.toIso8601String().split('T')[0]}');
                             setState(() {
                               _selectedDay = selectedDay;
                               _focusedDay = focusedDay;
                             });
+                            print(
+                                '📅 Selected day updated, events count: ${_getEventsForDay(selectedDay).length}');
                           },
                           onFormatChanged: (format) {
                             HapticFeedback.lightImpact();
@@ -390,7 +460,8 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                                     Container(
                                       padding: const EdgeInsets.all(8),
                                       decoration: BoxDecoration(
-                                        color: AppColors.primary.withOpacity(0.1),
+                                        color:
+                                            AppColors.primary.withOpacity(0.1),
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       child: const Icon(
@@ -435,7 +506,18 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                                 ),
                               ),
                               Expanded(
-                                child: _buildEventsList(),
+                                child: RefreshIndicator(
+                                  onRefresh: () async {
+                                    print('🔄 Pull to refresh triggered');
+                                    await _viewModel?.loadAppointments();
+                                    setState(() {
+                                      _loadEvents(
+                                          _viewModel?.appointments ?? []);
+                                    });
+                                    print('✅ Pull to refresh completed');
+                                  },
+                                  child: _buildEventsList(),
+                                ),
                               ),
                             ],
                           ),
@@ -473,18 +555,22 @@ class _ScheduleScreenState extends State<ScheduleScreen>
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
-              'No appointments for this day',
-              style: TextStyle(
+            Text(
+              _viewModel?.appointments.isEmpty == true
+                  ? 'No appointments found'
+                  : 'No appointments for this day',
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textBlack,
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Tap the + button to schedule an appointment',
-              style: TextStyle(
+            Text(
+              _viewModel?.appointments.isEmpty == true
+                  ? 'Pull to refresh or tap the + button to schedule an appointment'
+                  : 'Tap the + button to schedule an appointment',
+              style: const TextStyle(
                 fontSize: 14,
                 color: AppColors.textSecondary,
               ),
@@ -539,142 +625,272 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                         _showAppointmentActions(appointment);
                       },
                       child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Doctor Image
-                            Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: AppColors.primary,
-                                  width: 2,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.primary.withOpacity(0.2),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: CircleAvatar(
-                                radius: 28,
-                                backgroundImage: NetworkImage(appointment.doctorImage),
-                                backgroundColor: AppColors.primary.withOpacity(0.1),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-
-                            // Appointment Details
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    appointment.doctorName,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.textBlack,
-                                      letterSpacing: 0.2,
+                            // Header Row with Doctor Info and Status
+                            Row(
+                              children: [
+                                // Doctor Image
+                                Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: AppColors.primary,
+                                      width: 2,
                                     ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    appointment.specialty,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: AppColors.textSecondary,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(6),
-                                        decoration: BoxDecoration(
-                                          color: AppColors.primary.withOpacity(0.1),
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: const Icon(
-                                          Icons.access_time,
-                                          size: 16,
-                                          color: AppColors.primary,
-                                        ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color:
+                                            AppColors.primary.withOpacity(0.2),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
                                       ),
-                                      const SizedBox(width: 8),
+                                    ],
+                                  ),
+                                  child: CircleAvatar(
+                                    radius: 30,
+                                    backgroundImage:
+                                        NetworkImage(appointment.doctorImage),
+                                    backgroundColor:
+                                        AppColors.primary.withOpacity(0.1),
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                // Doctor Details
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
                                       Text(
-                                        appointment.time,
+                                        appointment.doctorName,
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.textBlack,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        appointment.specialty,
                                         style: const TextStyle(
                                           fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                          color: AppColors.primary,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 16),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 10,
-                                          vertical: 6,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: appointment.isVideoCall
-                                              ? Colors.blue.withOpacity(0.1)
-                                              : Colors.green.withOpacity(0.1),
-                                          borderRadius: BorderRadius.circular(12),
-                                          border: Border.all(
-                                            color: appointment.isVideoCall
-                                                ? Colors.blue.withOpacity(0.3)
-                                                : Colors.green.withOpacity(0.3),
-                                            width: 1,
-                                          ),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(
-                                              appointment.isVideoCall
-                                                  ? Icons.videocam
-                                                  : Icons.location_on,
-                                              size: 14,
-                                              color: appointment.isVideoCall
-                                                  ? Colors.blue
-                                                  : Colors.green,
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                              appointment.isVideoCall ? 'Video' : 'In-Person',
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w600,
-                                                color: appointment.isVideoCall
-                                                    ? Colors.blue
-                                                    : Colors.green,
-                                              ),
-                                            ),
-                                          ],
+                                          color: AppColors.textSecondary,
+                                          fontWeight: FontWeight.w500,
                                         ),
                                       ),
                                     ],
                                   ),
+                                ),
+                                // Appointment Type Badge
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: appointment.isVideoCall
+                                        ? Colors.blue.withOpacity(0.1)
+                                        : Colors.green.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: appointment.isVideoCall
+                                          ? Colors.blue.withOpacity(0.3)
+                                          : Colors.green.withOpacity(0.3),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        appointment.isVideoCall
+                                            ? Icons.videocam
+                                            : Icons.location_on,
+                                        size: 14,
+                                        color: appointment.isVideoCall
+                                            ? Colors.blue
+                                            : Colors.green,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        appointment.isVideoCall
+                                            ? 'Video'
+                                            : 'In-Person',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: appointment.isVideoCall
+                                              ? Colors.blue
+                                              : Colors.green,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            // Time and Date Section
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withOpacity(0.05),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: AppColors.primary.withOpacity(0.1),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: const Icon(
+                                      Icons.schedule,
+                                      size: 20,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          appointment.time,
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColors.textBlack,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          appointment.date,
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color: AppColors.textSecondary,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  // Status Badge
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: _getStatusColor(appointment.status)
+                                          .withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color:
+                                            _getStatusColor(appointment.status)
+                                                .withOpacity(0.3),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      appointment.status.toUpperCase(),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color:
+                                            _getStatusColor(appointment.status),
+                                      ),
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
-
-                            // Action Button
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(
-                                Icons.more_vert,
-                                color: AppColors.primary,
-                                size: 20,
-                              ),
+                            // Action Buttons
+                            const SizedBox(height: 16),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton.icon(
+                                    onPressed: () {
+                                      HapticFeedback.lightImpact();
+                                      _showDetailedAppointmentCard(appointment);
+                                    },
+                                    icon: const Icon(Icons.info_outline,
+                                        size: 16),
+                                    label: const Text('Details'),
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: AppColors.primary,
+                                      side: BorderSide(
+                                          color: AppColors.primary
+                                              .withOpacity(0.3)),
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 12),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: ElevatedButton.icon(
+                                    onPressed: () {
+                                      HapticFeedback.lightImpact();
+                                      // Handle join/reschedule action
+                                      if (appointment.isVideoCall) {
+                                        // Join video call
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                                'Joining video call with ${appointment.doctorName}'),
+                                            backgroundColor: Colors.blue,
+                                          ),
+                                        );
+                                      } else {
+                                        // Get directions
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                                'Getting directions to ${appointment.doctorName}\'s clinic'),
+                                            backgroundColor: Colors.green,
+                                          ),
+                                        );
+                                      }
+                                    },
+                                    icon: Icon(
+                                      appointment.isVideoCall
+                                          ? Icons.videocam
+                                          : Icons.location_on,
+                                      size: 16,
+                                    ),
+                                    label: Text(appointment.isVideoCall
+                                        ? 'Join Call'
+                                        : 'Directions'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primary,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 12),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -692,10 +908,401 @@ class _ScheduleScreenState extends State<ScheduleScreen>
 
   String _formatDate(DateTime date) {
     final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'scheduled':
+        return Colors.blue;
+      case 'confirmed':
+        return Colors.green;
+      case 'completed':
+        return Colors.grey;
+      case 'cancelled':
+        return Colors.red;
+      case 'pending':
+        return Colors.orange;
+      default:
+        return AppColors.primary;
+    }
+  }
+
+  void _showDebugInfo() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Debug Information'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                  'Total Appointments: ${_viewModel?.appointments.length ?? 0}'),
+              const SizedBox(height: 8),
+              Text('Events Loaded: ${_events.keys.length} dates'),
+              const SizedBox(height: 8),
+              Text(
+                  'Selected Day: ${_selectedDay != null ? _formatDate(_selectedDay!) : 'None'}'),
+              const SizedBox(height: 16),
+              const Text('Appointments:',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              ...(_viewModel?.appointments.map((apt) => Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                            '• ${apt.doctorName} - ${apt.date} at ${apt.time}'),
+                      )) ??
+                  []),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDetailedAppointmentCard(Appointment appointment) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 400, maxHeight: 600),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header with gradient background
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.primary,
+                      AppColors.primary.withOpacity(0.8),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    // Doctor Image and Info
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 35,
+                          backgroundImage:
+                              NetworkImage(appointment.doctorImage),
+                          backgroundColor: Colors.white.withOpacity(0.2),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                appointment.doctorName,
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                appointment.specialty,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white.withOpacity(0.9),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    // Appointment Type Badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            appointment.isVideoCall
+                                ? Icons.videocam
+                                : Icons.location_on,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            appointment.isVideoCall
+                                ? 'Video Consultation'
+                                : 'In-Person Visit',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Content
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Date and Time Section
+                      _buildDetailSection(
+                        'Date & Time',
+                        Icons.schedule,
+                        '${appointment.date} at ${appointment.time}',
+                        AppColors.primary,
+                      ),
+                      const SizedBox(height: 20),
+                      // Status Section
+                      _buildDetailSection(
+                        'Status',
+                        Icons.info_outline,
+                        appointment.status.toUpperCase(),
+                        _getStatusColor(appointment.status),
+                      ),
+                      const SizedBox(height: 20),
+                      // Appointment Type
+                      _buildDetailSection(
+                        'Appointment Type',
+                        Icons.medical_services,
+                        appointment.appointmentType.toUpperCase(),
+                        Colors.blue,
+                      ),
+                      const SizedBox(height: 20),
+                      // Preferred Time Slot
+                      if (appointment.preferredTimeSlot != null)
+                        _buildDetailSection(
+                          'Preferred Time',
+                          Icons.access_time,
+                          appointment.preferredTimeSlot!.toUpperCase(),
+                          Colors.orange,
+                        ),
+                      if (appointment.preferredTimeSlot != null)
+                        const SizedBox(height: 20),
+                      // Reason
+                      if (appointment.reason != null &&
+                          appointment.reason!.isNotEmpty)
+                        _buildDetailSection(
+                          'Reason',
+                          Icons.note,
+                          appointment.reason!,
+                          Colors.purple,
+                        ),
+                      if (appointment.reason != null &&
+                          appointment.reason!.isNotEmpty)
+                        const SizedBox(height: 20),
+                      // Symptoms
+                      if (appointment.symptoms != null &&
+                          appointment.symptoms!.isNotEmpty)
+                        _buildDetailSection(
+                          'Symptoms',
+                          Icons.healing,
+                          appointment.symptoms!.join(', '),
+                          Colors.red,
+                        ),
+                      if (appointment.symptoms != null &&
+                          appointment.symptoms!.isNotEmpty)
+                        const SizedBox(height: 20),
+                      // Insurance
+                      if (appointment.insuranceProvider != null)
+                        _buildDetailSection(
+                          'Insurance',
+                          Icons.security,
+                          '${appointment.insuranceProvider}${appointment.insuranceNumber != null ? ' - ${appointment.insuranceNumber}' : ''}',
+                          Colors.green,
+                        ),
+                      if (appointment.insuranceProvider != null)
+                        const SizedBox(height: 20),
+                      // Notes
+                      if (appointment.notes != null &&
+                          appointment.notes!.isNotEmpty)
+                        _buildDetailSection(
+                          'Notes',
+                          Icons.note_add,
+                          appointment.notes!,
+                          Colors.brown,
+                        ),
+                      if (appointment.notes != null &&
+                          appointment.notes!.isNotEmpty)
+                        const SizedBox(height: 20),
+                      // Pre-approval Status
+                      _buildDetailSection(
+                        'Pre-approval',
+                        Icons.approval,
+                        appointment.preApprovalStatus.toUpperCase(),
+                        appointment.preApprovalStatus == 'notRequired'
+                            ? Colors.green
+                            : Colors.orange,
+                      ),
+                      const SizedBox(height: 20),
+                      // Payment Information
+                      if (appointment.payment != null)
+                        _buildDetailSection(
+                          'Payment',
+                          Icons.payment,
+                          '${appointment.payment!['amount'] ?? 0} - ${appointment.payment!['status'] ?? 'pending'}',
+                          appointment.payment!['status'] == 'completed'
+                              ? Colors.green
+                              : Colors.orange,
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              // Action Buttons
+              Container(
+                padding: const EdgeInsets.all(24),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                          side: BorderSide(color: AppColors.primary),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text('Close'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _showAppointmentActions(appointment);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text('Actions'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailSection(
+      String title, IconData icon, String content, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: color.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              icon,
+              size: 20,
+              color: color,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: color,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  content,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textBlack,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showAppointmentActions(Appointment appointment) {
@@ -725,7 +1332,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
               ),
             ),
             const SizedBox(height: 24),
-            
+
             // Header
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -777,16 +1384,22 @@ class _ScheduleScreenState extends State<ScheduleScreen>
               ),
             ),
             const SizedBox(height: 24),
-            
+
             // Actions
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 children: [
                   _buildActionTile(
-                    icon: appointment.isVideoCall ? Icons.videocam : Icons.location_on,
-                    title: appointment.isVideoCall ? 'Join Video Call' : 'Get Directions',
-                    subtitle: appointment.isVideoCall ? 'Start your consultation' : 'Navigate to clinic',
+                    icon: appointment.isVideoCall
+                        ? Icons.videocam
+                        : Icons.location_on,
+                    title: appointment.isVideoCall
+                        ? 'Join Video Call'
+                        : 'Get Directions',
+                    subtitle: appointment.isVideoCall
+                        ? 'Start your consultation'
+                        : 'Navigate to clinic',
                     onTap: () {
                       Navigator.pop(context);
                       HapticFeedback.lightImpact();
@@ -850,12 +1463,12 @@ class _ScheduleScreenState extends State<ScheduleScreen>
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
           margin: const EdgeInsets.only(bottom: 8),
           decoration: BoxDecoration(
-            color: isDestructive 
+            color: isDestructive
                 ? Colors.red.withOpacity(0.05)
                 : AppColors.primary.withOpacity(0.05),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isDestructive 
+              color: isDestructive
                   ? Colors.red.withOpacity(0.2)
                   : AppColors.primary.withOpacity(0.2),
               width: 1,
@@ -866,7 +1479,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: isDestructive 
+                  color: isDestructive
                       ? Colors.red.withOpacity(0.1)
                       : AppColors.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
@@ -895,7 +1508,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                       subtitle,
                       style: TextStyle(
                         fontSize: 14,
-                        color: isDestructive 
+                        color: isDestructive
                             ? Colors.red.withOpacity(0.7)
                             : AppColors.textSecondary,
                       ),
@@ -1166,7 +1779,8 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
               child: const Text(
                 'Reschedule',

@@ -1,6 +1,8 @@
 import '../core/viewmodels/base_view_model.dart';
 import '../models/appointment.dart';
 import '../core/services/pre_approval_service.dart';
+import '../core/services/appointment_service.dart';
+import '../core/services/auth_service.dart';
 
 class ScheduleViewModel extends BaseViewModel {
   String _selectedTab = 'My Booking';
@@ -20,211 +22,33 @@ class ScheduleViewModel extends BaseViewModel {
   Future<void> loadAppointments() async {
     print('ScheduleViewModel.loadAppointments() called');
     setBusy(true);
-    // Using dummy data for UI/UX testing with specific dates
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final tomorrow = today.add(const Duration(days: 1));
-    final dayAfterTomorrow = today.add(const Duration(days: 2));
 
-    // Specific dates requested by user
-    final july2 = DateTime(now.year, 7, 2);
-    final july4 = DateTime(now.year, 7, 4);
-    final august8 = DateTime(now.year, 8, 8);
+    try {
+      // Initialize auth service
+      await AuthService.initialize();
 
-    print('Current year: ${now.year}');
-    print('July 2nd: $july2');
-    print('July 4th: $july4');
-    print('August 8th: $august8');
+      // Fetch appointments from API
+      final result =
+          await AppointmentService.getAppointments(includeCancelled: false);
 
-    _appointments = [
-      Appointment(
-        id: '3001',
-        doctorName: 'Dr. John Doe',
-        doctorImage: 'https://randomuser.me/api/portraits/men/11.jpg',
-        specialty: 'Cardiologist',
-        isVideoCall: true,
-        date:
-            '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}',
-        time: '09:00 AM',
-        appointmentType: "consultation",
-        preApprovalStatus:
-            _preApprovalService.isPreApprovalRequired('Cardiologist')
-                ? 'pending'
-                : 'notRequired',
-      ),
-      Appointment(
-        id: '3002',
-        doctorName: 'Dr. Sara Doe',
-        doctorImage: 'https://randomuser.me/api/portraits/women/12.jpg',
-        specialty: 'Dermatologist',
-        isVideoCall: false,
-        date:
-            '${tomorrow.year}-${tomorrow.month.toString().padLeft(2, '0')}-${tomorrow.day.toString().padLeft(2, '0')}',
-        time: '10:00 AM',
-        appointmentType: "consultation",
-        preApprovalStatus:
-            _preApprovalService.isPreApprovalRequired('Dermatologist')
-                ? 'pending'
-                : 'notRequired',
-      ),
-      Appointment(
-        id: '3003',
-        doctorName: 'Dr. Emily Brown',
-        doctorImage: 'https://randomuser.me/api/portraits/women/13.jpg',
-        specialty: 'Pediatrician',
-        isVideoCall: true,
-        date:
-            '${dayAfterTomorrow.year}-${dayAfterTomorrow.month.toString().padLeft(2, '0')}-${dayAfterTomorrow.day.toString().padLeft(2, '0')}',
-        time: '02:00 PM',
-        appointmentType: "consultation",
-        preApprovalStatus:
-            _preApprovalService.isPreApprovalRequired('Pediatrician')
-                ? 'pending'
-                : 'notRequired',
-      ),
-      // July 2nd appointments
-      Appointment(
-        id: '3004',
-        doctorName: 'Dr. Michael Chen',
-        doctorImage: 'https://randomuser.me/api/portraits/men/14.jpg',
-        specialty: 'Neurologist',
-        isVideoCall: true,
-        date:
-            '${july2.year}-${july2.month.toString().padLeft(2, '0')}-${july2.day.toString().padLeft(2, '0')}',
-        time: '11:00 AM',
-        appointmentType: "consultation",
-        preApprovalStatus:
-            _preApprovalService.isPreApprovalRequired('Neurologist')
-                ? 'approved'
-                : 'notRequired',
-      ),
-      Appointment(
-        id: '3005',
-        doctorName: 'Dr. Lisa Wang',
-        doctorImage: 'https://randomuser.me/api/portraits/women/15.jpg',
-        specialty: 'Orthopedic',
-        isVideoCall: false,
-        date:
-            '${july2.year}-${july2.month.toString().padLeft(2, '0')}-${july2.day.toString().padLeft(2, '0')}',
-        time: '03:30 PM',
-        appointmentType: "consultation",
-        preApprovalStatus:
-            _preApprovalService.isPreApprovalRequired('Orthopedic')
-                ? 'rejected'
-                : 'notRequired',
-      ),
-      // July 4th appointments
-      Appointment(
-        id: '3006',
-        doctorName: 'Dr. Robert Johnson',
-        doctorImage: 'https://randomuser.me/api/portraits/men/16.jpg',
-        specialty: 'General Physician',
-        isVideoCall: false,
-        date:
-            '${july4.year}-${july4.month.toString().padLeft(2, '0')}-${july4.day.toString().padLeft(2, '0')}',
-        time: '09:30 AM',
-        appointmentType: "consultation",
-        preApprovalStatus:
-            _preApprovalService.isPreApprovalRequired('General Physician')
-                ? 'pending'
-                : 'notRequired',
-      ),
-      Appointment(
-        id: '3007',
-        doctorName: 'Dr. Maria Garcia',
-        doctorImage: 'https://randomuser.me/api/portraits/women/17.jpg',
-        specialty: 'Dentist',
-        isVideoCall: false,
-        date:
-            '${july4.year}-${july4.month.toString().padLeft(2, '0')}-${july4.day.toString().padLeft(2, '0')}',
-        time: '02:00 PM',
-        appointmentType: "consultation",
-        preApprovalStatus: _preApprovalService.isPreApprovalRequired('Dentist')
-            ? 'pending'
-            : 'notRequired',
-      ),
-      Appointment(
-        id: '3008',
-        doctorName: 'Dr. David Kim',
-        doctorImage: 'https://randomuser.me/api/portraits/men/18.jpg',
-        specialty: 'Psychiatrist',
-        isVideoCall: true,
-        date:
-            '${july4.year}-${july4.month.toString().padLeft(2, '0')}-${july4.day.toString().padLeft(2, '0')}',
-        time: '04:15 PM',
-        appointmentType: "consultation",
-        preApprovalStatus:
-            _preApprovalService.isPreApprovalRequired('Psychiatrist')
-                ? 'pending'
-                : 'notRequired',
-      ),
-      // August 8th appointments
-      Appointment(
-        id: '3009',
-        doctorName: 'Dr. Sarah Wilson',
-        doctorImage: 'https://randomuser.me/api/portraits/women/19.jpg',
-        specialty: 'Gynecologist',
-        isVideoCall: false,
-        date:
-            '${august8.year}-${august8.month.toString().padLeft(2, '0')}-${august8.day.toString().padLeft(2, '0')}',
-        time: '10:00 AM',
-        appointmentType: "consultation",
-        preApprovalStatus:
-            _preApprovalService.isPreApprovalRequired('Gynecologist')
-                ? 'pending'
-                : 'notRequired',
-      ),
-      Appointment(
-        id: '3010',
-        doctorName: 'Dr. James Anderson',
-        doctorImage: 'https://randomuser.me/api/portraits/men/20.jpg',
-        specialty: 'Urologist',
-        isVideoCall: true,
-        date:
-            '${august8.year}-${august8.month.toString().padLeft(2, '0')}-${august8.day.toString().padLeft(2, '0')}',
-        time: '01:45 PM',
-        appointmentType: "consultation",
-        preApprovalStatus:
-            _preApprovalService.isPreApprovalRequired('Urologist')
-                ? 'pending'
-                : 'notRequired',
-      ),
-      Appointment(
-        id: '3011',
-        doctorName: 'Dr. Jennifer Lee',
-        doctorImage: 'https://randomuser.me/api/portraits/women/21.jpg',
-        specialty: 'Ophthalmologist',
-        isVideoCall: false,
-        date:
-            '${august8.year}-${august8.month.toString().padLeft(2, '0')}-${august8.day.toString().padLeft(2, '0')}',
-        time: '03:00 PM',
-        appointmentType: "consultation",
-        preApprovalStatus:
-            _preApprovalService.isPreApprovalRequired('Ophthalmologist')
-                ? 'pending'
-                : 'notRequired',
-      ),
-    ];
+      if (result['success'] == true) {
+        final List<dynamic> appointmentsData = result['data'] ?? [];
+        _appointments =
+            appointmentsData.map((json) => Appointment.fromJson(json)).toList();
 
-    print('Created ${_appointments.length} appointments');
-    _appointments.forEach((appointment) {
-      print('Appointment: ${appointment.doctorName} on ${appointment.date}');
-    });
+        print(
+            '✅ Successfully loaded ${_appointments.length} appointments from API');
+      } else {
+        print('❌ Failed to load appointments: ${result['message']}');
+        // Fallback to empty list if API fails
+        _appointments = [];
+      }
+    } catch (e) {
+      print('❌ Error loading appointments: $e');
+      // Fallback to empty list if there's an error
+      _appointments = [];
+    }
 
-    _historyAppointments = [
-      Appointment(
-        id: '3012',
-        doctorName: 'Dr. Mike Johnson',
-        doctorImage: 'https://randomuser.me/api/portraits/men/13.jpg',
-        specialty: 'Neurologist',
-        isVideoCall: true,
-        date:
-            '${today.subtract(const Duration(days: 1)).year}-${today.subtract(const Duration(days: 1)).month.toString().padLeft(2, '0')}-${today.subtract(const Duration(days: 1)).day.toString().padLeft(2, '0')}',
-        time: '02:00 PM',
-        appointmentType: "consultation",
-        preApprovalStatus: 'approved',
-      ),
-    ];
     setBusy(false);
     print('ScheduleViewModel.loadAppointments() completed');
   }
