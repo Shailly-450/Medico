@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "539152591710",
+    "project_id": "medu-bcc94",
+    "storage_bucket": "medu-bcc94.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:539152591710:android:be23130066db9079acbdcf",
+        "android_client_info": {
+          "package_name": "com.example.medico"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBniie0qf8DKfnZN3hOfb0hGVPd9S0F0b0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

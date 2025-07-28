@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../core/viewmodels/base_view_model.dart';
 import '../models/notification_item.dart';
+import '../core/services/notification_manager.dart';
+import '../core/services/notification_sender_service.dart';
+import '../core/services/notification_api_service.dart';
 
 class NotificationViewModel extends BaseViewModel {
   List<NotificationItem> notifications = [];
@@ -8,102 +11,15 @@ class NotificationViewModel extends BaseViewModel {
   @override
   void init() {
     print('NotificationViewModel: Initializing...');
-    _loadDummyData();
+    // _loadDummyData(); // Remove dummy data for production
+    NotificationManager.instance.setNotificationViewModel(this);
     print(
-        'NotificationViewModel: Loaded ${notifications.length} notifications');
+        'NotificationViewModel: Loaded  [1m${notifications.length} [0m notifications');
     print('NotificationViewModel: Unread count: $unreadCount');
     notifyListeners();
   }
 
-  void _loadDummyData() {
-    // Dummy notifications
-    notifications = [
-      NotificationItem(
-        id: '1',
-        title: 'Appointment Reminder',
-        message:
-            'Your appointment with Dr. Sarah Johnson is scheduled for tomorrow at 2:00 PM',
-        timestamp: DateTime.now().subtract(const Duration(hours: 2)),
-        type: NotificationType.appointment,
-        isRead: false,
-      ),
-      NotificationItem(
-        id: '2',
-        title: 'Special Offer',
-        message: 'Get 20% off on your next consultation with any cardiologist',
-        timestamp: DateTime.now().subtract(const Duration(hours: 4)),
-        type: NotificationType.offer,
-        isRead: false,
-      ),
-      NotificationItem(
-        id: '3',
-        title: 'New Hospital Added',
-        message: 'City General Hospital is now available in your area',
-        timestamp: DateTime.now().subtract(const Duration(days: 1)),
-        type: NotificationType.general,
-        isRead: true,
-      ),
-      NotificationItem(
-        id: '4',
-        title: 'Medicine Reminder',
-        message: 'Time to take your evening medication',
-        timestamp: DateTime.now().subtract(const Duration(days: 2)),
-        type: NotificationType.reminder,
-        isRead: true,
-      ),
-      NotificationItem(
-        id: '5',
-        title: 'Lab Results Ready',
-        message: 'Your blood test results are now available',
-        timestamp: DateTime.now().subtract(const Duration(days: 3)),
-        type: NotificationType.general,
-        isRead: true,
-      ),
-      NotificationItem(
-        id: '6',
-        title: 'Video Call Scheduled',
-        message:
-            'Your video consultation with Dr. Emily Brown starts in 15 minutes',
-        timestamp: DateTime.now().subtract(const Duration(minutes: 30)),
-        type: NotificationType.appointment,
-        isRead: false,
-      ),
-      NotificationItem(
-        id: '7',
-        title: 'Health Tips',
-        message:
-            'Stay hydrated! Drink 8 glasses of water daily for better health',
-        timestamp: DateTime.now().subtract(const Duration(hours: 6)),
-        type: NotificationType.general,
-        isRead: false,
-      ),
-      NotificationItem(
-        id: '8',
-        title: 'Prescription Renewal',
-        message:
-            'Your prescription for blood pressure medication needs renewal',
-        timestamp: DateTime.now().subtract(const Duration(days: 1)),
-        type: NotificationType.reminder,
-        isRead: true,
-      ),
-      NotificationItem(
-        id: '9',
-        title: 'Discount Alert',
-        message: '50% off on dental cleaning services this week only!',
-        timestamp: DateTime.now().subtract(const Duration(hours: 8)),
-        type: NotificationType.offer,
-        isRead: false,
-      ),
-      NotificationItem(
-        id: '10',
-        title: 'Emergency Contact',
-        message: 'Dr. Michael Chen is available for emergency consultations',
-        timestamp: DateTime.now().subtract(const Duration(hours: 12)),
-        type: NotificationType.general,
-        isRead: true,
-      ),
-    ];
-  }
+  // Remove _loadDummyData and all references to old NotificationType values and imageUrl
 
   void markAsRead(String notificationId) {
     final index = notifications.indexWhere((n) => n.id == notificationId);
@@ -115,7 +31,6 @@ class NotificationViewModel extends BaseViewModel {
         timestamp: notifications[index].timestamp,
         type: notifications[index].type,
         isRead: true,
-        imageUrl: notifications[index].imageUrl,
         data: notifications[index].data,
       );
       notifyListeners();
@@ -131,7 +46,6 @@ class NotificationViewModel extends BaseViewModel {
               timestamp: notification.timestamp,
               type: notification.type,
               isRead: true,
-              imageUrl: notification.imageUrl,
               data: notification.data,
             ))
         .toList();
@@ -143,5 +57,159 @@ class NotificationViewModel extends BaseViewModel {
   void deleteNotification(String notificationId) {
     notifications.removeWhere((n) => n.id == notificationId);
     notifyListeners();
+  }
+
+  // Method to add new notification from OneSignal
+  void addNotification(NotificationItem notification) {
+    notifications.insert(0, notification);
+    notifyListeners();
+  }
+
+  // Method to send test notification
+  Future<void> sendTestNotification() async {
+    await NotificationManager.instance.sendTestNotification();
+  }
+
+  // Method to get notification settings
+  Future<Map<String, bool>> getNotificationSettings() async {
+    return await NotificationManager.instance.getNotificationSettings();
+  }
+
+  // Method to update notification settings
+  Future<void> updateNotificationSettings(Map<String, bool> settings) async {
+    await NotificationManager.instance.updateNotificationSettings(settings);
+  }
+
+  // Method to send push notification to specific user
+  Future<bool> sendPushNotificationToUser({
+    required String userId,
+    required String title,
+    required String message,
+    NotificationType type = NotificationType.general,
+    Map<String, dynamic>? data,
+  }) async {
+    return await NotificationSenderService.sendToUser(
+      userId: userId,
+      title: title,
+      message: message,
+      type: type,
+      data: data,
+    );
+  }
+
+  // Method to send push notification to all users
+  Future<bool> sendPushNotificationToAll({
+    required String title,
+    required String message,
+    NotificationType type = NotificationType.general,
+    Map<String, dynamic>? data,
+  }) async {
+    return await NotificationSenderService.sendToAll(
+      title: title,
+      message: message,
+      type: type,
+      data: data,
+    );
+  }
+
+  // Method to send push notification to users with specific tags
+  Future<bool> sendPushNotificationToUsersWithTags({
+    required Map<String, String> tags,
+    required String title,
+    required String message,
+    NotificationType type = NotificationType.general,
+    Map<String, dynamic>? data,
+  }) async {
+    return await NotificationSenderService.sendToUsersWithTags(
+      tags: tags,
+      title: title,
+      message: message,
+      type: type,
+      data: data,
+    );
+  }
+
+  Future<void> fetchNotifications(String authToken) async {
+    notifications = await NotificationApiService.fetchNotifications(authToken);
+    notifyListeners();
+  }
+
+  Future<void> fetchUnreadNotifications(String authToken) async {
+    notifications = await NotificationApiService.fetchUnreadNotifications(authToken);
+    notifyListeners();
+  }
+
+  Future<void> markNotificationAsReadOnServer(String authToken, String notificationId) async {
+    try {
+      final updatedNotification = await NotificationApiService.markNotificationAsRead(authToken, notificationId);
+      final index = notifications.indexWhere((n) => n.id == notificationId);
+      if (index != -1) {
+        notifications[index] = updatedNotification;
+        notifyListeners();
+      }
+    } catch (e) {
+      print('Error marking notification as read: $e');
+      // Fallback to local update if server call fails
+      markAsRead(notificationId);
+    }
+  }
+
+  Future<void> markAllAsReadOnServer(String authToken) async {
+    try {
+      final success = await NotificationApiService.markAllNotificationsAsRead(authToken);
+      if (success) {
+        markAllAsRead(); // Locally mark all as read
+      }
+    } catch (e) {
+      print('Error marking all notifications as read: $e');
+      markAllAsRead(); // Fallback to local update
+    }
+  }
+
+  Future<void> deleteNotificationOnServer(String authToken, String notificationId) async {
+    try {
+      final success = await NotificationApiService.deleteNotification(authToken, notificationId);
+      if (success) {
+        deleteNotification(notificationId); // Locally remove the notification
+      }
+    } catch (e) {
+      print('Error deleting notification: $e');
+      deleteNotification(notificationId); // Fallback to local deletion
+    }
+  }
+
+  Future<NotificationItem?> createNotificationOnServer({
+    required String authToken,
+    required String type,
+    required String title,
+    required String message,
+    required String recipientId,
+    String? senderId,
+    String priority = 'medium',
+    List<String> channels = const [],
+    String category = 'system',
+    List<Map<String, dynamic>> actions = const [],
+  }) async {
+    try {
+      final newNotification = await NotificationApiService.createNotification(
+        authToken: authToken,
+        type: type,
+        title: title,
+        message: message,
+        recipientId: recipientId,
+        senderId: senderId,
+        priority: priority,
+        channels: channels,
+        category: category,
+        actions: actions,
+      );
+      
+      // Add to local list
+      addNotification(newNotification);
+      return newNotification;
+    } catch (e) {
+      print('Error creating notification: $e');
+      return null;
+    }
   }
 }

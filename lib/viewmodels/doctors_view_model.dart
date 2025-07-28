@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import '../core/viewmodels/base_view_model.dart';
 import '../models/doctor.dart';
 import '../models/doctor_review.dart';
+import '../core/config.dart';
 
 enum DoctorFilter {
   all,
@@ -54,7 +55,7 @@ class DoctorsViewModel extends BaseViewModel {
     _isLoading = true;
     notifyListeners();
     try {
-      final response = await http.get(Uri.parse('http://10.0.2.2:3000/api/users/doctors'));
+      final response = await http.get(Uri.parse('${AppConfig.apiBaseUrl}/users/doctors'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final List doctorsJson = data['data'];

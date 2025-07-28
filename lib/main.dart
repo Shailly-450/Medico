@@ -37,18 +37,32 @@ import 'views/appointments/doctor_selection_screen.dart';
 import 'views/appointments/book_appointment_screen.dart';
 import 'viewmodels/doctors_view_model.dart';
 import 'auth/auth_provider.dart';
+import 'viewmodels/profile_view_model.dart';
+import 'core/services/api_service.dart';
+import 'viewmodels/blog_view_model.dart';
+import 'core/services/onesignal_service.dart';
+import 'core/config.dart';
+import 'viewmodels/comparison_view_model.dart';
+import 'views/testing/services_api_test_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await ApiService.initialize();
   // Initialize AI Symptom Service
   AISymptomService().initialize();
+  // Initialize OneSignal
+  await OneSignalService.instance.initialize();
+  
+  // Register user with OneSignal after successful login
+  // This will be called from your login screen
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
         ChangeNotifierProxyProvider<AuthProvider, OrderViewModel>(
-          create: (context) => OrderViewModel(OrderService(Dio(BaseOptions(baseUrl: 'http://10.0.2.2:3000/api')), '')),
+          create: (context) => OrderViewModel(OrderService(Dio(BaseOptions(baseUrl: AppConfig.apiBaseUrl)), '')),
           update: (context, auth, previous) {
-            final dio = Dio(BaseOptions(baseUrl: 'http://10.0.2.2:3000/api'));
+            final dio = Dio(BaseOptions(baseUrl: AppConfig.apiBaseUrl));
             final jwtToken = auth.jwtToken ?? '';
             return OrderViewModel(OrderService(dio, jwtToken));
           },
@@ -65,6 +79,11 @@ void main() {
             create: (_) => AppointmentViewModel()),
         ChangeNotifierProvider<DoctorsViewModel>(
             create: (_) => DoctorsViewModel()),
+        ChangeNotifierProvider(
+            create: (_) => ProfileViewModel()),
+        ChangeNotifierProvider(create: (_) => BlogViewModel()..fetchAllBlogs()),
+        ChangeNotifierProvider<ComparisonViewModel>(
+            create: (_) => ComparisonViewModel()..initialize()),
       ],
       child: MyApp(),
     ),
@@ -140,6 +159,7 @@ class MyApp extends StatelessWidget {
             '/create-appointment': (context) => const CreateAppointmentScreen(),
             '/doctor-selection': (context) => const DoctorSelectionScreen(),
             '/book-appointment': (context) => const BookAppointmentScreen(),
+            '/services-api-test': (context) => const ServicesApiTestScreen(),
           },
           onGenerateRoute: (settings) {
             print('Navigating to: ${settings.name}');

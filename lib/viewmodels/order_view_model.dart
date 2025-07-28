@@ -1,9 +1,8 @@
-import 'package:flutter/material.dart';
 import '../models/order.dart';
-import '../models/medical_service.dart';
 import '../core/viewmodels/base_view_model.dart';
 import '../core/services/order_service.dart';
-import 'package:dio/dio.dart';
+import '../core/services/order_notification_service.dart';
+import '../core/services/auth_service.dart';
 
 class OrderViewModel extends BaseViewModel {
   final OrderService orderService;
@@ -86,6 +85,16 @@ class OrderViewModel extends BaseViewModel {
       _orders.insert(0, newOrder);
       _currentOrder = newOrder;
       notifyListeners();
+      
+      // Send order confirmation notification
+      final userId = AuthService.currentUserId;
+      if (userId != null) {
+        await OrderNotificationService.sendOrderConfirmation(
+          userId: userId,
+          order: newOrder,
+        );
+      }
+      
       return true;
     } catch (e) {
       setError('Failed to create order: ${e.toString()}');
@@ -105,6 +114,16 @@ class OrderViewModel extends BaseViewModel {
       if (orderIndex != -1) {
         _orders[orderIndex] = _orders[orderIndex].copyWith(status: OrderStatus.cancelled);
         notifyListeners();
+        
+        // Send order cancellation notification
+        final userId = AuthService.currentUserId;
+        if (userId != null) {
+          await OrderNotificationService.sendOrderCancellation(
+            userId: userId,
+            order: _orders[orderIndex],
+            reason: 'Cancelled by user',
+          );
+        }
       }
       return true;
     } catch (e) {
@@ -159,6 +178,45 @@ class OrderViewModel extends BaseViewModel {
     } catch (e) {
       setError('Failed to get statistics: ${e.toString()}');
       return {};
+    }
+  }
+
+  // Update order status
+  Future<bool> updateOrderStatus(String orderId, OrderStatus newStatus) async {
+    setLoading(true);
+    setError(null);
+    try {
+      // Call the API to update order status
+      final response = await orderService.updateOrderStatus(orderId, newStatus);
+      
+      if (response) {
+        // Update the order in the local list
+        final orderIndex = _orders.indexWhere((order) => order.id == orderId);
+        if (orderIndex != -1) {
+          final previousStatus = _orders[orderIndex].status;
+          _orders[orderIndex] = _orders[orderIndex].copyWith(status: newStatus);
+          notifyListeners();
+          
+          // Send status update notification
+          final userId = AuthService.currentUserId;
+          if (userId != null) {
+            await OrderNotificationService.sendOrderStatusUpdate(
+              userId: userId,
+              order: _orders[orderIndex],
+              previousStatus: previousStatus.toString().split('.').last,
+            );
+          }
+        }
+        return true;
+      } else {
+        setError('Failed to update order status');
+        return false;
+      }
+    } catch (e) {
+      setError('Failed to update order status: ${e.toString()}');
+      return false;
+    } finally {
+      setLoading(false);
     }
   }
 

@@ -96,4 +96,32 @@ class OrderService {
       throw Exception(response.data['message']);
     }
   }
+
+  // 8. Update Order Status
+  Future<bool> updateOrderStatus(String orderId, OrderStatus newStatus) async {
+    try {
+      final response = await dio.put(
+        '/orders/$orderId/status',
+        data: {
+          'status': newStatus.toString().split('.').last,
+        },
+        options: _authHeader,
+      );
+      
+      print('Update Order Status API response: data:${response.data}, status:${response.statusCode}');
+      
+      if (response.data['success'] == true) {
+        return true;
+      } else {
+        print('Failed to update order status: ${response.data['message']}');
+        return false;
+      }
+    } on DioError catch (e) {
+      print('DioError updating order status: ${e.response?.data}');
+      return false;
+    } catch (e) {
+      print('Error updating order status: $e');
+      return false;
+    }
+  }
 } 

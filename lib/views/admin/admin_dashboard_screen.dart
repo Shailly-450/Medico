@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../home/offers_screen.dart';
 import 'package:medico/views/admin/appointments/admin_appointments_panel.dart';
+import 'package:medico/views/admin/special_offers/special_offers_management_screen.dart';
+import 'package:medico/views/admin/orders/admin_orders_panel.dart';
 import '../../core/theme/app_colors.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
@@ -15,21 +16,21 @@ class AdminDashboardScreen extends StatelessWidget {
         foregroundColor: Colors.white,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(18.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _buildAdminCard(
               context,
-              icon: Icons.local_offer,
-              title: 'Offer Management',
-              subtitle: 'Create and manage offers/packages',
+              icon: Icons.notifications_active,
+              title: 'Special Offers Management',
+              subtitle: 'Create, manage, and send push notifications for special offers',
               onTap: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const OffersScreen()),
+                MaterialPageRoute(builder: (_) => const SpecialOffersManagementScreen()),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 5),
             _buildAdminCard(
               context,
               icon: Icons.event_available,
@@ -39,6 +40,49 @@ class AdminDashboardScreen extends StatelessWidget {
                 context,
                 MaterialPageRoute(builder: (_) => const AdminAppointmentsPanel()),
               ),
+            ),
+            const SizedBox(height: 5),
+            _buildAdminCard(
+              context,
+              icon: Icons.shopping_bag,
+              title: 'Order Management',
+              subtitle: 'View and update order statuses',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AdminOrdersPanel()),
+              ),
+            ),
+            const SizedBox(height: 24),
+            _buildAdminCard(
+              context,
+              icon: Icons.people,
+              title: 'User Management',
+              subtitle: 'Manage users, doctors, and permissions',
+              onTap: () {
+                // TODO: Navigate to user management screen
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('User Management coming soon!'),
+                    backgroundColor: Colors.blue,
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 24),
+            _buildAdminCard(
+              context,
+              icon: Icons.analytics,
+              title: 'Analytics & Reports',
+              subtitle: 'View app analytics and generate reports',
+              onTap: () {
+                // TODO: Navigate to analytics screen
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Analytics & Reports coming soon!'),
+                    backgroundColor: Colors.blue,
+                  ),
+                );
+              },
             ),
             // Add more admin features here as needed
           ],

@@ -14,6 +14,7 @@ class Blog {
   final int likes;
   final bool isBookmarked;
   final bool isFeatured;
+  final bool isLiked;
 
   Blog({
     required this.id,
@@ -31,25 +32,27 @@ class Blog {
     required this.likes,
     this.isBookmarked = false,
     this.isFeatured = false,
+    this.isLiked = false,
   });
 
   factory Blog.fromJson(Map<String, dynamic> json) {
     return Blog(
-      id: json['id'] ?? '',
+      id: json['_id'] ?? json['id'] ?? '',
       title: json['title'] ?? '',
       content: json['content'] ?? '',
       excerpt: json['excerpt'] ?? '',
-      author: json['author'] ?? '',
+      author: (json['authorName'] ?? (json['author'] is String ? json['author'] : (json['author']?['profile']?['name'] ?? ''))) ?? '',
       authorAvatar: json['authorAvatar'] ?? '',
-      publishedDate: DateTime.parse(json['publishedDate'] ?? DateTime.now().toIso8601String()),
+      publishedDate: json['publishedDate'] != null ? DateTime.tryParse(json['publishedDate']) ?? DateTime.now() : DateTime.now(),
       imageUrl: json['imageUrl'] ?? '',
-      tags: List<String>.from(json['tags'] ?? []),
+      tags: (json['tags'] as List?)?.map((e) => e.toString()).toList() ?? [],
       category: json['category'] ?? '',
       readTime: json['readTime'] ?? 5,
       views: json['views'] ?? 0,
       likes: json['likes'] ?? 0,
       isBookmarked: json['isBookmarked'] ?? false,
       isFeatured: json['isFeatured'] ?? false,
+      isLiked: json['isLiked'] == true,
     );
   }
 
@@ -70,6 +73,7 @@ class Blog {
       'likes': likes,
       'isBookmarked': isBookmarked,
       'isFeatured': isFeatured,
+      'isLiked': isLiked,
     };
   }
 
@@ -89,6 +93,7 @@ class Blog {
     int? likes,
     bool? isBookmarked,
     bool? isFeatured,
+    bool? isLiked,
   }) {
     return Blog(
       id: id ?? this.id,
@@ -106,6 +111,7 @@ class Blog {
       likes: likes ?? this.likes,
       isBookmarked: isBookmarked ?? this.isBookmarked,
       isFeatured: isFeatured ?? this.isFeatured,
+      isLiked: isLiked ?? this.isLiked,
     );
   }
 } 

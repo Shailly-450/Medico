@@ -1,3 +1,14 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    // Note: OneSignal handles Firebase configuration internally
+    // dependencies {
+    //     classpath("com.google.gms:google-services:4.4.0")
+    // }
+}
+
 allprojects {
     repositories {
         google()

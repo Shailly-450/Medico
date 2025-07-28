@@ -31,7 +31,7 @@ class ApiService {
   }
 
   // Save tokens to storage
-  static Future<void> _saveTokens(String accessToken, String refreshToken) async {
+  static Future<void> saveTokens(String accessToken, String refreshToken) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('accessToken', accessToken);
     await prefs.setString('refreshToken', refreshToken);
@@ -124,7 +124,7 @@ class ApiService {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['success'] == true) {
-          await _saveTokens(data['data']['accessToken'], data['data']['refreshToken']);
+          await saveTokens(data['data']['accessToken'], data['data']['refreshToken']);
           return true;
         }
       }
@@ -177,7 +177,7 @@ class ApiService {
       
       final data = _parseResponse(response);
       if (data['success'] == true) {
-        await _saveTokens(data['data']['accessToken'], data['data']['refreshToken']);
+        await saveTokens(data['data']['accessToken'], data['data']['refreshToken']);
       }
       
       return data;
@@ -204,6 +204,12 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> getProfile() async {
+    if (_accessToken == null) {
+      return {
+        'success': false,
+        'message': 'Access token required',
+      };
+    }
     try {
       final response = await _get('/auth/me');
       return _parseResponse(response);
@@ -223,6 +229,95 @@ class ApiService {
       return {
         'success': false,
         'message': 'Failed to update profile: ${e.toString()}',
+      };
+    }
+  }
+
+  // Change password
+  static Future<Map<String, dynamic>> changePassword(String oldPassword, String newPassword) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/change-password'),
+        headers: _authHeaders,
+        body: jsonEncode({
+          'oldPassword': oldPassword,
+          'newPassword': newPassword,
+        }),
+      ).timeout(timeout);
+      return _parseResponse(response);
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to change password:  ${e.toString()}',
+      };
+    }
+  }
+
+  // Upload/Update profile avatar
+  static Future<Map<String, dynamic>> uploadProfileAvatar(String filePath) async {
+    var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/auth/profile/avatar'));
+    request.headers.addAll(_authHeaders);
+    request.files.add(await http.MultipartFile.fromPath('avatar', filePath));
+    try {
+      final streamedResponse = await request.send().timeout(timeout);
+      final response = await http.Response.fromStream(streamedResponse);
+      return _parseResponse(response);
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to upload avatar:  ${e.toString()}',
+      };
+    }
+  }
+
+  // Add family member
+  static Future<Map<String, dynamic>> addFamilyMember(Map<String, dynamic> memberData) async {
+    try {
+      final response = await _post('/family-members', memberData);
+      return _parseResponse(response);
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to add family member:  ${e.toString()}',
+      };
+    }
+  }
+
+  // List family members
+  static Future<Map<String, dynamic>> getFamilyMembers() async {
+    try {
+      final response = await _get('/family-members');
+      return _parseResponse(response);
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to fetch family members: ${e.toString()}',
+      };
+    }
+  }
+
+  // Edit family member
+  static Future<Map<String, dynamic>> updateFamilyMember(String familyMemberId, Map<String, dynamic> data) async {
+    try {
+      final response = await _put('/family-members/$familyMemberId', data);
+      return _parseResponse(response);
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to update family member: ${e.toString()}',
+      };
+    }
+  }
+
+  // Delete family member
+  static Future<Map<String, dynamic>> deleteFamilyMember(String familyMemberId) async {
+    try {
+      final response = await _delete('/family-members/$familyMemberId');
+      return _parseResponse(response);
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to delete family member: ${e.toString()}',
       };
     }
   }
@@ -603,6 +698,32 @@ class ApiService {
     }
   }
 
+  // Give or update consent
+  static Future<Map<String, dynamic>> giveOrUpdateConsent(Map<String, dynamic> consentData) async {
+    try {
+      final response = await _post('/consent', consentData);
+      return _parseResponse(response);
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to give or update consent: ${e.toString()}',
+      };
+    }
+  }
+
+  // Get all consents
+  static Future<Map<String, dynamic>> getConsents() async {
+    try {
+      final response = await _get('/consent');
+      return _parseResponse(response);
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to fetch consents: ${e.toString()}',
+      };
+    }
+  }
+
   // Health check
   static Future<bool> healthCheck() async {
     try {
@@ -615,5 +736,37 @@ class ApiService {
     } catch (e) {
       return false;
     }
+  }
+
+  static Future<Map<String, dynamic>> getAllBlogs() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/blogs'),
+      headers: _authHeaders,
+    );
+    return _parseResponse(response);
+  }
+
+  static Future<Map<String, dynamic>> toggleBlogLike(String blogId) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/blogs/$blogId/like'),
+      headers: _authHeaders,
+    );
+    return _parseResponse(response);
+  }
+
+  static Future<Map<String, dynamic>> toggleBlogBookmark(String blogId) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/blogs/$blogId/bookmark'),
+      headers: _authHeaders,
+    );
+    return _parseResponse(response);
+  }
+
+  static Future<Map<String, dynamic>> getBookmarkedBlogs() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/blogs/user/bookmarks'),
+      headers: _authHeaders,
+    );
+    return _parseResponse(response);
   }
 } 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../core/views/base_view.dart';
+import 'package:provider/provider.dart';
 import '../../viewmodels/blog_view_model.dart';
 import '../../core/theme/app_colors.dart';
 import 'widgets/blog_card.dart';
@@ -22,6 +22,8 @@ class _BlogsScreenState extends State<BlogsScreen>
   late AnimationController _slideController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+
+  int _selectedTabIndex = 0; // 0 = All, 1 = Bookmarked
 
   @override
   void initState() {
@@ -53,6 +55,7 @@ class _BlogsScreenState extends State<BlogsScreen>
 
     _fadeController.forward();
     _slideController.forward();
+    // Removed fetchAllBlogs from here
   }
 
   @override
@@ -64,66 +67,61 @@ class _BlogsScreenState extends State<BlogsScreen>
 
   @override
   Widget build(BuildContext context) {
-    return BaseView<BlogViewModel>(
-      viewModelBuilder: () => BlogViewModel(),
-      builder: (context, model, child) => Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color(0xFFE8F5E8), // Light mint green
-                Color(0xFFF0F8F0), // Very light sage
-                Color(0xFFE6F3E6), // Soft green tint
-                Color(0xFFF5F9F5), // Almost white with green tint
-              ],
-              stops: [0.0, 0.3, 0.7, 1.0],
+    return Consumer<BlogViewModel>(
+      builder: (context, model, child) {
+        return Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFFE8F5E8), // Light mint green
+                  Color(0xFFF0F8F0), // Very light sage
+                  Color(0xFFE6F3E6), // Soft green tint
+                  Color(0xFFF5F9F5), // Almost white with green tint
+                ],
+                stops: [0.0, 0.3, 0.7, 1.0],
+              ),
             ),
-          ),
-          child: SafeArea(
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: SlideTransition(
-                position: _slideAnimation,
-                child: CustomScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  slivers: [
-                    // App Bar
-                    SliverToBoxAdapter(
-                      child: _buildAppBar(context),
-                    ),
-
-
-
-                    // Category Filters
-                    SliverToBoxAdapter(
-                      child: _buildCategoryFilters(context, model),
-                    ),
-
-                    // Featured Blogs
-                    if (model.featuredBlogs.isNotEmpty)
+            child: SafeArea(
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: SlideTransition(
+                  position: _slideAnimation,
+                  child: CustomScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    slivers: [
+                      // App Bar
                       SliverToBoxAdapter(
-                        child: _buildFeaturedSection(context, model),
+                        child: _buildAppBar(context),
                       ),
-
-                    // All Blogs
-                    SliverToBoxAdapter(
-                      child: _buildAllBlogsSection(context, model),
-                    ),
-
-                    // Bottom padding
-                    const SliverToBoxAdapter(
-                      child: SizedBox(height: 32),
-                    ),
-                  ],
+                      // Category Filters
+                      SliverToBoxAdapter(
+                        child: _buildCategoryFilters(context, model),
+                      ),
+                      // Featured Blogs
+                      if (model.featuredBlogs.isNotEmpty)
+                        SliverToBoxAdapter(
+                          child: _buildFeaturedSection(context, model),
+                        ),
+                      // All Blogs
+                      SliverToBoxAdapter(
+                        child: _buildAllBlogsSection(context, model),
+                      ),
+                      // Bottom padding
+                      const SliverToBoxAdapter(
+                        child: SizedBox(height: 32),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -212,7 +210,87 @@ class _BlogsScreenState extends State<BlogsScreen>
     );
   }
 
-
+  Widget _buildTabBar(BuildContext context, BlogViewModel model) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedTabIndex = 0;
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: _selectedTabIndex == 0 ? Colors.white : Colors.transparent,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: _selectedTabIndex == 0
+                      ? [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : [],
+                ),
+                child: Center(
+                  child: Text(
+                    'All Blogs',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: _selectedTabIndex == 0 ? AppColors.textBlack : AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: GestureDetector(
+              onTap: () async {
+                setState(() {
+                  _selectedTabIndex = 1;
+                });
+                await model.fetchBookmarkedBlogs();
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: _selectedTabIndex == 1 ? Colors.white : Colors.transparent,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: _selectedTabIndex == 1
+                      ? [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : [],
+                ),
+                child: Center(
+                  child: Text(
+                    'Bookmarked',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: _selectedTabIndex == 1 ? AppColors.textBlack : AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildCategoryFilters(BuildContext context, BlogViewModel model) {
     return Container(
@@ -267,16 +345,18 @@ class _BlogsScreenState extends State<BlogsScreen>
               physics: const BouncingScrollPhysics(),
               itemCount: model.featuredBlogs.length,
               itemBuilder: (context, index) {
+                final blog = model.featuredBlogs[index];
                 return Container(
                   width: 300,
                   margin: EdgeInsets.only(
                     right: index == model.featuredBlogs.length - 1 ? 0 : 16,
                   ),
                   child: FeaturedBlogCard(
-                    blog: model.featuredBlogs[index],
-                    onTap: () => _navigateToBlogDetail(context, model.featuredBlogs[index]),
-                    onBookmark: () => model.toggleBookmark(model.featuredBlogs[index].id),
-                    onLike: () => model.incrementLikes(model.featuredBlogs[index].id),
+                    blog: blog,
+                    onTap: () => _navigateToBlogDetail(context, blog),
+                    onBookmark: () => model.toggleBookmark(blog.id),
+                    onLike: () => model.toggleLike(blog.id),
+                    // Remove imageBuilder, handle image inside FeaturedBlogCard
                   ),
                 );
               },
@@ -345,19 +425,59 @@ class _BlogsScreenState extends State<BlogsScreen>
               physics: const NeverScrollableScrollPhysics(),
               itemCount: model.filteredBlogs.length,
               itemBuilder: (context, index) {
+                final blog = model.filteredBlogs[index];
                 return Container(
                   margin: const EdgeInsets.only(bottom: 16),
                   child: BlogCard(
-                    blog: model.filteredBlogs[index],
-                    onTap: () => _navigateToBlogDetail(context, model.filteredBlogs[index]),
-                    onBookmark: () => model.toggleBookmark(model.filteredBlogs[index].id),
-                    onLike: () => model.incrementLikes(model.filteredBlogs[index].id),
+                    blog: blog,
+                    onTap: () => _navigateToBlogDetail(context, blog),
+                    onBookmark: () async => await model.toggleBookmark(blog.id),
+                    onLike: () => model.toggleLike(blog.id),
+                    // Remove imageBuilder, handle image inside BlogCard
                   ),
                 );
               },
             ),
         ],
       ),
+    );
+  }
+
+  Widget _buildBookmarkedBlogsSection(BuildContext context, BlogViewModel model) {
+    if (model.isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4CAF50)),
+        ),
+      );
+    }
+    if (model.bookmarkedBlogs.isEmpty) {
+      return Center(
+        child: Text(
+          'No bookmarked blogs found.',
+          style: TextStyle(
+            fontSize: 16,
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      );
+    }
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      itemCount: model.bookmarkedBlogs.length,
+      itemBuilder: (context, index) {
+        final blog = model.bookmarkedBlogs[index];
+        return Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          child: BlogCard(
+            blog: blog,
+            onTap: () => _navigateToBlogDetail(context, blog),
+            onBookmark: () async => await model.toggleBookmark(blog.id),
+            onLike: () => model.toggleLike(blog.id),
+          ),
+        );
+      },
     );
   }
 
@@ -395,11 +515,15 @@ class _BlogsScreenState extends State<BlogsScreen>
   }
 
   void _navigateToBlogDetail(BuildContext context, dynamic blog) {
+    final blogVM = Provider.of<BlogViewModel>(context, listen: false);
     Navigator.push(
       context,
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) =>
-            BlogDetailScreen(blog: blog),
+            ChangeNotifierProvider.value(
+              value: blogVM,
+              child: BlogDetailScreen(blog: blog),
+            ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return SlideTransition(
             position: Tween<Offset>(

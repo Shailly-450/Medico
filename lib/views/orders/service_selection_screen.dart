@@ -4,6 +4,7 @@ import '../../core/theme/app_colors.dart';
 import '../../viewmodels/order_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:dio/dio.dart';
+import '../../core/config.dart';
 
 class ServiceSelectionScreen extends StatefulWidget {
   final List<MedicalService> selectedServices;
@@ -38,7 +39,7 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
 
   Future<void> _loadCategories() async {
     try {
-      final dio = Dio(BaseOptions(baseUrl: 'http://10.0.2.2:3000/api'));
+      final dio = Dio(BaseOptions(baseUrl: AppConfig.apiBaseUrl));
       final response = await dio.get('/orders/services/categories');
       if (response.data['success'] == true) {
         final categories = (response.data['data'] as List)
@@ -61,7 +62,7 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
       });
 
       // Fetch services directly from API
-      final dio = Dio(BaseOptions(baseUrl: 'http://10.0.2.2:3000/api'));
+      final dio = Dio(BaseOptions(baseUrl: AppConfig.apiBaseUrl));
       final response = await dio.get('/orders/services');
       if (response.data['success'] == true) {
         final services = (response.data['data'] as List)

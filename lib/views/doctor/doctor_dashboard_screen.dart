@@ -5,6 +5,8 @@ import '../../models/appointment.dart';
 import '../../models/doctor.dart';
 import '../../core/services/pre_approval_service.dart';
 import '../admin/appointments/admin_appointments_panel.dart';
+import 'create_doctor_profile_screen.dart';
+import 'package:medico/views/doctor/patients/patient_list_screen.dart';
 
 class DoctorDashboardScreen extends StatefulWidget {
   const DoctorDashboardScreen({Key? key}) : super(key: key);
@@ -486,6 +488,42 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
                 color: Colors.grey,
                 onTap: () {
                   // Navigate to settings
+                },
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _buildActionCard(
+                title: 'Create Doctor Profile',
+                icon: Icons.person_add,
+                color: Colors.deepPurple,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CreateDoctorProfileScreen(),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildActionCard(
+                title: 'Patient List',
+                icon: Icons.people,
+                color: Colors.teal,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const PatientListScreen(),
+                    ),
+                  );
                 },
               ),
             ),

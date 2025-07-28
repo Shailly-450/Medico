@@ -4,11 +4,11 @@ import 'package:provider/provider.dart';
 import '../../core/views/base_view.dart';
 import '../../viewmodels/home_view_model.dart';
 import '../../core/theme/app_colors.dart';
+import '../blogs/widgets/blog_card.dart';
 import 'widgets/appointment_card.dart';
 import 'widgets/doctor_card.dart';
 import 'widgets/offer_card.dart';
 import 'widgets/hospital_card.dart';
-import '../shared/profile_header.dart';
 import '../notifications/notification_screen.dart';
 import 'offers_screen.dart';
 import 'hospitals_screen.dart';
@@ -16,21 +16,18 @@ import 'hospital_detail_screen.dart';
 import 'hospital_map_screen.dart';
 import '../doctors/doctors_screen.dart';
 import '../doctors/doctor_detail_screen.dart';
-import 'package:medico/views/home/hospital_detail_screen.dart';
 import 'find_hospitals_screen.dart';
-import 'package:medico/views/schedule/schedule_screen.dart';
 import '../appointments/all_appointments_screen.dart';
-
 import '../blogs/blogs_screen.dart';
-import '../shared/widgets/video_card.dart';
-import '../shared/widgets/article_card.dart';
-import '../shared/widgets/content_list_widget.dart';
 import '../../models/video_content.dart';
 import '../../models/article_content.dart';
 import '../video/video_player_screen.dart';
 import '../../core/config.dart';
 import '../../models/doctor.dart';
 import '../../viewmodels/doctors_view_model.dart';
+import '../../viewmodels/profile_view_model.dart';
+import '../../viewmodels/blog_view_model.dart';
+import '../blogs/blog_detail_screen.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -93,51 +90,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   ];
 
   // Sample article data
-  final List<ArticleContent> _sampleArticles = [
-    ArticleContent(
-      id: '1',
-      title:
-          'The Future of Telemedicine: How Technology is Transforming Healthcare',
-      summary:
-          'Explore how telemedicine is revolutionizing patient care and making healthcare more accessible than ever before.',
-      content: 'Full article content would go here...',
-      imageUrl:
-          'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&h=200&fit=crop',
-      author: 'Dr. James Wilson',
-      authorAvatarUrl:
-          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
-      publishedAt: DateTime.now().subtract(const Duration(hours: 4)),
-      readTime: 8,
-      views: 5670,
-      likes: 234,
-      tags: ['Telemedicine', 'Technology', 'Healthcare'],
-      category: 'Technology',
-      isPremium: false,
-      rating: 4.6,
-      isBookmarked: false,
-    ),
-    ArticleContent(
-      id: '2',
-      title: 'Nutrition Myths Debunked: What Science Really Says',
-      summary:
-          'Separate fact from fiction with evidence-based information about common nutrition misconceptions.',
-      content: 'Full article content would go here...',
-      imageUrl:
-          'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&h=200&fit=crop',
-      author: 'Dr. Lisa Park',
-      authorAvatarUrl:
-          'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=100&h=100&fit=crop&crop=face',
-      publishedAt: DateTime.now().subtract(const Duration(days: 2)),
-      readTime: 12,
-      views: 12340,
-      likes: 567,
-      tags: ['Nutrition', 'Science', 'Health'],
-      category: 'Nutrition',
-      isPremium: true,
-      rating: 4.8,
-      isBookmarked: true,
-    ),
-  ];
+  // final List<ArticleContent> _sampleArticles = [ ... ]; // Commented out, now using API blogs
 
   @override
   void initState() {
@@ -187,10 +140,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         print('HomeViewModel onModelReady called');
         model.init();
       },
-      builder: (context, model, child) {
-        print('HomeScreen offers length: ${model.offers.length}');
-        if (model.offers.isNotEmpty) {
-          for (var offer in model.offers) {
+      builder: (context, homeModel, child) {
+        print('HomeScreen offers length: ${homeModel.offers.length}');
+        if (homeModel.offers.isNotEmpty) {
+          for (var offer in homeModel.offers) {
             print('Offer: title=${offer.title}, id=${offer.id}, isActive=${offer.isActive}, validUntil=${offer.validUntil}');
           }
         }
@@ -221,7 +174,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     slivers: [
                       // App Bar with Profile
                       SliverToBoxAdapter(
-                        child: _buildAppBar(context, model),
+                        child: _buildAppBar(context, homeModel),
                       ),
 
                       // Search Section
@@ -231,33 +184,33 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
                       // Quick Actions
                       SliverToBoxAdapter(
-                        child: _buildQuickActions(context, model),
+                        child: _buildQuickActions(context, homeModel),
                       ),
 
                       // Categories Grid
                       SliverToBoxAdapter(
-                        child: _buildCategoriesSection(context, model),
+                        child: _buildCategoriesSection(context, homeModel),
                       ),
 
                       // Upcoming Appointments
-                      if (model.upcomingAppointments.isNotEmpty)
+                      if (homeModel.upcomingAppointments.isNotEmpty)
                         SliverToBoxAdapter(
-                          child: _buildAppointmentsSection(context, model),
+                          child: _buildAppointmentsSection(context, homeModel),
                         ),
 
                       // Offers Section (always visible, even if empty)
                       SliverToBoxAdapter(
-                        child: _buildOffersSection(context, model),
+                        child: _buildOffersSection(context, homeModel),
                       ),
 
                       // Doctors Section
                       SliverToBoxAdapter(
-                        child: _buildDoctorsSection(context, model),
+                        child: _buildDoctorsSection(context, homeModel),
                       ),
 
                       // Hospitals Section
                       SliverToBoxAdapter(
-                        child: _buildHospitalsSection(context, model),
+                        child: _buildHospitalsSection(context, homeModel),
                       ),
 
                       // Health Content Section
@@ -265,17 +218,70 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         child: _buildHealthContentSection(context),
                       ),
 
-                      // Bottom padding
-                      const SliverToBoxAdapter(
-                        child: SizedBox(height: 32),
-                      ),
+                      // Blog Section
+                      // SliverToBoxAdapter(
+                      //   child: Consumer<BlogViewModel>(
+                      //     builder: (context, blogModel, _) {
+                      //       if (!blogModel.isLoading && blogModel.blogs.isEmpty) {
+                      //         blogModel.fetchAllBlogs();
+                      //       }
+                      //       if (blogModel.isLoading) {
+                      //         return const Center(child: CircularProgressIndicator());
+                      //       }
+                      //       if (blogModel.blogs.isEmpty) {
+                      //         return const Center(child: Text('No blogs found.'));
+                      //       }
+                      //       return Column(
+                      //         crossAxisAlignment: CrossAxisAlignment.start,
+                      //         children: [
+                      //           Padding(
+                      //             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      //             child: Text(
+                      //               'Latest Blogs',
+                      //               style: TextStyle(
+                      //                 fontSize: 20,
+                      //                 fontWeight: FontWeight.bold,
+                      //                 color: Colors.black87,
+                      //               ),
+                      //             ),
+                      //           ),
+                      //           ListView.builder(
+                      //             shrinkWrap: true,
+                      //             physics: const NeverScrollableScrollPhysics(),
+                      //             itemCount: blogModel.blogs.length,
+                      //             itemBuilder: (context, idx) {
+                      //               final blog = blogModel.blogs[idx];
+                      //               return Card(
+                      //                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      //                 child: ListTile(
+                      //                   leading: blog.imageUrl != null
+                      //                       ? Image.network(blog.imageUrl!, width: 60, height: 60, fit: BoxFit.cover)
+                      //                       : Container(width: 60, height: 60, color: Colors.grey[200]),
+                      //                   title: Text(blog.title),
+                      //                   subtitle: Text(blog.excerpt ?? ''),
+                      //                   onTap: () {
+                      //                     // Navigate to blog detail if needed
+                      //                   },
+                      //                 ),
+                      //               );
+                      //             },
+                      //           ),
+                      //         ],
+                      //       );
+                      //     },
+                      //   ),
+                      // ),
+                      // // Bottom padding
+                      // const SliverToBoxAdapter(
+                      //   child: SizedBox(height: 32),
+                      // ),
                     ],
                   ),
                 ),
               ),
             ),
+            // floatingActionButton: _buildFloatingActionButton(context),
           ),
-          floatingActionButton: _buildFloatingActionButton(context),
         );
       },
     );
@@ -338,31 +344,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildAppBar(BuildContext context, HomeViewModel model) {
+    final profileVM = Provider.of<ProfileViewModel>(context);
+    final address = profileVM.profileData?['profile']?['address'] ?? model.userLocation;
+    final userName = profileVM.profileData?['profile']?['name'] ?? model.userName;
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.85),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.3),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-          BoxShadow(
-            color: const Color(0xFF4CAF50).withOpacity(0.1),
-            blurRadius: 40,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
+      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Profile Avatar
           Hero(
@@ -406,7 +394,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
           const SizedBox(width: 18),
-          // Welcome and Name
+          // Welcome, Name, and Address
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -425,7 +413,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         ),
                       ),
                       TextSpan(
-                        text: model.userName,
+                        text: userName,
                         style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.bold,
@@ -438,48 +426,38 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
+                const SizedBox(height: 4),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.location_on,
+                      size: 16,
+                      color: const Color(0xFF2E7D32),
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        address,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF2E7D32),
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
           const SizedBox(width: 12),
-          // Location and Notification
+          // Notification
           Row(
             children: [
-              // Location
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE8F5E8).withOpacity(0.8),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: const Color(0xFF4CAF50).withOpacity(0.3),
-                    width: 1.2,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.location_on,
-                      size: 18,
-                      color: const Color(0xFF2E7D32),
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      model.userLocation,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF2E7D32),
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              // Notification
+              // Notification icon, etc.
               Stack(
                 clipBehavior: Clip.none,
                 children: [
@@ -524,7 +502,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ),
                     ),
                   ),
-                  if (model.unreadCount > 0)
+                  if (Provider.of<HomeViewModel>(context).unreadCount > 0)
                     Positioned(
                       right: -2,
                       top: -2,
@@ -553,7 +531,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 minHeight: 20,
                               ),
                               child: Text(
-                                '${model.unreadCount}',
+                                '${Provider.of<HomeViewModel>(context).unreadCount}',
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 11,
@@ -906,7 +884,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   context,
                                   PageRouteBuilder(
                                     pageBuilder: (context, animation, secondaryAnimation) =>
-                                        const BlogsScreen(),
+                                        ChangeNotifierProvider(
+                                          create: (_) => BlogViewModel(),
+                                          child: const BlogsScreen(),
+                                        ),
                                     transitionsBuilder: (context, animation, secondaryAnimation, child) {
                                       return SlideTransition(
                                         position: Tween<Offset>(
@@ -1764,103 +1745,157 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Section Header
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.85),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.3),
-                width: 1.5,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.06),
-                  blurRadius: 16,
-                  offset: const Offset(0, 4),
-                ),
-                BoxShadow(
-                  color: const Color(0xFF4CAF50).withOpacity(0.08),
-                  blurRadius: 32,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE8F5E8).withOpacity(0.8),
-                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.white.withOpacity(0.85),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.3),
+                      width: 1.5,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.06),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
+                      ),
+                      BoxShadow(
+                        color: const Color(0xFF4CAF50).withOpacity(0.08),
+                        blurRadius: 32,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
                   ),
-                  child: Icon(
-                    Icons.play_circle_outline,
-                    color: const Color(0xFF2E7D32),
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      Text(
-                        'Health Content',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textBlack,
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE8F5E8).withOpacity(0.8),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.play_circle_outline,
+                          color: const Color(0xFF2E7D32),
+                          size: 24,
                         ),
                       ),
-                      Text(
-                        'Videos and articles from medical experts',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textSecondary,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Health Content',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textBlack,
+                              ),
+                            ),
+                            Text(
+                              'Videos and articles from medical experts',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF4CAF50).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: const Color(0xFF4CAF50).withOpacity(0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: Text(
+                          'New',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF2E7D32),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const BlogsScreen()),
+                          );
+                        },
+                        child: const Text('View All'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Color(0xFF2E7D32),
+                          textStyle: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
                     ],
                   ),
                 ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF4CAF50).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: const Color(0xFF4CAF50).withOpacity(0.3),
-                      width: 1,
-                    ),
-                  ),
-                  child: Text(
-                    'New',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF2E7D32),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
-          // Content List
-          ContentListWidget(
-            videos: _sampleVideos,
-            articles: _sampleArticles,
-            contentType: ContentType.mixed,
-            showFilterChips: false,
-            onVideoTap: (video) => _showVideoDetail(video),
-            onArticleTap: (article) => _showArticleDetail(article),
-            onVideoPlay: (video) => _playVideo(video),
-            onVideoLike: (video) => _likeVideo(video),
-            onVideoShare: (video) => _shareVideo(video),
-            onArticleLike: (article) => _likeArticle(article),
-            onArticleShare: (article) => _shareArticle(article),
-            onArticleBookmark: (article) => _bookmarkArticle(article),
+          // Blog Content List from API
+          Consumer<BlogViewModel>(
+            builder: (context, blogModel, _) {
+              if (blogModel.isLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (blogModel.blogs.isEmpty) {
+                return const Center(child: Text('No health content found.'));
+              }
+              // Show up to two blog cards
+              final blogsToShow = blogModel.blogs.take(2).toList();
+              return Column(
+                children: blogsToShow.map((blog) => Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: BlogCard(
+                    blog: blog,
+                    onTap: () {
+                      final blogVM = Provider.of<BlogViewModel>(context, listen: false);
+                      Navigator.push(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder: (context, animation, secondaryAnimation) =>
+                              ChangeNotifierProvider.value(
+                                value: blogVM,
+                                child: BlogDetailScreen(blog: blog),
+                              ),
+                          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                            return SlideTransition(
+                              position: Tween<Offset>(
+                                begin: const Offset(1.0, 0.0),
+                                end: Offset.zero,
+                              ).animate(CurvedAnimation(
+                                parent: animation,
+                                curve: Curves.easeInOut,
+                              )),
+                              child: child,
+                            );
+                          },
+                          transitionDuration: const Duration(milliseconds: 300),
+                        ),
+                      );
+                    },
+                    onBookmark: () async => await blogModel.toggleBookmark(blog.id),
+                    onLike: () => blogModel.toggleLike(blog.id),
+                  ),
+                )).toList(),
+              );
+            },
           ),
         ],
       ),

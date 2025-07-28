@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'backend_testing_screen.dart';
+import 'services_api_test_screen.dart';
 
 class TestingHomeScreen extends StatelessWidget {
   const TestingHomeScreen({Key? key}) : super(key: key);
@@ -92,6 +93,35 @@ class TestingHomeScreen extends StatelessWidget {
             
             const SizedBox(height: 12),
             
+            // Services API Testing
+            Card(
+              child: ListTile(
+                leading: const Icon(
+                  Icons.medical_services,
+                  color: Colors.teal,
+                  size: 32,
+                ),
+                title: const Text(
+                  'Services API Testing',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: const Text(
+                  'Test services API integration for comparison feature',
+                ),
+                trailing: const Icon(Icons.arrow_forward_ios),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ServicesApiTestScreen(),
+                    ),
+                  );
+                },
+              ),
+            ),
+            
+            const SizedBox(height: 12),
+            
             // UI Testing (placeholder for future)
             Card(
               child: ListTile(
@@ -167,8 +197,9 @@ class TestingHomeScreen extends StatelessWidget {
                     const Text(
                       '1. Ensure your backend server is running on localhost:3000\n'
                       '2. Start with Backend API Testing\n'
-                      '3. Run individual tests or use "Run All Tests"\n'
-                      '4. Check the response and logs for detailed results',
+                      '3. Test Services API for comparison feature\n'
+                      '4. Run individual tests or use "Run All Tests"\n'
+                      '5. Check the response and logs for detailed results',
                       style: TextStyle(fontSize: 14),
                     ),
                   ],

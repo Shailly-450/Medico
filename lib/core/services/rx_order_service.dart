@@ -2,12 +2,13 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../models/rx_order.dart';
 import '../../models/medicine.dart';
+import '../../core/config.dart';
 
 class RxOrderService {
-  static const String baseUrl = 'https://api.medico.com'; // Mock API base URL
+  static String get baseUrl => AppConfig.apiBaseUrl;
   static const Duration timeout = Duration(seconds: 10);
 
-  // Mock API endpoints
+  // API endpoints
   static const String rxOrdersEndpoint = '/api/v1/rx-orders';
   static const String pharmaciesEndpoint = '/api/v1/pharmacies';
   static const String medicinesEndpoint = '/api/v1/medicines';

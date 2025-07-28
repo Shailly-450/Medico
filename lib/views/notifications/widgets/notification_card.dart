@@ -195,27 +195,57 @@ class _NotificationCardState extends State<NotificationCard>
 
   IconData _getIcon(NotificationType type) {
     switch (type) {
-      case NotificationType.appointment:
+      case NotificationType.appointment_reminder:
         return Icons.calendar_today;
-      case NotificationType.offer:
-        return Icons.local_offer;
-      case NotificationType.reminder:
-        return Icons.medication;
+      case NotificationType.appointment_confirmed:
+        return Icons.event_available;
+      case NotificationType.appointment_cancelled:
+        return Icons.event_busy;
+      case NotificationType.prescription_ready:
+        return Icons.medical_services;
+      case NotificationType.test_result_ready:
+        return Icons.science;
+      case NotificationType.doctor_message:
+        return Icons.chat_bubble_outline;
+      case NotificationType.system_alert:
+        return Icons.warning_amber_rounded;
+      case NotificationType.payment_reminder:
+        return Icons.payments;
+      case NotificationType.video_call_invite:
+        return Icons.video_call;
+      case NotificationType.health_reminder:
+        return Icons.health_and_safety;
       case NotificationType.general:
-        return Icons.info;
+      default:
+        return Icons.notifications;
     }
   }
 
   Color _getIconColor(NotificationType type) {
     switch (type) {
-      case NotificationType.appointment:
-        return const Color(0xFF2E7D32); // Dark green
-      case NotificationType.offer:
-        return const Color(0xFF1B5E20); // Darker green
-      case NotificationType.reminder:
-        return const Color(0xFF43A047); // Medium green
+      case NotificationType.appointment_reminder:
+        return const Color(0xFF2E7D32);
+      case NotificationType.appointment_confirmed:
+        return const Color(0xFF388E3C);
+      case NotificationType.appointment_cancelled:
+        return const Color(0xFFD32F2F);
+      case NotificationType.prescription_ready:
+        return const Color(0xFF1976D2);
+      case NotificationType.test_result_ready:
+        return const Color(0xFF512DA8);
+      case NotificationType.doctor_message:
+        return const Color(0xFF00897B);
+      case NotificationType.system_alert:
+        return const Color(0xFFFBC02D);
+      case NotificationType.payment_reminder:
+        return const Color(0xFF6D4C41);
+      case NotificationType.video_call_invite:
+        return const Color(0xFF0288D1);
+      case NotificationType.health_reminder:
+        return const Color(0xFF43A047);
       case NotificationType.general:
-        return const Color(0xFF66BB6A); // Light green
+      default:
+        return const Color(0xFF66BB6A);
     }
   }
 

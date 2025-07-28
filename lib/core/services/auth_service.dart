@@ -109,6 +109,30 @@ class AuthService {
     }
   }
 
+  // Login with token and userId for biometric login
+  static Future<Map<String, dynamic>> loginWithTokenAndUserId(String token, String userId) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/auth/token-login'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({
+          'token': token,
+          'userId': userId,
+        }),
+      ).timeout(timeout);
+      final data = jsonDecode(response.body);
+      return data;
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Biometric login error:  [31m$e [0m',
+      };
+    }
+  }
+
   // Get user profile
   static Future<Map<String, dynamic>> getProfile() async {
     try {

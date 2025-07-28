@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
+import 'package:provider/provider.dart';
+import '../../viewmodels/profile_view_model.dart';
 
 class ChangePasswordDialog extends StatefulWidget {
   const ChangePasswordDialog({Key? key}) : super(key: key);
@@ -145,13 +147,22 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
 
   void _submit() async {
     setState(() => _isSubmitting = true);
-    await Future.delayed(const Duration(seconds: 2)); // Simulate API call
+    final profileVM = Provider.of<ProfileViewModel>(context, listen: false);
+    final oldPwd = _currentController.text.trim();
+    final newPwd = _newController.text.trim();
+    final result = await profileVM.changePassword(oldPwd, newPwd);
     setState(() => _isSubmitting = false);
     if (!mounted) return;
-    Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Password changed successfully!')),
-    );
+    if (result['success'] == true) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password changed successfully!')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result['message'] ?? 'Failed to change password')),
+      );
+    }
   }
 }
 
