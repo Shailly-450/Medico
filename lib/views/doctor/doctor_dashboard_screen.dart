@@ -29,7 +29,7 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
 
   void _loadDoctorData() {
     // Create doctor object from current user data
-    _currentDoctor = Doctor(
+    _currentDoctor = Doctor.mock(
       id: AuthService.currentUserId ?? '',
       name: AuthService.currentUserName ?? 'Dr. Unknown',
       specialty: 'General Medicine', // This would come from backend
@@ -43,28 +43,9 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
       experience: 15,
       education: 'MBBS, MD',
       languages: ['English'],
-      specializations: ['General Medicine'],
-      about: 'Experienced doctor with excellent patient care.',
-      availability: {
-        'Monday': '9:00 AM - 5:00 PM',
-        'Tuesday': '9:00 AM - 5:00 PM',
-        'Wednesday': '9:00 AM - 5:00 PM',
-        'Thursday': '9:00 AM - 5:00 PM',
-        'Friday': '9:00 AM - 5:00 PM',
-        'Saturday': '9:00 AM - 2:00 PM',
-        'Sunday': 'Closed',
-      },
-      awards: ['Excellence in Patient Care Award'],
-      consultationFee: '₹1200',
-      acceptsInsurance: true,
-      insuranceProviders: ['Max Bupa', 'HDFC Health'],
-      location: 'City Center',
-      distance: 0.0,
       isVerified: true,
-      phoneNumber: '+1 555-123-4567',
+      phone: '+1 555-123-4567',
       email: AuthService.currentUserId ?? '',
-      symptoms: [],
-      videoCall: true,
     );
   }
 

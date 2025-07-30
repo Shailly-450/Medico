@@ -5,7 +5,7 @@ import '../../models/family_member.dart';
 import '../../viewmodels/family_members_view_model.dart';
 import '../prescriptions/prescription_screen.dart';
 import 'family_members_screen.dart';
-import 'insurance_form_screen.dart';
+import '../insurance/insurance_screen.dart';
 import 'settings_screen.dart';
 import 'help_support_screen.dart';
 import 'privacy_policy_screen.dart';
@@ -199,7 +199,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (_) => const InsuranceFormScreen()),
+                                builder: (_) => const InsuranceScreen()),
                           );
                         },
                       ),
@@ -450,6 +450,8 @@ class _ProfileScreenState extends State<ProfileScreen>
                 Navigator.of(context).pop();
                 if (!mounted) return;
                 if (result['success'] == true) {
+                  // Force refresh the avatar display
+                  profileVM.refreshAvatar();
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Profile picture updated!')),
                   );
@@ -463,7 +465,7 @@ class _ProfileScreenState extends State<ProfileScreen>
               }
             },
             child: _ModernProfileAvatar(
-              key: ValueKey(profile?['id']),
+              key: ValueKey('${profile?['id']}_${profile?['imageUrl']}_${profileVM.avatarUpdateTimestamp}'),
               name: name,
               imageUrl: profile?['imageUrl'],
               radius: 36,
@@ -981,6 +983,10 @@ class _ModernProfileAvatar extends StatelessWidget {
           radius: radius,
           backgroundImage: NetworkImage(imageUrl!),
           backgroundColor: AppColors.primary.withOpacity(0.1),
+          onBackgroundImageError: (exception, stackTrace) {
+            // Handle image loading errors
+            debugPrint('Failed to load profile image: $exception');
+          },
         ),
       );
     }

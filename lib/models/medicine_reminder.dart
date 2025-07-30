@@ -115,21 +115,67 @@ class MedicineReminder {
 
   // Factory constructor to create MedicineReminder from JSON
   factory MedicineReminder.fromJson(Map<String, dynamic> json) {
+    // Parse frequency from backend string format
+    ReminderFrequency parseFrequency(dynamic frequencyValue) {
+      if (frequencyValue == null) return ReminderFrequency.daily;
+      
+      String frequencyStr = frequencyValue.toString().toLowerCase();
+      switch (frequencyStr) {
+        case 'once':
+          return ReminderFrequency.once;
+        case 'daily':
+          return ReminderFrequency.daily;
+        case 'everyotherday':
+        case 'every_other_day':
+          return ReminderFrequency.everyOtherDay;
+        case 'weekly':
+          return ReminderFrequency.weekly;
+        case 'biweekly':
+        case 'bi_weekly':
+          return ReminderFrequency.biWeekly;
+        case 'monthly':
+          return ReminderFrequency.monthly;
+        case 'asneeded':
+        case 'as_needed':
+          return ReminderFrequency.asNeeded;
+        case 'custom':
+          return ReminderFrequency.custom;
+        default:
+          return ReminderFrequency.daily;
+      }
+    }
+
+    // Parse status from backend string format
+    ReminderStatus parseStatus(dynamic statusValue) {
+      if (statusValue == null) return ReminderStatus.active;
+      
+      String statusStr = statusValue.toString().toLowerCase();
+      switch (statusStr) {
+        case 'active':
+          return ReminderStatus.active;
+        case 'paused':
+          return ReminderStatus.paused;
+        case 'completed':
+          return ReminderStatus.completed;
+        case 'skipped':
+          return ReminderStatus.skipped;
+        default:
+          return ReminderStatus.active;
+      }
+    }
+
     return MedicineReminder(
-      id: json['id'] as String,
-      medicineId: json['medicineId'] as String,
+      id: json['_id'] ?? json['id'] ?? '',
+      medicineId: json['medicineId'] ?? '',
       medicine: json['medicine'] != null
           ? Medicine.fromJson(json['medicine'] as Map<String, dynamic>)
           : null,
-      reminderName: json['reminderName'] as String,
-      frequency: ReminderFrequency.values.firstWhere(
-        (e) => e.toString() == json['frequency'],
-        orElse: () => ReminderFrequency.daily,
-      ),
-      dosesPerDay: json['dosesPerDay'] as int,
-      reminderTimes: (json['reminderTimes'] as List)
-          .map((time) => DateTime.parse(time as String))
-          .toList(),
+      reminderName: json['reminderName'] ?? '',
+      frequency: parseFrequency(json['frequency']),
+      dosesPerDay: json['dosesPerDay'] ?? 1,
+      reminderTimes: (json['reminderTimes'] as List?)
+          ?.map((time) => DateTime.parse(time as String))
+          .toList() ?? [],
       startDate: DateTime.parse(json['startDate'] as String),
       endDate: json['endDate'] != null
           ? DateTime.parse(json['endDate'] as String)
@@ -137,17 +183,14 @@ class MedicineReminder {
       totalDoses: json['totalDoses'] as int?,
       dosesCompleted: json['dosesCompleted'] as int? ?? 0,
       isActive: json['isActive'] as bool? ?? true,
-      status: ReminderStatus.values.firstWhere(
-        (e) => e.toString() == json['status'],
-        orElse: () => ReminderStatus.active,
-      ),
+      status: parseStatus(json['status']),
       instructions: json['instructions'] as String?,
       takeWithFood: json['takeWithFood'] as bool? ?? false,
       takeWithWater: json['takeWithWater'] as bool? ?? true,
       customFrequencyDescription: json['customFrequencyDescription'] as String?,
       customIntervalDays: json['customIntervalDays'] as int?,
       skipDays:
-          json['skipDays'] != null ? List<int>.from(json['skipDays']) : null,
+          json['skipDays'] != null ? List<int>.from(json['skipDays']) : const [],
       hasNotifications: json['hasNotifications'] as bool? ?? true,
       notificationSettings: json['notificationSettings'] != null
           ? NotificationSettings.fromJson(json['notificationSettings'])
@@ -166,8 +209,12 @@ class MedicineReminder {
               ),
             ),
       reminderVibration: json['reminderVibration'] ?? true,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      createdAt: json['createdAt'] != null 
+          ? DateTime.parse(json['createdAt'] as String)
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'] as String)
+          : DateTime.now(),
     );
   }
 

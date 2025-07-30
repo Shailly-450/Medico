@@ -35,9 +35,9 @@ class DoctorCard extends StatelessWidget {
                     color: Colors.grey[200],
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: doctor.imageUrl.isNotEmpty
+                  child: doctor.profileImage.isNotEmpty
                       ? Image.network(
-                          doctor.imageUrl,
+                          doctor.profileImage,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
                             return Icon(
@@ -105,9 +105,9 @@ class DoctorCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
 
-                    // Hospital
+                    // Experience and Education
                     Text(
-                      doctor.hospital,
+                      '${doctor.experience} years exp • ${doctor.education}',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey[500],
@@ -115,6 +115,19 @@ class DoctorCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    const SizedBox(height: 4),
+
+                    // Languages
+                    if (doctor.languages.isNotEmpty)
+                      Text(
+                        'Languages: ${doctor.languagesString}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey[500],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     const SizedBox(height: 8),
 
                     // Rating and Reviews
@@ -127,7 +140,7 @@ class DoctorCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '${doctor.rating.toStringAsFixed(1)} (${doctor.reviews})',
+                          '${doctor.ratingFormatted} (${doctor.reviewCount})',
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.grey[600],
@@ -153,7 +166,7 @@ class DoctorCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      '₹${doctor.price.toStringAsFixed(0)}',
+                      doctor.consultationFeeFormatted,
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -187,14 +200,23 @@ class DoctorCard extends StatelessWidget {
                     ],
                   ),
 
-                  // Distance
-                  if (doctor.distance > 0) ...[
+                  // Availability
+                  if (doctor.isAvailableToday) ...[
                     const SizedBox(height: 4),
-                    Text(
-                      '${doctor.distance} km',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: Colors.grey[500],
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: Colors.green, width: 0.5),
+                      ),
+                      child: Text(
+                        'Available Today',
+                        style: TextStyle(
+                          fontSize: 9,
+                          color: Colors.green,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ],

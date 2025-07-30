@@ -4,41 +4,9 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/appointment.dart';
+import '../../models/doctor.dart';
 import '../../core/config.dart';
 import '../auth/login_screen.dart';
-
-class Doctor {
-  final String id;
-  final String name;
-  final String imageUrl;
-  final String specialty;
-  final String hospital;
-  final double consultationFee;
-  final bool isOnline;
-
-  Doctor({
-    required this.id,
-    required this.name,
-    required this.imageUrl,
-    required this.specialty,
-    required this.hospital,
-    required this.consultationFee,
-    required this.isOnline,
-  });
-
-  factory Doctor.fromJson(Map<String, dynamic> json) {
-    return Doctor(
-      id: json['_id'] ?? '',
-      name: json['profile']['name'] ?? 'Unknown Doctor',
-      imageUrl: json['profile']['imageUrl'] ?? '',
-      specialty: json['doctorProfile']['specialty'] ?? 'General Practice',
-      hospital: json['doctorProfile']['hospital'] ?? 'Not specified',
-      consultationFee:
-          (json['doctorProfile']['consultationFee'] ?? 0).toDouble(),
-      isOnline: json['doctorProfile']['isOnline'] ?? false,
-    );
-  }
-}
 
 class DoctorCard extends StatelessWidget {
   final Doctor doctor;
@@ -66,10 +34,10 @@ class DoctorCard extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 30,
-              backgroundImage: doctor.imageUrl.isNotEmpty
-                  ? NetworkImage(doctor.imageUrl)
+              backgroundImage: doctor.profileImage.isNotEmpty
+                  ? NetworkImage(doctor.profileImage)
                   : null,
-              child: doctor.imageUrl.isEmpty
+              child: doctor.profileImage.isEmpty
                   ? const Icon(Icons.person, color: Colors.white)
                   : null,
               backgroundColor: Colors.grey,
@@ -88,7 +56,7 @@ class DoctorCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${doctor.specialty} • \$${doctor.consultationFee.toStringAsFixed(2)}',
+                    '${doctor.specialty} • ${doctor.consultationFeeFormatted}',
                     style: TextStyle(
                       color: Colors.grey[600],
                       fontSize: 14,
@@ -197,20 +165,20 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
       };
 
       final response = await http.get(
-        Uri.parse('${AppConfig.apiBaseUrl}/users/doctors').replace(
+        Uri.parse('${AppConfig.apiBaseUrl}/api/doctors').replace(
           queryParameters: queryParams,
         ),
         headers: {
-          'Authorization': 'Bearer $_accessToken',
           'Content-Type': 'application/json',
         },
       );
 
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
-        final List<dynamic> doctorsJson = responseData['data'];
-        final List<Doctor> newDoctors =
-            doctorsJson.map((doc) => Doctor.fromJson(doc)).toList();
+        if (responseData['success'] == true) {
+          final List<dynamic> doctorsJson = responseData['data'];
+          final List<Doctor> newDoctors =
+              doctorsJson.map((doc) => Doctor.fromJson(doc)).toList();
 
         setState(() {
           _doctors.addAll(newDoctors);
@@ -218,12 +186,12 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
           _currentPage++;
           _isLoadingDoctors = false;
         });
-      } else if (response.statusCode == 401) {
-        _showError("Session expired. Please login again.");
-        _redirectToLogin();
       } else {
         throw Exception('Failed to load doctors: ${response.body}');
       }
+    } else {
+      throw Exception('Failed to load doctors: ${response.body}');
+    }
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();

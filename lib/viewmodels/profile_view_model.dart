@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
 import '../core/services/api_service.dart';
+import 'package:flutter/services.dart';
 
 class ProfileViewModel extends ChangeNotifier {
   Map<String, dynamic>? profileData;
   bool isLoading = false;
   String? error;
+  int _avatarUpdateTimestamp = 0;
+  
+  int get avatarUpdateTimestamp => _avatarUpdateTimestamp;
+  
+  void refreshAvatar() {
+    _avatarUpdateTimestamp = DateTime.now().millisecondsSinceEpoch;
+    notifyListeners();
+  }
 
   Future<void> fetchProfile() async {
     isLoading = true;
@@ -65,15 +74,31 @@ class ProfileViewModel extends ChangeNotifier {
     isLoading = true;
     error = null;
     notifyListeners();
-    final result = await ApiService.uploadProfileAvatar(filePath);
-    if (result['success'] == true) {
-      // Optionally, update profileData with new avatar URL if needed
-      await fetchProfile();
-    } else {
-      error = result['message'] ?? 'Failed to update avatar';
+    try {
+      final result = await ApiService.uploadProfileAvatar(filePath);
+      if (result['success'] == true) {
+        // Update timestamp to force UI refresh
+        _avatarUpdateTimestamp = DateTime.now().millisecondsSinceEpoch;
+        // Clear image cache to force refresh
+        PaintingBinding.instance.imageCache.clear();
+        PaintingBinding.instance.imageCache.clearLiveImages();
+        // Refresh profile data to get the updated avatar URL
+        await fetchProfile();
+        return result;
+      } else {
+        error = result['message'] ?? 'Failed to update avatar';
+        isLoading = false;
+        notifyListeners();
+        return result;
+      }
+    } catch (e) {
+      error = e.toString();
+      isLoading = false;
+      notifyListeners();
+      return {
+        'success': false,
+        'message': 'Failed to update avatar: ${e.toString()}',
+      };
     }
-    isLoading = false;
-    notifyListeners();
-    return result;
   }
 } 

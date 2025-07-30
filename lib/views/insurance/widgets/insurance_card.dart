@@ -20,16 +20,16 @@ class InsuranceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 0,
+      elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.grey[200]!, width: 1),
+        side: BorderSide(color: Colors.grey[100]!, width: 1),
       ),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -43,17 +43,21 @@ class InsuranceCard extends StatelessWidget {
                       children: [
                         Text(
                           insurance.insuranceProvider,
-                          style: Theme.of(context).textTheme.titleMedium
+                          style: Theme.of(context).textTheme.titleLarge
                               ?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.textBlack,
+                                fontSize: 18,
                               ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           'Policy #${insurance.policyNumber}',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: AppColors.textSecondary),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: AppColors.textSecondary,
+                                fontSize: 14,
+                              ),
                         ),
                       ],
                     ),
@@ -105,19 +109,33 @@ class InsuranceCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   if (onEdit != null)
-                    IconButton(
-                      onPressed: onEdit,
-                      icon: const Icon(Icons.edit),
-                      tooltip: 'Edit',
-                      color: AppColors.primary,
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: IconButton(
+                        onPressed: onEdit,
+                        icon: const Icon(Icons.edit, size: 18),
+                        tooltip: 'Edit',
+                        color: AppColors.primary,
+                        padding: const EdgeInsets.all(8),
+                      ),
                     ),
                   if (onDelete != null) ...[
                     const SizedBox(width: 8),
-                    IconButton(
-                      onPressed: onDelete,
-                      icon: const Icon(Icons.delete),
-                      tooltip: 'Delete',
-                      color: Colors.red,
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.red.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: IconButton(
+                        onPressed: onDelete,
+                        icon: const Icon(Icons.delete, size: 18),
+                        tooltip: 'Delete',
+                        color: Colors.red,
+                        padding: const EdgeInsets.all(8),
+                      ),
                     ),
                   ],
                 ],
@@ -155,21 +173,23 @@ class InsuranceCard extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: chipColor,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: textColor.withValues(alpha: 0.3), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: textColor),
-          const SizedBox(width: 4),
+          Icon(icon, size: 16, color: textColor),
+          const SizedBox(width: 6),
           Text(
             text,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: textColor,
               fontWeight: FontWeight.w600,
+              fontSize: 12,
             ),
           ),
         ],

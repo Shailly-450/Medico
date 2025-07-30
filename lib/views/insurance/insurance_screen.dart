@@ -5,6 +5,7 @@ import '../../core/theme/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'widgets/insurance_card.dart';
 import 'create_insurance_screen.dart';
+import 'insurance_detail_screen.dart';
 import '../../core/views/base_view.dart';
 
 class InsuranceScreen extends StatefulWidget {
@@ -36,32 +37,122 @@ class _InsuranceScreenState extends State<InsuranceScreen>
       viewModelBuilder: () => InsuranceViewModel(),
       builder: (context, model, child) => Scaffold(
         appBar: AppBar(
-          title: const Text('Insurance'),
+          title: const Text(
+            'Insurance',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          elevation: 0,
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
           bottom: TabBar(
             controller: _tabController,
+            indicatorColor: Colors.white,
+            indicatorWeight: 3,
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white.withValues(alpha: 0.7),
+            labelStyle: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+            unselectedLabelStyle: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.normal,
+            ),
             tabs: const [
-              Tab(text: 'Active'),
-              Tab(text: 'Expiring Soon'),
-              Tab(text: 'Expired'),
+              Tab(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.check_circle, size: 16),
+                    SizedBox(width: 4),
+                    Text('Active'),
+                  ],
+                ),
+              ),
+              Tab(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.warning, size: 16),
+                    SizedBox(width: 4),
+                    Text('Expiring Soon'),
+                  ],
+                ),
+              ),
+              Tab(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.error, size: 16),
+                    SizedBox(width: 4),
+                    Text('Expired'),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
         body: model.busy
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text(
+                      'Loading insurances...',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              )
             : model.errorMessage != null
             ? Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      'Error: ${model.errorMessage}',
-                      style: const TextStyle(color: Colors.red),
-                      textAlign: TextAlign.center,
+                    Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: Colors.red[300],
                     ),
                     const SizedBox(height: 16),
-                    ElevatedButton(
+                    Text(
+                      'Error Loading Insurances',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textBlack,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      model.errorMessage!,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: AppColors.textSecondary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton.icon(
                       onPressed: () => model.loadInsurances(),
-                      child: const Text('Retry'),
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Retry'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -79,7 +170,10 @@ class _InsuranceScreenState extends State<InsuranceScreen>
               ),
         floatingActionButton: FloatingActionButton(
           onPressed: () => _addInsurance(context),
-          child: const Icon(Icons.add),
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          elevation: 4,
+          child: const Icon(Icons.add, size: 24),
         ),
       ),
     );
@@ -87,10 +181,48 @@ class _InsuranceScreenState extends State<InsuranceScreen>
 
   Widget _buildInsuranceList(List<Insurance> insurances) {
     if (insurances.isEmpty) {
-      return const Center(
-        child: Text(
-          'No insurances found',
-          style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.health_and_safety_outlined,
+              size: 64,
+              color: AppColors.textSecondary.withValues(alpha: 0.5),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No Insurance Policies',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textBlack,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Add your first insurance policy to get started',
+              style: TextStyle(
+                fontSize: 14,
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () => _addInsurance(context),
+              icon: const Icon(Icons.add),
+              label: const Text('Add Insurance'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+              ),
+            ),
+          ],
         ),
       );
     }
@@ -138,9 +270,11 @@ class _InsuranceScreenState extends State<InsuranceScreen>
   }
 
   Future<void> _viewInsurance(BuildContext context, Insurance insurance) async {
-    // TODO: Implement insurance detail view
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Insurance detail view coming soon!')),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => InsuranceDetailScreen(insurance: insurance),
+      ),
     );
   }
 

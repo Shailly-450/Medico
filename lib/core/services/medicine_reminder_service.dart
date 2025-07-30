@@ -1,15 +1,31 @@
 import '../../models/medicine_reminder.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../config.dart';
+import 'auth_service.dart';
 
 class MedicineReminderService {
-  final String _baseUrl =
-      'YOUR_API_BASE_URL'; // Replace with your actual API URL
+  final String _baseUrl = AppConfig.apiBaseUrl;
+
+  Map<String, String> get _authHeaders {
+    final token = AuthService.accessToken;
+    if (token == null) {
+      throw Exception('User not authenticated');
+    }
+    return {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+  }
 
   /// Get all reminders for the authenticated user
   Future<List<MedicineReminder>> getReminders() async {
     try {
-      final response = await http.get(Uri.parse('$_baseUrl/api/reminders'));
+      final response = await http.get(
+        Uri.parse('$_baseUrl/medicine-reminders'),
+        headers: _authHeaders,
+      );
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         return data.map((json) => MedicineReminder.fromJson(json)).toList();
@@ -39,31 +55,57 @@ class MedicineReminderService {
     bool hasNotifications = true,
     NotificationSettings? notificationSettings,
     bool reminderVibration = true,
-    required String userId,
   }) async {
     try {
+      // Convert frequency enum to string format expected by backend
+      String frequencyString;
+      switch (frequency) {
+        case ReminderFrequency.once:
+          frequencyString = 'once';
+          break;
+        case ReminderFrequency.daily:
+          frequencyString = 'daily';
+          break;
+        case ReminderFrequency.everyOtherDay:
+          frequencyString = 'everyOtherDay';
+          break;
+        case ReminderFrequency.weekly:
+          frequencyString = 'weekly';
+          break;
+        case ReminderFrequency.biWeekly:
+          frequencyString = 'biWeekly';
+          break;
+        case ReminderFrequency.monthly:
+          frequencyString = 'monthly';
+          break;
+        case ReminderFrequency.asNeeded:
+          frequencyString = 'asNeeded';
+          break;
+        case ReminderFrequency.custom:
+          frequencyString = 'custom';
+          break;
+      }
+
       final response = await http.post(
-        Uri.parse('$_baseUrl/api/reminders'),
+        Uri.parse('$_baseUrl/medicine-reminders'),
         body: json.encode({
-          'medicineId': medicineId,
           'reminderName': reminderName,
-          'frequency': frequency.toString(),
+          'frequency': frequencyString,
           'dosesPerDay': dosesPerDay,
-          'reminderTimes':
-              reminderTimes.map((dt) => dt.toIso8601String()).toList(),
           'startDate': startDate.toIso8601String(),
+          'reminderTimes': reminderTimes.map((dt) => dt.toIso8601String()).toList(),
           'instructions': instructions,
           'takeWithFood': takeWithFood,
-          'hasNotifications': hasNotifications,
-          'userId': userId,
+          'takeWithWater': takeWithWater,
+          'isActive': true,
         }),
-        headers: {'Content-Type': 'application/json'},
+        headers: _authHeaders,
       );
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 201 || response.statusCode == 200) {
         return MedicineReminder.fromJson(json.decode(response.body));
       }
-      throw Exception('Failed to create reminder');
+      throw Exception('Failed to create reminder: ${response.statusCode} - ${response.body}');
     } catch (e) {
       throw Exception('Error creating reminder: $e');
     }
@@ -73,7 +115,8 @@ class MedicineReminderService {
   Future<MedicineReminder> markDoseTaken(String reminderId) async {
     try {
       final response = await http.post(
-        Uri.parse('$_baseUrl/api/reminders/$reminderId/take-dose'),
+        Uri.parse('$_baseUrl/medicine-reminders/$reminderId/take-dose'),
+        headers: _authHeaders,
       );
 
       if (response.statusCode == 200) {
@@ -88,8 +131,10 @@ class MedicineReminderService {
   /// Get today's reminders
   Future<List<MedicineReminder>> getTodayReminders() async {
     try {
-      final response =
-          await http.get(Uri.parse('$_baseUrl/api/reminders/today'));
+      final response = await http.get(
+        Uri.parse('$_baseUrl/medicine-reminders/today'),
+        headers: _authHeaders,
+      );
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         return data.map((json) => MedicineReminder.fromJson(json)).toList();
@@ -103,8 +148,10 @@ class MedicineReminderService {
   /// Get overdue reminders
   Future<List<MedicineReminder>> getOverdueReminders() async {
     try {
-      final response =
-          await http.get(Uri.parse('$_baseUrl/api/reminders/overdue'));
+      final response = await http.get(
+        Uri.parse('$_baseUrl/medicine-reminders/overdue'),
+        headers: _authHeaders,
+      );
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         return data.map((json) => MedicineReminder.fromJson(json)).toList();
@@ -142,13 +189,14 @@ class MedicineReminderService {
       final Map<String, dynamic> updates = {};
       if (reminderName != null) updates['reminderName'] = reminderName;
       if (instructions != null) updates['instructions'] = instructions;
-      if (hasNotifications != null)
-        updates['hasNotifications'] = hasNotifications;
+      if (takeWithFood != null) updates['takeWithFood'] = takeWithFood;
+      if (takeWithWater != null) updates['takeWithWater'] = takeWithWater;
+      if (isActive != null) updates['isActive'] = isActive;
 
       final response = await http.put(
-        Uri.parse('$_baseUrl/api/reminders/$reminderId'),
+        Uri.parse('$_baseUrl/medicine-reminders/$reminderId'),
         body: json.encode(updates),
-        headers: {'Content-Type': 'application/json'},
+        headers: _authHeaders,
       );
 
       if (response.statusCode == 200) {
@@ -164,7 +212,8 @@ class MedicineReminderService {
   Future<MedicineReminder> pauseReminder(String reminderId) async {
     try {
       final response = await http.post(
-        Uri.parse('$_baseUrl/api/reminders/$reminderId/pause'),
+        Uri.parse('$_baseUrl/medicine-reminders/$reminderId/pause'),
+        headers: _authHeaders,
       );
 
       if (response.statusCode == 200) {
@@ -180,7 +229,8 @@ class MedicineReminderService {
   Future<MedicineReminder> resumeReminder(String reminderId) async {
     try {
       final response = await http.post(
-        Uri.parse('$_baseUrl/api/reminders/$reminderId/resume'),
+        Uri.parse('$_baseUrl/medicine-reminders/$reminderId/resume'),
+        headers: _authHeaders,
       );
 
       if (response.statusCode == 200) {
@@ -196,7 +246,8 @@ class MedicineReminderService {
   Future<MedicineReminder> markDoseSkipped(String reminderId) async {
     try {
       final response = await http.post(
-        Uri.parse('$_baseUrl/api/reminders/$reminderId/skip-dose'),
+        Uri.parse('$_baseUrl/medicine-reminders/$reminderId/skip-dose'),
+        headers: _authHeaders,
       );
 
       if (response.statusCode == 200) {
@@ -212,7 +263,8 @@ class MedicineReminderService {
   Future<bool> deleteReminder(String reminderId) async {
     try {
       final response = await http.delete(
-        Uri.parse('$_baseUrl/api/reminders/$reminderId'),
+        Uri.parse('$_baseUrl/medicine-reminders/$reminderId'),
+        headers: _authHeaders,
       );
       return response.statusCode == 200;
     } catch (e) {
@@ -223,8 +275,10 @@ class MedicineReminderService {
   /// Get reminder statistics
   Future<Map<String, dynamic>> getReminderStatistics() async {
     try {
-      final response =
-          await http.get(Uri.parse('$_baseUrl/api/reminders/statistics'));
+      final response = await http.get(
+        Uri.parse('$_baseUrl/medicine-reminders/statistics'),
+        headers: _authHeaders,
+      );
       if (response.statusCode == 200) {
         return json.decode(response.body);
       }
@@ -238,7 +292,8 @@ class MedicineReminderService {
   Future<List<MedicineReminder>> searchReminders(String query) async {
     try {
       final response = await http.get(
-        Uri.parse('$_baseUrl/api/reminders/search?q=$query'),
+        Uri.parse('$_baseUrl/medicine-reminders/search?q=$query'),
+        headers: _authHeaders,
       );
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);

@@ -102,4 +102,54 @@ class TestCheckupService {
       throw Exception('Failed to create checkup: ${response.statusCode}');
     }
   }
+
+  // Update checkup status
+  Future<Map<String, dynamic>> updateCheckupStatus(
+    String checkupId,
+    String status,
+  ) async {
+    final requestBody = {
+      'status': status,
+    };
+
+    print('Updating checkup status: $checkupId to $status');
+
+    final response = await http
+        .patch(
+          Uri.parse('$baseUrl$checkupsEndpoint/$checkupId/status'),
+          headers: _authHeaders,
+          body: jsonEncode(requestBody),
+        )
+        .timeout(timeout);
+
+    print('API Response [${response.statusCode}]: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data;
+    } else {
+      throw Exception('Failed to update checkup status: ${response.statusCode}');
+    }
+  }
+
+  // Delete checkup
+  Future<Map<String, dynamic>> deleteCheckup(String checkupId) async {
+    print('Deleting checkup: $checkupId');
+
+    final response = await http
+        .delete(
+          Uri.parse('$baseUrl$checkupsEndpoint/$checkupId'),
+          headers: _authHeaders,
+        )
+        .timeout(timeout);
+
+    print('API Response [${response.statusCode}]: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data;
+    } else {
+      throw Exception('Failed to delete checkup: ${response.statusCode}');
+    }
+  }
 }

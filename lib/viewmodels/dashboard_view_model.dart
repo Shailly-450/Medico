@@ -1,9 +1,15 @@
-import 'package:flutter/material.dart';
 import 'dart:developer' as developer;
+
+import 'package:flutter/material.dart';
+
 import '../core/viewmodels/base_view_model.dart';
 import '../core/services/dashboard_service.dart';
 import '../core/services/auth_service.dart';
+import '../core/services/medicine_reminder_service.dart';
+import '../core/services/medical_journey_service.dart';
 import '../models/dashboard.dart';
+import '../models/medicine_reminder.dart';
+import '../models/journey_stage.dart';
 import '../views/dashboard/widgets/quick_action_card.dart';
 import '../views/appointments/book_appointment_screen.dart';
 import '../views/medicine_reminders/medicine_reminders_screen.dart';
@@ -24,6 +30,10 @@ class DashboardViewModel extends BaseViewModel {
   Dashboard? _dashboardData;
   Dashboard? get dashboardData => _dashboardData;
 
+  // Medicine reminders data
+  List<MedicineReminder> _medicineReminders = [];
+  List<MedicineReminder> get medicineReminders => _medicineReminders;
+
   // Health Overview Data (from API or fallback)
   double get totalSavings =>
       _dashboardData?.healthOverview.totalSavings ?? 2450.00;
@@ -37,13 +47,17 @@ class DashboardViewModel extends BaseViewModel {
 
   // Health Tracker Data
   VitalSigns? _latestVitals;
-  List<VitalSigns> _vitalSignsHistory = [];
+  final List<VitalSigns> _vitalSignsHistory = [];
   List<Map<String, dynamic>> _healthMetrics = [];
 
   // Getters for health tracking
   VitalSigns? get latestVitals => _latestVitals;
   List<VitalSigns> get vitalSignsHistory => _vitalSignsHistory;
   List<Map<String, dynamic>> get healthMetrics => _healthMetrics;
+
+  // Journey data
+  List<MedicalJourney> _journeys = [];
+  List<JourneyStage> get activeJourneyStages => _journeys.expand((j) => j.stages).where((s) => s.status == JourneyStatus.inProgress || s.status == JourneyStatus.notStarted).toList();
 
   // Recent Medical History (from API or fallback)
   List<Map<String, dynamic>> get recentVisits {
@@ -97,8 +111,37 @@ class DashboardViewModel extends BaseViewModel {
     ];
   }
 
-  // Active Care Items (from API or fallback)
+  // Active Care Items (from Medicine Reminder API or fallback)
   List<Map<String, dynamic>> get activeMedications {
+    // Try to use medicine reminder API data first
+    if (_medicineReminders.isNotEmpty) {
+      return _medicineReminders
+          .where((reminder) => reminder.isActive && reminder.status == ReminderStatus.active)
+          .map((reminder) {
+            final medicine = reminder.medicine;
+            final nextDoseTime = _getNextDoseTime(reminder);
+            
+            return {
+              'name': medicine?.name ?? reminder.reminderName,
+              'dosage': medicine?.dosage ?? 'As prescribed',
+              'frequency': _getFrequencyText(reminder.frequency),
+              'nextDose': nextDoseTime?.toIso8601String() ?? '',
+              'remaining': medicine?.remainingQuantity ?? 0,
+              'refillNeeded': medicine?.needsRefill ?? false,
+              'instructions': reminder.instructions,
+              'takeWithFood': reminder.takeWithFood,
+              'takeWithWater': reminder.takeWithWater,
+              'dosesPerDay': reminder.dosesPerDay,
+              'dosesCompleted': reminder.dosesCompleted,
+              'totalDoses': reminder.totalDoses,
+              'startDate': reminder.startDate.toIso8601String(),
+              'endDate': reminder.endDate?.toIso8601String(),
+            };
+          })
+          .toList();
+    }
+
+    // Fallback to dashboard API data if available
     if (_dashboardData?.currentMedications.isNotEmpty == true) {
       return _dashboardData!.currentMedications
           .map((med) => {
@@ -171,12 +214,12 @@ class DashboardViewModel extends BaseViewModel {
       };
     }
 
-    // Fallback data
+    // Fallback data - updated to match sample data
     return {
-      'all': 5,
+      'all': 3,
       'today': 1,
-      'upcoming': 2,
-      'completed': 2,
+      'upcoming': 1,
+      'completed': 1,
     };
   }
 
@@ -278,7 +321,6 @@ class DashboardViewModel extends BaseViewModel {
   Future<void> loadDashboardData() async {
     try {
       setBusy(true);
-      developer.log('🔄 DashboardViewModel: Loading dashboard data...');
 
       // Initialize auth service if needed
       await AuthService.initialize();
@@ -286,55 +328,107 @@ class DashboardViewModel extends BaseViewModel {
       final dashboard = await DashboardService.getDashboardData();
       if (dashboard != null) {
         _dashboardData = dashboard;
-        developer
-            .log('✅ DashboardViewModel: Successfully loaded dashboard data');
-        developer.log(
-            '📊 DashboardViewModel: Health Score: ${dashboard.healthOverview.healthScore}');
-        developer.log(
-            '💰 DashboardViewModel: Total Savings: \$${dashboard.healthOverview.totalSavings}');
-        developer.log(
-            '🏥 DashboardViewModel: Visits This Month: ${dashboard.healthOverview.visitsThisMonth}');
-      } else {
-        developer.log(
-            '⚠️ DashboardViewModel: Failed to load dashboard data, using fallback');
       }
+      
+      // Also load medicine reminders
+      await loadMedicineReminders();
     } catch (e) {
-      developer.log('❌ DashboardViewModel: Error loading dashboard data: $e');
+      // Handle error silently in production
     } finally {
       setBusy(false);
     }
   }
 
-  // Test backend connection
-  Future<bool> testBackendConnection() async {
+  // Load medicine reminders from API
+  Future<void> loadMedicineReminders() async {
     try {
-      developer.log('🔍 DashboardViewModel: Testing backend connection...');
-      final isConnected = await DashboardService.testBackendConnection();
-      developer.log(
-          '🔍 DashboardViewModel: Backend connection test result: $isConnected');
-      return isConnected;
+      final reminders = await MedicineReminderService().getReminders();
+      _medicineReminders = reminders;
+      notifyListeners();
     } catch (e) {
-      developer.log('❌ DashboardViewModel: Backend connection test failed: $e');
-      return false;
+      // Handle error silently in production
+      developer.log('Error loading medicine reminders: $e');
     }
   }
 
-  // Debug method to print current state
-  void debugPrintState() {
-    developer.log('🔍 DashboardViewModel: Current State:');
-    developer.log('  - Dashboard Data Loaded: ${_dashboardData != null}');
-    developer.log('  - Health Score: $healthScore');
-    developer.log('  - Total Savings: \$$totalSavings');
-    developer.log('  - Visits This Month: $visitsThisMonth');
-    developer.log('  - Has Insurance: $hasInsurance');
-    developer.log('  - Recent Visits Count: ${recentVisits.length}');
-    developer.log('  - Active Medications Count: ${activeMedications.length}');
-    developer.log('  - Ongoing Treatments Count: ${ongoingTreatments.length}');
-    developer.log('  - Notifications Count: ${notifications.length}');
+  // Load journeys from API
+  Future<void> loadJourneys() async {
+    try {
+      final apiJourneys = await MedicalJourneyService().getJourneys();
+      _journeys = apiJourneys.map((json) => MedicalJourney.fromJson(json as Map<String, dynamic>)).toList();
+      notifyListeners();
+    } catch (e) {
+      // handle error
+    }
   }
 
+  // Helper method to get next dose time
+  DateTime? _getNextDoseTime(MedicineReminder reminder) {
+    if (reminder.reminderTimes.isEmpty) return null;
+    
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    
+    // Find the next reminder time for today
+    for (final reminderTime in reminder.reminderTimes) {
+      final timeOfDay = TimeOfDay.fromDateTime(reminderTime);
+      final nextDose = DateTime(
+        today.year,
+        today.month,
+        today.day,
+        timeOfDay.hour,
+        timeOfDay.minute,
+      );
+      
+      if (nextDose.isAfter(now)) {
+        return nextDose;
+      }
+    }
+    
+    // If no more doses today, return the first dose of tomorrow
+    if (reminder.reminderTimes.isNotEmpty) {
+      final firstTime = reminder.reminderTimes.first;
+      final timeOfDay = TimeOfDay.fromDateTime(firstTime);
+      return DateTime(
+        today.year,
+        today.month,
+        today.day + 1,
+        timeOfDay.hour,
+        timeOfDay.minute,
+      );
+    }
+    
+    return null;
+  }
+
+  // Helper method to get frequency text
+  String _getFrequencyText(ReminderFrequency frequency) {
+    switch (frequency) {
+      case ReminderFrequency.once:
+        return 'Once';
+      case ReminderFrequency.daily:
+        return 'Daily';
+      case ReminderFrequency.everyOtherDay:
+        return 'Every Other Day';
+      case ReminderFrequency.weekly:
+        return 'Weekly';
+      case ReminderFrequency.biWeekly:
+        return 'Bi-Weekly';
+      case ReminderFrequency.monthly:
+        return 'Monthly';
+      case ReminderFrequency.asNeeded:
+        return 'As Needed';
+      case ReminderFrequency.custom:
+        return 'Custom';
+    }
+  }
+
+
+
+
+
   // Quick Actions - Keep existing structure
-  List<QuickAction> get quickActions => [
+  List<QuickAction> get quickActions => const [
         QuickAction(
           title: 'AI Symptom Check',
           subtitle: 'Check your symptoms',
@@ -408,7 +502,7 @@ class DashboardViewModel extends BaseViewModel {
       ];
 
   // Recommendations - Keep existing structure
-  List<Map<String, dynamic>> get recommendations => [
+  List<Map<String, dynamic>> get recommendations => const [
         {
           'type': 'appointment',
           'title': 'Annual Checkup Due',
@@ -435,6 +529,60 @@ class DashboardViewModel extends BaseViewModel {
   // Initialize the view model
   Future<void> initialize() async {
     await loadDashboardData();
+    await loadMedicineReminders(); // Load medicine reminders from API
+    await loadJourneys(); // Load journeys from API
+    
+    // Initialize sample vital signs data if not available from API
+    if (_latestVitals == null) {
+      _latestVitals = VitalSigns(
+        bloodPressureSystolic: 120.0,
+        bloodPressureDiastolic: 80.0,
+        heartRate: 72,
+        weight: 70.5,
+        temperature: 98.6,
+        bloodSugar: 95.0,
+        oxygenSaturation: 98.0,
+        height: 175.0,
+        timestamp: DateTime.now(),
+      );
+    }
+    
+    // Initialize sample health metrics
+    _healthMetrics = [
+      {
+        'name': 'Steps',
+        'value': 8500,
+        'target': 10000,
+        'unit': 'steps',
+        'progress': 0.85,
+        'status': 'Good',
+        'color': Colors.green,
+        'icon': Icons.directions_walk,
+      },
+      {
+        'name': 'Water Intake',
+        'value': 6,
+        'target': 8,
+        'unit': 'glasses',
+        'progress': 0.75,
+        'status': 'Good',
+        'color': Colors.blue,
+        'icon': Icons.water_drop,
+      },
+      {
+        'name': 'Sleep',
+        'value': 7.5,
+        'target': 8,
+        'unit': 'hours',
+        'progress': 0.94,
+        'status': 'Excellent',
+        'color': Colors.purple,
+        'icon': Icons.bedtime,
+      },
+    ];
+    
+    // Notify listeners to update the UI
+    notifyListeners();
   }
 
   // Helper method to get screen for navigation
@@ -516,18 +664,64 @@ class DashboardViewModel extends BaseViewModel {
 
   // Get filtered test checkups (placeholder - would return actual data)
   List<Map<String, dynamic>> getFilteredTestCheckups() {
-    // This would typically filter actual test checkup data
-    // For now, return empty list as placeholder
-    return [];
+    // Sample test checkup data
+    final sampleData = [
+      {
+        'title': 'Blood Test',
+        'description': 'Complete blood count and metabolic panel',
+        'type': 'TestCheckupType.bloodTest',
+        'status': 'TestCheckupStatus.scheduled',
+        'statusDisplayName': 'Scheduled',
+        'formattedDateTime': 'Jan 20, 2024 - 9:00 AM',
+        'estimatedCost': 120.0,
+        'location': 'City Medical Lab',
+      },
+      {
+        'title': 'Chest X-Ray',
+        'description': 'Routine chest examination',
+        'type': 'TestCheckupType.xRay',
+        'status': 'TestCheckupStatus.completed',
+        'statusDisplayName': 'Completed',
+        'formattedDateTime': 'Jan 15, 2024 - 2:30 PM',
+        'estimatedCost': 85.0,
+        'location': 'Radiology Center',
+      },
+      {
+        'title': 'MRI Scan',
+        'description': 'Brain MRI for headache evaluation',
+        'type': 'TestCheckupType.mri',
+        'status': 'TestCheckupStatus.upcoming',
+        'statusDisplayName': 'Upcoming',
+        'formattedDateTime': 'Jan 25, 2024 - 11:00 AM',
+        'estimatedCost': 450.0,
+        'location': 'Advanced Imaging Center',
+      },
+    ];
+    
+    // Filter based on selected filter
+    switch (_selectedTestFilter.toLowerCase()) {
+      case 'today':
+        return sampleData.where((test) => 
+          test['status'] == 'TestCheckupStatus.scheduled' && 
+          (test['formattedDateTime'] as String?)?.contains('Jan 20') == true
+        ).toList();
+      case 'upcoming':
+        return sampleData.where((test) => 
+          test['status'] == 'TestCheckupStatus.upcoming'
+        ).toList();
+      case 'completed':
+        return sampleData.where((test) => 
+          test['status'] == 'TestCheckupStatus.completed'
+        ).toList();
+      default:
+        return sampleData;
+    }
   }
 
   // Mark notification as read
   void markNotificationAsRead(int index) {
     if (index >= 0 && index < notifications.length) {
       // In a real app, you would make an API call here to update the notification status
-      developer
-          .log('📱 DashboardViewModel: Marking notification $index as read');
-
       // For now, we'll just log the action since we're using getters
       // In a real implementation, you would update the actual data source
       // and call notifyListeners() to update the UI
@@ -536,7 +730,6 @@ class DashboardViewModel extends BaseViewModel {
 
   // Mark all notifications as read
   void markAllNotificationsAsRead() {
-    developer.log('📱 DashboardViewModel: Marking all notifications as read');
     // In a real app, you would make an API call here to update all notifications
     // For now, we'll just log the action
     // In a real implementation, you would update the actual data source

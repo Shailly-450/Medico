@@ -778,7 +778,7 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
                         return DropdownMenuItem<ServiceProvider>(
                           value: provider,
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4), // reduced from 8
                             child: Row(
                               children: [
                                 CircleAvatar(
@@ -797,6 +797,7 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
                                         provider.name,
@@ -839,6 +840,7 @@ class _ComparisonScreenState extends State<ComparisonScreen> {
                           viewModel.addProvider(provider);
                         }
                       },
+                      isDense: true,
                     ),
                   ),
                 ),

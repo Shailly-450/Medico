@@ -205,7 +205,7 @@ class _AllAppointmentsScreenState extends State<AllAppointmentsScreen>
             String doctorImage = '';
             final doctor = doctorsViewModel.allDoctors.firstWhere(
               (d) => d.id == appointment.doctorId,
-              orElse: () => Doctor(
+              orElse: () => Doctor.mock(
                 id: '',
                 name: '',
                 specialty: '',
@@ -219,20 +219,9 @@ class _AllAppointmentsScreenState extends State<AllAppointmentsScreen>
                 experience: 0,
                 education: '',
                 languages: const [],
-                specializations: const [],
-                about: '',
-                availability: const {},
-                awards: const [],
-                consultationFee: '',
-                acceptsInsurance: false,
-                insuranceProviders: const [],
-                location: '',
-                distance: 0.0,
                 isVerified: false,
-                phoneNumber: '',
+                phone: '',
                 email: '',
-                symptoms: const [],
-                videoCall: false,
               ),
             );
             if (doctor != null) {

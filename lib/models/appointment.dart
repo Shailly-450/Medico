@@ -50,8 +50,6 @@ class Appointment {
   // Factory constructor to create Appointment from JSON
   factory Appointment.fromJson(Map<String, dynamic> json) {
     try {
-      print('🔍 Appointment.fromJson: Parsing appointment data');
-      print('🔍 Appointment.fromJson: JSON structure: $json');
 
       // Extract doctor name with better fallback logic
       String doctorName = 'Unknown Doctor';
@@ -78,7 +76,7 @@ class Appointment {
         doctorName = json['doctorName'];
       }
 
-      print('🔍 Appointment.fromJson: Extracted doctor name: $doctorName');
+      
 
       return Appointment(
         id: json['_id'] ?? json['id'] ?? '',

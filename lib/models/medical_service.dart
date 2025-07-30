@@ -60,17 +60,21 @@ class MedicalService {
   });
 
   factory MedicalService.fromJson(Map<String, dynamic> json) {
+    final price = (json['price'] is num)
+        ? (json['price'] as num).toDouble()
+        : (json['averagePrice'] is num)
+            ? (json['averagePrice'] as num).toDouble()
+            : 0.0;
+    
     return MedicalService(
       id: json['id'] ?? json['_id'] ?? '',
       name: json['name'] ?? '',
       description: json['description'] ?? '',
       category: json['category'] ?? '',
       subcategory: json['subcategory'],
-      price: (json['price'] is num)
-          ? (json['price'] as num).toDouble()
-          : 0.0,
+      price: price,
       currency: json['currency'] ?? 'USD',
-      duration: json['duration'] ?? 0,
+      duration: json['duration'] ?? json['averageDuration'] ?? 0,
       includedTests: List<String>.from(json['includedTests'] ?? []),
       requirements: List<String>.from(json['requirements'] ?? []),
       notes: json['notes'],

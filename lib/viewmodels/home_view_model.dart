@@ -150,7 +150,7 @@ class HomeViewModel extends BaseViewModel {
   }
 
   List<Doctor> doctors = [
-    Doctor(
+    Doctor.mock(
       id: '1',
       name: "Dr. Sarah Johnson",
       imageUrl:
@@ -165,35 +165,11 @@ class HomeViewModel extends BaseViewModel {
       experience: 15,
       education: 'MBBS, MD - Cardiology, Harvard Medical School',
       languages: ['English', 'Spanish'],
-      specializations: [
-        'Interventional Cardiology',
-        'Heart Failure',
-        'Preventive Cardiology'
-      ],
-      about:
-      'Dr. Sarah Johnson is a board-certified cardiologist with over 15 years of experience.',
-      availability: {
-        'Monday': '9:00 AM - 5:00 PM',
-        'Tuesday': '9:00 AM - 5:00 PM',
-        'Wednesday': '9:00 AM - 5:00 PM',
-        'Thursday': '9:00 AM - 5:00 PM',
-        'Friday': '9:00 AM - 5:00 PM',
-        'Saturday': '9:00 AM - 2:00 PM',
-        'Sunday': 'Closed',
-      },
-      awards: ['Best Cardiologist 2023', 'Excellence in Patient Care Award'],
-      consultationFee: '₹1200',
-      acceptsInsurance: true,
-      insuranceProviders: ['Max Bupa', 'HDFC Health', 'ICICI Lombard'],
-      location: 'New York, NY',
-      distance: 0.8,
       isVerified: true,
-      phoneNumber: '+1 555-123-4567',
+      phone: '+1 555-123-4567',
       email: 'dr.sarah.johnson@hospital.com',
-      symptoms: ['Chest Pain', 'Heart Palpitations', 'High Blood Pressure'],
-      videoCall: true,
     ),
-    Doctor(
+    Doctor.mock(
       id: '2',
       name: "Dr. Michael Chen",
       imageUrl:
@@ -208,35 +184,11 @@ class HomeViewModel extends BaseViewModel {
       experience: 12,
       education: 'BDS, MDS - Orthodontics, NYU School of Dentistry',
       languages: ['English', 'Mandarin'],
-      specializations: [
-        'Orthodontics',
-        'Cosmetic Dentistry',
-        'Root Canal Treatment'
-      ],
-      about:
-      'Dr. Michael Chen is a skilled dentist with expertise in orthodontics.',
-      availability: {
-        'Monday': '10:00 AM - 6:00 PM',
-        'Tuesday': '10:00 AM - 6:00 PM',
-        'Wednesday': '10:00 AM - 6:00 PM',
-        'Thursday': '10:00 AM - 6:00 PM',
-        'Friday': '10:00 AM - 6:00 PM',
-        'Saturday': '9:00 AM - 3:00 PM',
-        'Sunday': 'Closed',
-      },
-      awards: ['Best Dentist Award 2022', 'Patient Choice Award'],
-      consultationFee: '₹800',
-      acceptsInsurance: true,
-      insuranceProviders: ['Max Bupa', 'Star Health'],
-      location: 'New York, NY',
-      distance: 1.2,
       isVerified: true,
-      phoneNumber: '+1 555-234-5678',
+      phone: '+1 555-234-5678',
       email: 'dr.michael.chen@dental.com',
-      symptoms: ['Tooth Pain', 'Gum Problems', 'Teeth Whitening'],
-      videoCall: false,
     ),
-    Doctor(
+    Doctor.mock(
       id: '3',
       name: "Dr. Emily Brown",
       imageUrl:
@@ -251,33 +203,9 @@ class HomeViewModel extends BaseViewModel {
       experience: 18,
       education: 'MBBS, MD - Pediatrics, Columbia University',
       languages: ['English', 'Spanish'],
-      specializations: [
-        'General Pediatrics',
-        'Child Development',
-        'Vaccination'
-      ],
-      about:
-      'Dr. Emily Brown is a compassionate pediatrician with 18 years of experience.',
-      availability: {
-        'Monday': '8:00 AM - 4:00 PM',
-        'Tuesday': '8:00 AM - 4:00 PM',
-        'Wednesday': '8:00 AM - 4:00 PM',
-        'Thursday': '8:00 AM - 4:00 PM',
-        'Friday': '8:00 AM - 4:00 PM',
-        'Saturday': '8:00 AM - 12:00 PM',
-        'Sunday': 'Closed',
-      },
-      awards: ['Best Pediatrician 2023', 'Child Care Excellence Award'],
-      consultationFee: '₹1000',
-      acceptsInsurance: true,
-      insuranceProviders: ['Max Bupa', 'HDFC Health', 'Star Health'],
-      location: 'New York, NY',
-      distance: 2.5,
       isVerified: true,
-      phoneNumber: '+1 555-345-6789',
+      phone: '+1 555-345-6789',
       email: 'dr.emily.brown@children.com',
-      symptoms: ['Fever', 'Cough', 'Growth Concerns', 'Vaccination'],
-      videoCall: true,
     ),
   ];
 
@@ -312,7 +240,7 @@ class HomeViewModel extends BaseViewModel {
             .toList();
         print('DEBUG: Parsed hospitals count: ${hospitals.length}');
         _hospitalsLoaded = true;
-        print('✅ Loaded ${hospitals.length} hospitals from API');
+
       } else {
         _hospitalsError = result['message'] ?? 'Failed to load hospitals';
         print('❌ Failed to load hospitals: ${result['message']}');
@@ -351,7 +279,7 @@ class HomeViewModel extends BaseViewModel {
             .toList();
         print('DEBUG: Parsed hospitals count: ${hospitals.length}');
         _hospitalsLoaded = true;
-        print('✅ Found ${hospitals.length} nearby hospitals');
+
       } else {
         _hospitalsError =
             result['message'] ?? 'Failed to search nearby hospitals';

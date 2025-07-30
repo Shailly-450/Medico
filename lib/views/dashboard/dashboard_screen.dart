@@ -3,6 +3,7 @@ import '../../core/views/base_view.dart';
 import '../../viewmodels/dashboard_view_model.dart';
 import '../../core/theme/app_colors.dart';
 
+import '../video_call/video_call_screen.dart';
 import 'widgets/health_overview_card.dart';
 import 'widgets/recent_visit_card.dart';
 import 'widgets/medication_card.dart';
@@ -22,7 +23,7 @@ import 'widgets/pre_approval_summary_card.dart';
 import 'widgets/policy_documents_card.dart';
 import 'widgets/vitals_graph_section.dart';
 import '../chat/chat_list_screen.dart';
-import '../video_call/test_video_call_screen.dart';
+
 import '../insurance/insurance_screen.dart';
 import '../appointments/appointment_calendar_screen.dart';
 import '../prescriptions/prescription_screen.dart';
@@ -61,8 +62,6 @@ class DashboardScreen extends StatelessWidget {
                 children: [
                   // Modern Custom App Bar
                   _buildModernDashboardAppBar(context, model),
-                  // Profile Header with Welcome Message
-                  _buildWelcomeHeader(context, model),
 
                   // Health Overview Cards - Most Important Info First
                   _buildHealthOverview(context, model),
@@ -185,16 +184,7 @@ class DashboardScreen extends StatelessWidget {
           // Actions
           Row(
             children: [
-              IconButton(
-                icon: const Icon(
-                  Icons.bug_report,
-                  color: AppColors.primary,
-                ),
-                tooltip: 'Debug Info',
-                onPressed: () {
-                  _showDebugInfo(context, model);
-                },
-              ),
+
               IconButton(
                 icon: const Icon(
                   Icons.refresh,
@@ -237,7 +227,7 @@ class DashboardScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => const TestVideoCallScreen(),
+                      builder: (_) => const VideoCallScreen(doctorName: '', doctorSpecialty: '',),
                     ),
                   );
                 },
@@ -249,102 +239,7 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildWelcomeHeader(BuildContext context, DashboardViewModel model) {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.85),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.3), width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-          BoxShadow(
-            color: const Color(0xFF4CAF50).withOpacity(0.1),
-            blurRadius: 40,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Profile Avatar
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  const Color(0xFF2E7D32),
-                  const Color(0xFF4CAF50),
-                  const Color(0xFF66BB6A),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF2E7D32).withOpacity(0.4),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: const Icon(Icons.person, color: Colors.white, size: 28),
-          ),
-          const SizedBox(width: 18),
-          // Welcome and Name
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: 'Welcome back, ',
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 0.3,
-                        ),
-                      ),
-                      TextSpan(
-                        text: 'Abdullah Alshahrani',
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textBlack,
-                          letterSpacing: 0.2,
-                        ),
-                      ),
-                    ],
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'How can we help you today?',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 
   Widget _buildHealthOverview(BuildContext context, DashboardViewModel model) {
     return Container(
@@ -1351,6 +1246,93 @@ class DashboardScreen extends StatelessWidget {
                     ),
                   ),
                 ],
+
+                // Active Medical Journeys
+                if (model.activeJourneyStages.isNotEmpty) ...[
+                  if (model.activeMedications.isNotEmpty || model.ongoingTreatments.isNotEmpty)
+                    Divider(height: 1, color: Colors.grey[200]),
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Active Medical Journeys',
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textBlack,
+                              ),
+                        ),
+                        const SizedBox(height: 8),
+                        ...model.activeJourneyStages.map((stage) {
+                          return Card(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              side: BorderSide(color: Colors.grey[200]!),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        stage.title,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primary.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Text(
+                                          stage.status.toString().split('.').last,
+                                          style: TextStyle(
+                                            color: AppColors.primary,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    stage.description,
+                                    style: TextStyle(color: Colors.grey[700], fontSize: 12),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'Type: ${stage.type.toString().split('.').last}',
+                                        style: TextStyle(color: Colors.grey[600], fontSize: 11),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      if (stage.startDate != null)
+                                        Text(
+                                          'Started: ${stage.startDate!.toLocal().toString().split(' ')[0]}',
+                                          style: TextStyle(color: Colors.grey[600], fontSize: 11),
+                                        ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -1498,7 +1480,7 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTestCheckupCard(testCheckup) {
+  Widget _buildTestCheckupCard(Map<String, dynamic> testCheckup) {
     return Container(
       margin: const EdgeInsets.all(12),
       padding: const EdgeInsets.all(16),
@@ -1515,12 +1497,12 @@ class DashboardScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: _getTypeColor(testCheckup.type).withOpacity(0.1),
+                  color: _getTypeColor(testCheckup['type']).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
-                  _getTypeIcon(testCheckup.type),
-                  color: _getTypeColor(testCheckup.type),
+                  _getTypeIcon(testCheckup['type']),
+                  color: _getTypeColor(testCheckup['type']),
                   size: 20,
                 ),
               ),
@@ -1530,14 +1512,14 @@ class DashboardScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      testCheckup.title,
+                      testCheckup['title'] ?? 'Unknown Test',
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),
                     ),
                     Text(
-                      testCheckup.description,
+                      testCheckup['description'] ?? 'No description available',
                       style: TextStyle(color: Colors.grey[600], fontSize: 12),
                     ),
                   ],
@@ -1547,14 +1529,14 @@ class DashboardScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: _getTestCheckupStatusColor(
-                    testCheckup.status,
+                    testCheckup['status'],
                   ).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  testCheckup.statusDisplayName,
+                  testCheckup['statusDisplayName'] ?? 'Unknown',
                   style: TextStyle(
-                    color: _getTestCheckupStatusColor(testCheckup.status),
+                    color: _getTestCheckupStatusColor(testCheckup['status']),
                     fontSize: 10,
                     fontWeight: FontWeight.w500,
                   ),
@@ -1568,14 +1550,14 @@ class DashboardScreen extends StatelessWidget {
               Icon(Icons.schedule, size: 14, color: Colors.grey[600]),
               const SizedBox(width: 4),
               Text(
-                testCheckup.formattedDateTime,
+                testCheckup['formattedDateTime'] ?? 'No date',
                 style: TextStyle(color: Colors.grey[600], fontSize: 12),
               ),
               const Spacer(),
-              if (testCheckup.estimatedCost != null) ...[
+              if (testCheckup['estimatedCost'] != null) ...[
                 Icon(Icons.currency_rupee, size: 14, color: Colors.grey[600]),
                 Text(
-                  '${testCheckup.estimatedCost!.toInt()}',
+                  '${(testCheckup['estimatedCost'] as num).toInt()}',
                   style: TextStyle(
                     color: Colors.grey[600],
                     fontSize: 12,
@@ -1585,14 +1567,14 @@ class DashboardScreen extends StatelessWidget {
               ],
             ],
           ),
-          if (testCheckup.location != null) ...[
+          if (testCheckup['location'] != null) ...[
             const SizedBox(height: 8),
             Row(
               children: [
                 Icon(Icons.location_on, size: 14, color: Colors.grey[600]),
                 const SizedBox(width: 4),
                 Text(
-                  testCheckup.location!,
+                  testCheckup['location'] as String,
                   style: TextStyle(color: Colors.grey[600], fontSize: 12),
                 ),
               ],
@@ -1697,74 +1679,5 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  void _showDebugInfo(BuildContext context, DashboardViewModel model) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Dashboard Debug Info'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('Dashboard Data Loaded: ${model.dashboardData != null}'),
-                Text(
-                    'Total Savings: \$${model.totalSavings.toStringAsFixed(2)}'),
-                Text('Health Score: ${model.healthScore.toInt()}%'),
-                Text('Visits This Month: ${model.visitsThisMonth}'),
-                Text('Visits This Year: ${model.visitsThisYear}'),
-                Text('Has Insurance: ${model.hasInsurance}'),
-                Text('Recent Visits Count: ${model.recentVisits.length}'),
-                Text(
-                    'Active Medications Count: ${model.activeMedications.length}'),
-                Text(
-                    'Ongoing Treatments Count: ${model.ongoingTreatments.length}'),
-                Text('Notifications Count: ${model.notifications.length}'),
-                const SizedBox(height: 16),
-                const Text('Test Checkups:',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                Text('  All: ${model.testCheckupsData['all']}'),
-                Text('  Today: ${model.testCheckupsData['today']}'),
-                Text('  Upcoming: ${model.testCheckupsData['upcoming']}'),
-                Text('  Completed: ${model.testCheckupsData['completed']}'),
-                const SizedBox(height: 16),
-                const Text('Pre-approval Status:',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                Text('  Pending: ${model.preApprovalData['pending']}'),
-                Text('  Approved: ${model.preApprovalData['approved']}'),
-                Text('  Rejected: ${model.preApprovalData['rejected']}'),
-                const SizedBox(height: 16),
-                const Text('Policy Documents:',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                Text('  Insurance: ${model.policyDocumentsData['insurance']}'),
-                Text('  Medical: ${model.policyDocumentsData['medical']}'),
-                Text('  ID Cards: ${model.policyDocumentsData['idCards']}'),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Test Connection'),
-              onPressed: () async {
-                final isConnected = await model.testBackendConnection();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(isConnected
-                        ? 'Backend connected!'
-                        : 'Backend connection failed'),
-                    backgroundColor: isConnected ? Colors.green : Colors.red,
-                  ),
-                );
-              },
-            ),
-            TextButton(
-              child: const Text('Close'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+
 }

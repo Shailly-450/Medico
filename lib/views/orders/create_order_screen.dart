@@ -7,6 +7,8 @@ import '../../viewmodels/order_view_model.dart';
 import '../../core/theme/app_colors.dart';
 import 'service_selection_screen.dart';
 import '../../auth/auth_provider.dart';
+import '../../core/services/services_api_service.dart';
+import '../../models/service_provider.dart';
 
 class CreateOrderScreen extends StatefulWidget {
   final String serviceProviderId;
@@ -33,11 +35,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   // Provider selection state
   String? _selectedProviderId;
   String? _selectedProviderName;
-  final List<Map<String, String>> _providers = [
-    {'id': '687e2068ebeecf6738c30018', 'name': 'Mount Sinai Medical Center'},
-    {'id': '687e2068ebeecf6738c30019', 'name': 'City General Hospital'},
-    // Add more providers as needed
-  ];
+  List<ServiceProvider> _providers = [];
+  bool _isLoadingProviders = true;
 
   // Payment method selection state
   String? _selectedPaymentMethod;
@@ -54,6 +53,16 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     if (widget.initialServices != null) {
       _selectedServices.addAll(widget.initialServices!);
     }
+    _loadProviders();
+  }
+
+  Future<void> _loadProviders() async {
+    setState(() => _isLoadingProviders = true);
+    final providers = await ServicesApiService.fetchProviders();
+    setState(() {
+      _providers = providers;
+      _isLoadingProviders = false;
+    });
   }
 
   @override
@@ -72,26 +81,33 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Provider selection dropdown
-            DropdownButtonFormField<String>(
-              value: _selectedProviderId,
-              decoration: const InputDecoration(
-                labelText: 'Select Provider',
-                border: OutlineInputBorder(),
-              ),
-              items: _providers.map((provider) {
-                return DropdownMenuItem<String>(
-                  value: provider['id'],
-                  child: Text(provider['name']!),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedProviderId = value;
-                  _selectedProviderName = _providers.firstWhere((p) => p['id'] == value)['name'];
-                });
-              },
-              validator: (value) => value == null ? 'Please select a provider' : null,
-            ),
+            _isLoadingProviders
+                ? const Center(child: CircularProgressIndicator())
+                : DropdownButtonFormField<String>(
+                    value: _selectedProviderId,
+                    decoration: const InputDecoration(
+                      labelText: 'Select Provider',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: _providers.map((provider) {
+                      return DropdownMenuItem<String>(
+                        value: provider.id,
+                        child: Text(provider.name),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedProviderId = value;
+                        if (value != null) {
+                          final selected = _providers.firstWhere((p) => p.id == value);
+                          _selectedProviderName = selected.name;
+                        } else {
+                          _selectedProviderName = null;
+                        }
+                      });
+                    },
+                    validator: (value) => value == null ? 'Please select a provider' : null,
+                  ),
             const SizedBox(height: 16),
             // Payment method selection dropdown
             DropdownButtonFormField<String>(
@@ -229,12 +245,13 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                 ),
               ),
               TextButton(
-                onPressed: () async {
+                onPressed: _selectedProviderId == null ? null : () async {
                   final result = await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => ServiceSelectionScreen(
                         selectedServices: _selectedServices,
+                        providerId: _selectedProviderId!,
                       ),
                     ),
                   );
@@ -252,43 +269,63 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
           ),
           const SizedBox(height: 12),
           if (_selectedServices.isEmpty)
-            GestureDetector(
-              onTap: () async {
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ServiceSelectionScreen(
-                      selectedServices: _selectedServices,
+            _selectedProviderId == null
+                ? Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.orange[50],
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.orange[300]!),
                     ),
-                  ),
-                );
-                
-                if (result != null && result is List<MedicalService>) {
-                  setState(() {
-                    _selectedServices.clear();
-                    _selectedServices.addAll(result);
-                  });
-                }
-              },
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey[50],
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey[300]!),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.add_circle_outline, color: Colors.grey[400]),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Tap to select services',
-                      style: TextStyle(color: Colors.grey[600]),
+                    child: Row(
+                      children: [
+                        Icon(Icons.warning, color: Colors.orange[600]),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Please select a provider first',
+                          style: TextStyle(color: Colors.orange[700]),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-            )
+                  )
+                : GestureDetector(
+                    onTap: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ServiceSelectionScreen(
+                            selectedServices: _selectedServices,
+                            providerId: _selectedProviderId!,
+                          ),
+                        ),
+                      );
+                      
+                      if (result != null && result is List<MedicalService>) {
+                        setState(() {
+                          _selectedServices.clear();
+                          _selectedServices.addAll(result);
+                        });
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[50],
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey[300]!),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.add_circle_outline, color: Colors.grey[400]),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Tap to select services',
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
           else
             ..._selectedServices.map((service) => _buildServiceItem(service)),
         ],
@@ -635,6 +672,29 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       );
       return;
     }
+    if (_selectedServices.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select at least one service.')),
+      );
+      return;
+    }
+    
+    // Validate that all services have valid data
+    for (var service in _selectedServices) {
+      if (service.name.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Invalid service data: ${service.name}')),
+        );
+        return;
+      }
+      // Allow services with 0 price for now (backend might handle pricing)
+      if (service.price < 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Invalid service price: ${service.name}')),
+        );
+        return;
+      }
+    }
     final scheduledDateTime = DateTime(
       _selectedDate.year,
       _selectedDate.month,
@@ -645,19 +705,20 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
     // Get userId from AuthService
     final userId = AuthService.currentUserId;
-    print('userId: $userId');
-    print('serviceProviderId: $_selectedProviderId');
-    print('serviceProviderName: $_selectedProviderName');
-    print('paymentMethod: $_selectedPaymentMethod');
 
     // Build orderData map for API with required fields
+    // Match the structure of existing orders in the system
     final orderData = {
       'userId': userId,
       'serviceProviderId': _selectedProviderId,
       'serviceProviderName': _selectedProviderName,
       'items': _selectedServices.map((service) => {
+        // Match the backend structure as suggested by the backend team
         'serviceId': service.id,
+        'serviceName': service.name,
         'quantity': 1,
+        'unitPrice': service.price,
+        'totalPrice': service.price,
         'notes': null,
       }).toList(),
       'scheduledDate': scheduledDateTime.toIso8601String(),
@@ -684,13 +745,13 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       },
       'paymentMethod': _selectedPaymentMethod,
     };
-    print('Order payload: $orderData');
 
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => const Center(child: CircularProgressIndicator()),
     );
+    
     final success = await orderViewModel.createOrder(orderData);
     Navigator.pop(context); // Remove loading dialog
     if (success && mounted) {
@@ -702,10 +763,29 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         ),
       );
     } else if (mounted) {
+      String errorMessage = orderViewModel.errorMessage ?? 'Failed to create order.';
+      
+      // Provide more specific error messages
+      if (errorMessage.contains('Service with ID null not found') || 
+          errorMessage.contains('Service with ID undefined not found') ||
+          errorMessage.contains('Service with ID')) {
+        errorMessage = 'Service validation error. Please try selecting different services.';
+      } else if (errorMessage.contains('Server error') || errorMessage.contains('500')) {
+        errorMessage = 'Server error occurred. Please try again later.';
+      } else if (errorMessage.contains('400')) {
+        errorMessage = 'Invalid order data. Please check your selections.';
+      }
+      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(orderViewModel.errorMessage ?? 'Failed to create order.'),
+          content: Text(errorMessage),
           backgroundColor: AppColors.error,
+          duration: const Duration(seconds: 5),
+          action: SnackBarAction(
+            label: 'Retry',
+            onPressed: () => _createOrder(orderViewModel),
+            textColor: Colors.white,
+          ),
         ),
       );
     }

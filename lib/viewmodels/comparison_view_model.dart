@@ -84,7 +84,7 @@ class ComparisonViewModel extends ChangeNotifier {
       }
       
       _setLoading(false);
-      print('✅ Loaded ${services.length} services and ${categories.length} categories from API');
+      
       
     } catch (e) {
       _setError('Failed to load services: $e');
@@ -106,7 +106,7 @@ class ComparisonViewModel extends ChangeNotifier {
       );
       
       _providers = providers;
-      print('✅ Loaded ${providers.length} providers from API');
+      
       
     } catch (e) {
       print('❌ Error loading providers from API: $e');
@@ -119,7 +119,7 @@ class ComparisonViewModel extends ChangeNotifier {
     try {
       final services = await ServicesApiService.fetchProviderServices();
       _providerServices = services;
-      print('✅ Loaded ${services.length} provider services from API');
+      
     } catch (e) {
       print('❌ Error loading provider services from API: ${e.toString()}');
       _providerServices = [];

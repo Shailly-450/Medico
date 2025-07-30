@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../models/insurance.dart';
 import '../core/services/insurance_service.dart';
+import '../core/services/insurance_filters_service.dart';
 import '../core/services/auth_service.dart';
 import '../core/viewmodels/base_view_model.dart';
 import 'dart:io';
@@ -8,8 +9,12 @@ import 'dart:io';
 class InsuranceViewModel extends BaseViewModel {
   final _service = InsuranceService();
   List<Insurance> _insurances = [];
+  Map<String, dynamic> _availableFilters = {};
+  List<String> _insuranceProviders = [];
 
   List<Insurance> get insurances => _insurances;
+  Map<String, dynamic> get availableFilters => _availableFilters;
+  List<String> get insuranceProviders => _insuranceProviders;
 
   // Filter getters
   List<Insurance> get validInsurances =>
@@ -25,6 +30,7 @@ class InsuranceViewModel extends BaseViewModel {
   @override
   void init() {
     loadInsurances();
+    loadInsuranceFilters();
   }
 
   Future<void> loadInsurances() async {
@@ -144,6 +150,31 @@ class InsuranceViewModel extends BaseViewModel {
       return insurance;
     } catch (e) {
       setError('Failed to update insurance: $e');
+      return null;
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  Future<void> loadInsuranceFilters() async {
+    try {
+      _availableFilters = await InsuranceFiltersService.getInsuranceFilters();
+      _insuranceProviders = await InsuranceFiltersService.getInsuranceProviders();
+      notifyListeners();
+    } catch (e) {
+      print('Error loading insurance filters: $e');
+    }
+  }
+
+  Future<Insurance?> getInsuranceById(String insuranceId) async {
+    try {
+      setBusy(true);
+      clearError();
+
+      final insurance = await _service.getInsuranceById(insuranceId);
+      return insurance;
+    } catch (e) {
+      setError('Failed to fetch insurance: $e');
       return null;
     } finally {
       setBusy(false);

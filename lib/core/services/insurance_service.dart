@@ -46,6 +46,37 @@ class InsuranceService {
     }
   }
 
+  // Get single insurance by ID
+  Future<Insurance> getInsuranceById(String insuranceId) async {
+    print('Fetching insurance $insuranceId...');
+
+    if (AuthService.accessToken == null) {
+      throw Exception('Not authenticated');
+    }
+
+    final response = await http
+        .get(Uri.parse('$baseUrl$insuranceEndpoint/$insuranceId'), headers: _headers)
+        .timeout(timeout);
+
+    print('API Response [${response.statusCode}]: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+
+      if (responseData['success'] == true && responseData['data'] != null) {
+        return Insurance.fromJson(responseData['data']);
+      } else {
+        throw Exception('Invalid response format: ${response.body}');
+      }
+    } else if (response.statusCode == 401) {
+      throw Exception('Authentication required');
+    } else if (response.statusCode == 404) {
+      throw Exception('Insurance not found');
+    } else {
+      throw Exception('Failed to fetch insurance: ${response.statusCode}');
+    }
+  }
+
   // Create new insurance
   Future<Insurance> createInsurance({
     required String userId,

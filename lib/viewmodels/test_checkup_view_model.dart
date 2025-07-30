@@ -153,47 +153,82 @@ class TestCheckupViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  // Delete checkup
+  // Delete checkup using API
   Future<void> deleteCheckup(String id) async {
     setBusy(true);
-    _checkups.removeWhere((checkup) => checkup.id == id);
-    _updateCheckupLists();
-    setBusy(false);
-    notifyListeners();
+    try {
+      await _service.deleteCheckup(id);
+      _checkups.removeWhere((checkup) => checkup.id == id);
+      _updateCheckupLists();
+      notifyListeners();
+    } catch (e) {
+      setError('Failed to delete checkup: ${e.toString()}');
+    } finally {
+      setBusy(false);
+    }
   }
 
-  // Mark checkup as completed
+  // Mark checkup as completed using API
   Future<void> markAsCompleted(String id, {String? results}) async {
     setBusy(true);
-    final index = _checkups.indexWhere((c) => c.id == id);
-    if (index != -1) {
-      final checkup = _checkups[index];
-      _checkups[index] = checkup.copyWith(
-        status: TestCheckupStatus.completed,
-        completedDate: DateTime.now(),
-        results: results,
-        updatedAt: DateTime.now(),
-      );
-      _updateCheckupLists();
+    try {
+      await _service.updateCheckupStatus(id, 'completed');
+      
+      final index = _checkups.indexWhere((c) => c.id == id);
+      if (index != -1) {
+        final checkup = _checkups[index];
+        _checkups[index] = checkup.copyWith(
+          status: TestCheckupStatus.completed,
+          completedDate: DateTime.now(),
+          results: results,
+          updatedAt: DateTime.now(),
+        );
+        _updateCheckupLists();
+      }
+      notifyListeners();
+    } catch (e) {
+      setError('Failed to mark checkup as completed: ${e.toString()}');
+    } finally {
+      setBusy(false);
     }
-    setBusy(false);
-    notifyListeners();
+  }
+
+  // Update checkup status using API
+  Future<void> updateCheckupStatus(String id, String status) async {
+    setBusy(true);
+    try {
+      await _service.updateCheckupStatus(id, status);
+      
+      // Reload checkups to get updated data
+      await _loadCheckups();
+    } catch (e) {
+      setError('Failed to update checkup status: ${e.toString()}');
+    } finally {
+      setBusy(false);
+    }
   }
 
   // Cancel checkup
   Future<void> cancelCheckup(String id) async {
     setBusy(true);
-    final index = _checkups.indexWhere((c) => c.id == id);
-    if (index != -1) {
-      final checkup = _checkups[index];
-      _checkups[index] = checkup.copyWith(
-        status: TestCheckupStatus.cancelled,
-        updatedAt: DateTime.now(),
-      );
-      _updateCheckupLists();
+    try {
+      await _service.updateCheckupStatus(id, 'cancelled');
+      
+      final index = _checkups.indexWhere((c) => c.id == id);
+      if (index != -1) {
+        final checkup = _checkups[index];
+        _checkups[index] = checkup.copyWith(
+          status: TestCheckupStatus.cancelled,
+          updatedAt: DateTime.now(),
+        );
+        _updateCheckupLists();
+      }
+      notifyListeners();
+    } catch (e) {
+      setError('Failed to cancel checkup: ${e.toString()}');
+    } finally {
+      setBusy(false);
     }
-    setBusy(false);
-    notifyListeners();
   }
 
   // Reschedule checkup
@@ -203,19 +238,26 @@ class TestCheckupViewModel extends BaseViewModel {
     TimeOfDay newTime,
   ) async {
     setBusy(true);
-    final index = _checkups.indexWhere((c) => c.id == id);
-    if (index != -1) {
-      final checkup = _checkups[index];
-      _checkups[index] = checkup.copyWith(
-        status: TestCheckupStatus.rescheduled,
-        scheduledDate: newDate,
-        scheduledTime: newTime,
-        updatedAt: DateTime.now(),
-      );
-      _updateCheckupLists();
+    try {
+      await _service.updateCheckupStatus(id, 'rescheduled');
+      
+      final index = _checkups.indexWhere((c) => c.id == id);
+      if (index != -1) {
+        final checkup = _checkups[index];
+        _checkups[index] = checkup.copyWith(
+          status: TestCheckupStatus.rescheduled,
+          scheduledDate: newDate,
+          scheduledTime: newTime,
+          updatedAt: DateTime.now(),
+        );
+        _updateCheckupLists();
+      }
+      notifyListeners();
+    } catch (e) {
+      setError('Failed to reschedule checkup: ${e.toString()}');
+    } finally {
+      setBusy(false);
     }
-    setBusy(false);
-    notifyListeners();
   }
 
   // Get statistics
@@ -296,5 +338,10 @@ class TestCheckupViewModel extends BaseViewModel {
     _selectedFilter = null;
     _statusFilter = null;
     notifyListeners();
+  }
+
+  // Refresh checkups from API
+  Future<void> refreshCheckups() async {
+    await _loadCheckups();
   }
 }

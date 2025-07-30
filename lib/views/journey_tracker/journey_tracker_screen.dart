@@ -3,6 +3,7 @@ import '../../core/views/base_view.dart';
 import '../../viewmodels/journey_tracker_view_model.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/journey_stage.dart';
+import '../../core/services/auth_service.dart';
 import 'widgets/journey_card.dart';
 import 'widgets/journey_timeline.dart';
 import 'widgets/journey_progress_card.dart';
@@ -51,13 +52,8 @@ class JourneyTrackerScreen extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.add_circle, color: Colors.white),
               tooltip: 'Add New Journey',
-              onPressed: () {
-                // TODO: Implement add new journey functionality
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Add new journey feature coming soon!'),
-                  ),
-                );
+              onPressed: () async {
+                await _showAddJourneyDialog(context, model);
               },
             ),
           ],
@@ -131,7 +127,7 @@ class JourneyTrackerScreen extends StatelessWidget {
 
   Widget _buildBody(BuildContext context, JourneyTrackerViewModel model) {
     if (model.journeys.isEmpty) {
-      return _buildEmptyState(context);
+      return _buildEmptyState(context, model);
     }
 
     return SafeArea(
@@ -155,7 +151,7 @@ class JourneyTrackerScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildEmptyState(BuildContext context, JourneyTrackerViewModel model) {
     return Center(
       child: Container(
         margin: const EdgeInsets.all(32),
@@ -251,13 +247,8 @@ class JourneyTrackerScreen extends StatelessWidget {
                 ],
               ),
               child: ElevatedButton.icon(
-                onPressed: () {
-                  // TODO: Implement add new journey functionality
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Add new journey feature coming soon!'),
-                    ),
-                  );
+                onPressed: () async {
+                  await _showAddJourneyDialog(context, model);
                 },
                 icon: const Icon(Icons.add),
                 label: const Text('Start Your First Journey'),
@@ -560,6 +551,70 @@ class JourneyTrackerScreen extends StatelessWidget {
         onStageAdded: (newStage) {
           model.addNewStage(model.selectedJourney!.id, newStage);
         },
+      ),
+    );
+  }
+
+  Future<void> _showAddJourneyDialog(BuildContext context, JourneyTrackerViewModel model) async {
+    final nameController = TextEditingController();
+    final stage1Controller = TextEditingController();
+    final stage2Controller = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add New Journey'),
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Journey Name'),
+                validator: (value) => value == null || value.isEmpty ? 'Required' : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: stage1Controller,
+                decoration: const InputDecoration(labelText: 'Stage 1 Name'),
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: stage2Controller,
+                decoration: const InputDecoration(labelText: 'Stage 2 Name'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (formKey.currentState?.validate() ?? false) {
+                final userId = AuthService.currentUserId ?? '';
+                final stages = <Map<String, dynamic>>[];
+                if (stage1Controller.text.isNotEmpty) {
+                  stages.add({'name': stage1Controller.text, 'status': 'Pending'});
+                }
+                if (stage2Controller.text.isNotEmpty) {
+                  stages.add({'name': stage2Controller.text, 'status': 'Active'});
+                }
+                await model.addJourney(
+                  name: nameController.text,
+                  userId: userId,
+                  stages: stages,
+                );
+                Navigator.of(context).pop();
+              }
+            },
+            child: const Text('Add'),
+          ),
+        ],
       ),
     );
   }

@@ -43,7 +43,7 @@ import 'viewmodels/blog_view_model.dart';
 import 'core/services/onesignal_service.dart';
 import 'core/config.dart';
 import 'viewmodels/comparison_view_model.dart';
-import 'views/testing/services_api_test_screen.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -157,9 +157,18 @@ class MyApp extends StatelessWidget {
             '/invoices': (context) => const InvoicesScreen(),
             '/doctor-dashboard': (context) => const DoctorDashboardScreen(),
             '/create-appointment': (context) => const CreateAppointmentScreen(),
-            '/doctor-selection': (context) => const DoctorSelectionScreen(),
+            '/doctor-selection': (context) => DoctorSelectionScreen(
+              onDoctorSelected: (doctor) {
+                // Navigate to appointment creation with selected doctor
+                Navigator.pushNamed(
+                  context,
+                  '/create-appointment',
+                  arguments: doctor,
+                );
+              },
+            ),
             '/book-appointment': (context) => const BookAppointmentScreen(),
-            '/services-api-test': (context) => const ServicesApiTestScreen(),
+    
           },
           onGenerateRoute: (settings) {
             print('Navigating to: ${settings.name}');

@@ -30,7 +30,7 @@ class JourneyTrackerViewModel extends BaseViewModel {
     try {
       final apiJourneys = await _service.getJourneys();
       _journeys = apiJourneys
-          .map<MedicalJourney>((json) => MedicalJourney.fromJson(json))
+          .map<MedicalJourney>((json) => mapBackendJourney(json as Map<String, dynamic>))
           .toList();
       _errorMessage = null;
     } catch (e) {
@@ -294,4 +294,89 @@ class JourneyTrackerViewModel extends BaseViewModel {
       notifyListeners();
     }
   }
+
+  Future<void> addJourney({
+    required String name,
+    required String userId,
+    List<Map<String, dynamic>>? stages,
+  }) async {
+    setBusy(true);
+    try {
+      final journeyData = {
+        'name': name,
+        'userId': userId,
+        'stages': stages ?? [],
+      };
+      final response = await _service.createJourney(journeyData);
+      final newJourney = mapBackendJourney(response);
+      _journeys.add(newJourney);
+      notifyListeners();
+      _errorMessage = null;
+    } catch (e) {
+      _errorMessage = 'Failed to add journey: \n${e.toString()}';
+    } finally {
+      setBusy(false);
+      notifyListeners();
+    }
+  }
+}
+
+MedicalJourney mapBackendJourney(Map<String, dynamic> json) {
+  JourneyStatus parseStatus(String? status) {
+    switch (status?.toLowerCase()) {
+      case 'notstarted':
+      case 'not_started':
+      case 'pending':
+        return JourneyStatus.notStarted;
+      case 'inprogress':
+      case 'in_progress':
+      case 'active':
+        return JourneyStatus.inProgress;
+      case 'completed':
+        return JourneyStatus.completed;
+      case 'cancelled':
+        return JourneyStatus.cancelled;
+      default:
+        return JourneyStatus.notStarted;
+    }
+  }
+
+  JourneyStageType parseStageType(String? type) {
+    switch (type?.toLowerCase()) {
+      case 'consult':
+        return JourneyStageType.consult;
+      case 'test':
+        return JourneyStageType.test;
+      case 'surgery':
+        return JourneyStageType.surgery;
+      default:
+        return JourneyStageType.consult;
+    }
+  }
+
+  return MedicalJourney(
+    id: json['_id'] ?? '',
+    patientId: json['patientId'] ?? '',
+    title: json['name'] ?? '',
+    description: json['description'] ?? '',
+    createdAt: DateTime.now(),
+    completedAt: null,
+    stages: (json['stages'] as List<dynamic>? ?? []).map((stage) {
+      return JourneyStage(
+        id: stage['_id'] ?? '',
+        type: parseStageType(stage['type']),
+        title: stage['name'] ?? '',
+        description: stage['description'] ?? '',
+        status: parseStatus(stage['status']),
+        startDate: null,
+        completedDate: null,
+        notes: stage['notes'],
+        attachments: List<String>.from(stage['attachments'] ?? []),
+        metadata: Map<String, dynamic>.from(stage['metadata'] ?? {}),
+      );
+    }).toList(),
+    doctorId: json['doctorId'],
+    hospitalId: json['hospitalId'],
+    metadata: Map<String, dynamic>.from(json['metadata'] ?? {}),
+  );
 }

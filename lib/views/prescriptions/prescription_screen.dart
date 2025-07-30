@@ -1,161 +1,116 @@
 import 'package:flutter/material.dart';
 import '../../../models/prescription.dart';
-import '../../../core/services/prescription_service.dart';
+import '../../../viewmodels/prescriptions_view_model.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/loading_indicator.dart';
 import '../../../core/widgets/error_view.dart';
+import '../../../core/views/base_view.dart';
 import './prescription_detail_screen.dart';
+import './create_prescription_screen.dart';
 
-class PrescriptionsScreen extends StatefulWidget {
+class PrescriptionsScreen extends StatelessWidget {
   const PrescriptionsScreen({Key? key}) : super(key: key);
 
   @override
-  State<PrescriptionsScreen> createState() => _PrescriptionsScreenState();
-}
-
-class _PrescriptionsScreenState extends State<PrescriptionsScreen> {
-  final PrescriptionService _prescriptionService = PrescriptionService();
-  bool _isLoading = true;
-  String? _error;
-  List<Prescription> _prescriptions = [];
-  List<Prescription> _filteredPrescriptions = [];
-  final TextEditingController _searchController = TextEditingController();
-  String _selectedStatus = 'all';
-
-  @override
-  void initState() {
-    super.initState();
-    _loadPrescriptions();
-    _searchController.addListener(_filterPrescriptions);
-  }
-
-  Future<void> _loadPrescriptions() async {
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
-
-    try {
-      final prescriptions = await _prescriptionService.getPrescriptions();
-      setState(() {
-        _prescriptions = prescriptions;
-        _filteredPrescriptions = prescriptions;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _error = e.toString();
-        _isLoading = false;
-      });
-    }
-  }
-
-  void _filterPrescriptions() {
-    if (_prescriptions.isEmpty) return;
-
-    final query = _searchController.text.toLowerCase();
-    setState(() {
-      _filteredPrescriptions = _prescriptions.where((prescription) {
-        final matchesSearch =
-            prescription.doctorName.toLowerCase().contains(query) ||
-                prescription.diagnosis.toLowerCase().contains(query) ||
-                prescription.medications
-                    .any((med) => med.name.toLowerCase().contains(query));
-
-        if (_selectedStatus == 'all') return matchesSearch;
-
-        if (_selectedStatus == 'active' && prescription.isActive())
-          return matchesSearch;
-        if (_selectedStatus == 'expired' && prescription.isExpired())
-          return matchesSearch;
-        if (_selectedStatus == 'completed' &&
-            !prescription.isActive() &&
-            !prescription.isExpired()) return matchesSearch;
-
-        return false;
-      }).toList();
-    });
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Prescriptions'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadPrescriptions,
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Search prescriptions...',
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
+    return BaseView<PrescriptionsViewModel>(
+      viewModelBuilder: () => PrescriptionsViewModel()..initialize(),
+      builder: (context, model, child) => Scaffold(
+        appBar: AppBar(
+          title: const Text('Prescriptions'),
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          actions: [
+            if (model.prescriptions.any((p) => p.id.startsWith('mock')))
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                margin: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.orange),
+                ),
+                child: Text(
+                  'Demo Mode (${model.prescriptions.where((p) => p.id.startsWith('mock')).length})',
+                  style: const TextStyle(
+                    color: Colors.orange,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(width: 16),
-                DropdownButton<String>(
-                  value: _selectedStatus,
-                  items: const [
-                    DropdownMenuItem(value: 'all', child: Text('All')),
-                    DropdownMenuItem(value: 'active', child: Text('Active')),
-                    DropdownMenuItem(
-                        value: 'completed', child: Text('Completed')),
-                    DropdownMenuItem(value: 'expired', child: Text('Expired')),
-                  ],
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() {
-                        _selectedStatus = value;
-                        _filterPrescriptions();
-                      });
-                    }
-                  },
+              ),
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: () => model.loadPrescriptions(),
+            ),
+          ],
+        ),
+        body: Column(
+          children: [
+            _buildSearchAndFilterSection(model),
+            Expanded(child: _buildBody(context, model)),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => _createPrescription(context),
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+          child: const Icon(Icons.add),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchAndFilterSection(PrescriptionsViewModel model) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              onChanged: model.setSearchQuery,
+              decoration: InputDecoration(
+                hintText: 'Search prescriptions...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
-              ],
+              ),
             ),
           ),
-          Expanded(child: _buildBody()),
+          const SizedBox(width: 16),
+          DropdownButton<String>(
+            value: model.statusFilter,
+            items: const [
+              DropdownMenuItem(value: 'all', child: Text('All')),
+              DropdownMenuItem(value: 'active', child: Text('Active')),
+              DropdownMenuItem(value: 'completed', child: Text('Completed')),
+              DropdownMenuItem(value: 'expired', child: Text('Expired')),
+            ],
+            onChanged: (value) {
+              if (value != null) {
+                model.setStatusFilter(value);
+              }
+            },
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildBody() {
-    if (_isLoading) {
+  Widget _buildBody(BuildContext context, PrescriptionsViewModel model) {
+    if (model.isBusy) {
       return const LoadingIndicator();
     }
 
-    if (_error != null) {
+    if (model.error != null) {
       return ErrorView(
-        error: _error!,
-        onRetry: _loadPrescriptions,
+        error: model.error!,
+        onRetry: () => model.loadPrescriptions(),
       );
     }
 
-    final prescriptions = _searchController.text.isEmpty
-        ? _prescriptions
-        : _filteredPrescriptions;
+    final prescriptions = model.filteredPrescriptions;
 
     if (prescriptions.isEmpty) {
       return Center(
@@ -174,7 +129,7 @@ class _PrescriptionsScreenState extends State<PrescriptionsScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              _searchController.text.isEmpty
+              model.searchQuery.isEmpty
                   ? 'Your prescriptions will appear here'
                   : 'Try adjusting your search or filters',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -193,13 +148,24 @@ class _PrescriptionsScreenState extends State<PrescriptionsScreen> {
         final prescription = prescriptions[index];
         return _PrescriptionCard(
           prescription: prescription,
-          onView: () => _viewPrescription(prescription),
+          onView: () => _viewPrescription(context, prescription),
+          onEdit: () => _editPrescription(context, prescription),
+          onDelete: () => _deletePrescription(context, model, prescription),
         );
       },
     );
   }
 
-  void _viewPrescription(Prescription prescription) {
+  void _createPrescription(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const CreatePrescriptionScreen(),
+      ),
+    );
+  }
+
+  void _viewPrescription(BuildContext context, Prescription prescription) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -208,16 +174,61 @@ class _PrescriptionsScreenState extends State<PrescriptionsScreen> {
       ),
     );
   }
+
+  void _editPrescription(BuildContext context, Prescription prescription) {
+    // TODO: Implement edit prescription screen
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Edit prescription feature coming soon!'),
+      ),
+    );
+  }
+
+  void _deletePrescription(BuildContext context, PrescriptionsViewModel model, Prescription prescription) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Prescription'),
+        content: const Text('Are you sure you want to delete this prescription?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              final success = await model.deletePrescription(prescription.id);
+              if (success && context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Prescription deleted successfully'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _PrescriptionCard extends StatelessWidget {
   final Prescription prescription;
   final VoidCallback onView;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
 
   const _PrescriptionCard({
     Key? key,
     required this.prescription,
     required this.onView,
+    required this.onEdit,
+    required this.onDelete,
   }) : super(key: key);
 
   @override
@@ -235,20 +246,16 @@ class _PrescriptionCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Dr. ${prescription.doctorName}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                  Expanded(
+                    child: Text(
+                      'Dr. ${prescription.doctorName}',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                  Text(
-                    _formatDate(prescription.prescriptionDate),
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 14,
-                    ),
-                  ),
+                  _buildStatusChip(prescription),
                 ],
               ),
               const SizedBox(height: 8),
@@ -288,6 +295,16 @@ class _PrescriptionCard extends StatelessWidget {
                   ),
                   Row(
                     children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit, size: 20),
+                        onPressed: onEdit,
+                        tooltip: 'Edit',
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete, size: 20, color: Colors.red),
+                        onPressed: onDelete,
+                        tooltip: 'Delete',
+                      ),
                       TextButton.icon(
                         icon: const Icon(Icons.picture_as_pdf),
                         label: const Text('View PDF'),
@@ -304,7 +321,38 @@ class _PrescriptionCard extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
+  Widget _buildStatusChip(Prescription prescription) {
+    Color color;
+    String text;
+
+    if (prescription.isExpired()) {
+      color = Colors.red;
+      text = 'Expired';
+    } else if (prescription.isCompleted()) {
+      color = Colors.green;
+      text = 'Completed';
+    } else {
+      color = Colors.blue;
+      text = 'Active';
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: color,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
   }
+
+  // Removed unused _formatDate method
 }

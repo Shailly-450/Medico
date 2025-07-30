@@ -30,35 +30,7 @@ class MedicineReminderServiceExample {
     }
   }
 
-  /// Example: Create a new reminder
-  Future<void> createNewReminder() async {
-    try {
-      final reminder = await _service.createReminder(
-        medicineId: 'medicine_123',
-        reminderName: 'Morning Vitamin D',
-        frequency: ReminderFrequency.daily,
-        dosesPerDay: 1,
-        reminderTimes: [
-          DateTime.now().copyWith(
-            hour: 8,
-            minute: 0,
-            second: 0,
-            millisecond: 0,
-          ),
-        ],
-        startDate: DateTime.now(),
-        instructions: 'Take with breakfast',
-        takeWithFood: true,
-        hasNotifications: true,
-        userId: 'YOUR_USER_ID_HERE', // <-- required argument
-      );
 
-      print('Created reminder: ${reminder.reminderName}');
-      print('Reminder ID: ${reminder.id}');
-    } catch (e) {
-      print('Error creating reminder: $e');
-    }
-  }
 
   /// Example: Mark a dose as taken
   Future<void> markDoseAsTaken(String reminderId) async {

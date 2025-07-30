@@ -3,15 +3,16 @@ import '../../models/medical_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../viewmodels/order_view_model.dart';
 import 'package:provider/provider.dart';
-import 'package:dio/dio.dart';
-import '../../core/config.dart';
+import '../../core/services/services_api_service.dart';
 
 class ServiceSelectionScreen extends StatefulWidget {
   final List<MedicalService> selectedServices;
+  final String providerId;
 
   const ServiceSelectionScreen({
     Key? key,
     required this.selectedServices,
+    required this.providerId,
   }) : super(key: key);
 
   @override
@@ -39,16 +40,10 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
 
   Future<void> _loadCategories() async {
     try {
-      final dio = Dio(BaseOptions(baseUrl: AppConfig.apiBaseUrl));
-      final response = await dio.get('/orders/services/categories');
-      if (response.data['success'] == true) {
-        final categories = (response.data['data'] as List)
-            .map((cat) => cat['category'] as String)
-            .toList();
+      final categories = await ServicesApiService.fetchCategories();
         setState(() {
           _categories = ['All', ...categories];
         });
-      }
     } catch (e) {
       // Optionally handle error
     }
@@ -61,23 +56,13 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
         _errorMessage = null;
       });
 
-      // Fetch services directly from API
-      final dio = Dio(BaseOptions(baseUrl: AppConfig.apiBaseUrl));
-      final response = await dio.get('/orders/services');
-      if (response.data['success'] == true) {
-        final services = (response.data['data'] as List)
-            .map((json) => MedicalService.fromJson(json))
-            .toList();
+      // Use the new available services method as suggested by backend team
+      final services = await ServicesApiService.fetchAvailableServices();
+      
         setState(() {
           _allServices = services;
           _isLoading = false;
         });
-      } else {
-        setState(() {
-          _errorMessage = response.data['message'] ?? 'Failed to load services.';
-          _isLoading = false;
-        });
-      }
     } catch (e) {
       setState(() {
         _errorMessage = 'Failed to load services: ${e.toString()}';

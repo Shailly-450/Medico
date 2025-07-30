@@ -91,7 +91,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
         _loadEvents(_viewModel!.appointments);
         _isLoading = false;
       });
-      print('✅ setState called, _isLoading set to false');
+      
     } catch (e) {
       print('❌ Error in _initializeData: $e');
       setState(() {
@@ -105,7 +105,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
     for (final appointment in appointments) {
       try {
         final dateString = appointment.date;
-        print('🔍 Processing appointment date: $dateString');
+
 
         DateTime date;
         if (dateString.contains('T')) {
@@ -198,7 +198,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                 _loadEvents(_viewModel?.appointments ?? []);
                 _isLoading = false;
               });
-              print('✅ Appointments refreshed');
+      
             },
             icon: const Icon(Icons.refresh),
             tooltip: 'Refresh Appointments',
@@ -514,7 +514,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
                                       _loadEvents(
                                           _viewModel?.appointments ?? []);
                                     });
-                                    print('✅ Pull to refresh completed');
+                            
                                   },
                                   child: _buildEventsList(),
                                 ),

@@ -13,7 +13,6 @@ class OrderService {
   // 1. List Orders
   Future<List<Order>> fetchOrders(
       {String? status, int page = 1, int limit = 10}) async {
-    print('Fetching orders with JWT token: $jwtToken');
     final response = await dio.get(
       '/orders',
       queryParameters: {
@@ -23,8 +22,6 @@ class OrderService {
       },
       options: _authHeader,
     );
-    print(
-        'Orders API response: data:${response.data}, status:${response.statusCode} ');
     if (response.data['success']) {
       return (response.data['data'] as List)
           .map((json) => Order.fromJson(json))
@@ -46,23 +43,20 @@ class OrderService {
 
   // 3. Create Order
   Future<Order> createOrder(Map<String, dynamic> orderData) async {
-    print('Creating order with JWT token: $jwtToken');
-    print('Order payload: $orderData');
     try {
       final response = await dio.post(
         '/orders',
         data: orderData,
         options: _authHeader,
       );
-      print(
-          'Create Order API response: data:${response.data}, status:${response.statusCode}');
       if (response.data['success']) {
         return Order.fromJson(response.data['data']);
       } else {
         throw Exception(response.data['message']);
       }
     } on DioError catch (e) {
-      print('DioError: ${e.response?.data}');
+      rethrow;
+    } catch (e) {
       rethrow;
     }
   }

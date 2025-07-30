@@ -4,6 +4,8 @@ import '../core/services/medicine_reminder_service.dart';
 import '../core/services/auth_service.dart';
 import '../models/medicine.dart';
 import '../models/medicine_reminder.dart';
+import '../core/services/notification_sender_service.dart';
+import '../models/notification_item.dart';
 
 class MedicineReminderViewModel extends BaseViewModel {
   final MedicineReminderService _reminderService = MedicineReminderService();
@@ -371,12 +373,24 @@ class MedicineReminderViewModel extends BaseViewModel {
         hasNotifications: reminder.hasNotifications,
         notificationSettings: reminder.notificationSettings,
         reminderVibration: reminder.reminderVibration,
-        userId: AuthService.currentUserId ?? 'YOUR_USER_ID_HERE',
       );
 
       _reminders.add(newReminder);
       _updateReminderLists();
       notifyListeners();
+      // Send push notification if enabled
+      if (newReminder.hasNotifications) {
+        await NotificationSenderService.sendToUser(
+          userId: AuthService.currentUserId ?? 'YOUR_USER_ID_HERE',
+          title: 'Medicine Reminder',
+          message: 'It\'s time to take your medicine: ${newReminder.reminderName} at ${newReminder.reminderTimes.isNotEmpty ? newReminder.reminderTimes.first.hour.toString().padLeft(2, '0') + ':' + newReminder.reminderTimes.first.minute.toString().padLeft(2, '0') : ''}',
+          type: NotificationType.health_reminder,
+          data: {
+            'reminderId': newReminder.id,
+            'medicineId': newReminder.medicineId,
+          },
+        );
+      }
       return true;
     } catch (e) {
       setError('Failed to add reminder: ${e.toString()}');

@@ -168,11 +168,23 @@ class OrderItem {
   });
 
   factory OrderItem.fromJson(Map<String, dynamic> json) {
-    // Support both 'service' and 'serviceId' as the service object
-    final serviceJson = json['service'] ?? json['serviceId'];
+    // Create a MedicalService from individual fields since backend sends them separately
+    final service = MedicalService(
+      id: json['serviceId']?.toString() ?? '',
+      name: json['serviceName'] ?? '',
+      description: json['serviceDescription'] ?? '',
+      category: json['serviceCategory'] ?? 'general',
+      price: (json['unitPrice'] ?? 0.0).toDouble(),
+      duration: json['serviceDuration'] ?? 30,
+      provider: json['serviceProvider'] ?? '',
+      location: json['serviceLocation'] ?? '',
+      rating: (json['serviceRating'] ?? 0.0).toDouble(),
+      reviewCount: json['serviceReviewCount'] ?? 0,
+    );
+    
     return OrderItem(
       id: json['id'] ?? json['_id'] ?? '',
-      service: MedicalService.fromJson(serviceJson),
+      service: service,
       quantity: json['quantity'] ?? 1,
       unitPrice: (json['unitPrice'] ?? 0.0).toDouble(),
       totalPrice: (json['totalPrice'] ?? 0.0).toDouble(),

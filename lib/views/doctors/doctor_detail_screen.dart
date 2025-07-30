@@ -139,9 +139,9 @@ class _DoctorDetailScreenState extends State<DoctorDetailScreen>
                               color: const Color(0xFFE8F5E8),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: widget.doctor.imageUrl.isNotEmpty
+                            child: widget.doctor.profileImage.isNotEmpty
                                 ? Image.network(
-                                    widget.doctor.imageUrl,
+                                    widget.doctor.profileImage,
                                     fit: BoxFit.cover,
                                     errorBuilder: (context, error, stackTrace) {
                                       return Icon(
@@ -269,7 +269,7 @@ class _DoctorDetailScreenState extends State<DoctorDetailScreen>
                       Expanded(
                         child: _buildStatCard(
                           'Consultation',
-                          widget.doctor.consultationFee,
+                          widget.doctor.consultationFeeFormatted,
                           Icons.attach_money,
                         ),
                       ),
@@ -516,14 +516,14 @@ class _DoctorDetailScreenState extends State<DoctorDetailScreen>
                     ),
                   ),
                   const SizedBox(height: 12),
-                  ...widget.doctor.availability.entries.map((entry) => Padding(
+                  ...widget.doctor.availability.map((entry) => Padding(
                         padding: const EdgeInsets.only(bottom: 8),
                         child: Row(
                           children: [
                             SizedBox(
                               width: 80,
                               child: Text(
-                                entry.key,
+                                (entry['day'] as String).toUpperCase(),
                                 style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w500,
@@ -533,7 +533,7 @@ class _DoctorDetailScreenState extends State<DoctorDetailScreen>
                             const SizedBox(width: 16),
                             Expanded(
                               child: Text(
-                                entry.value,
+                                '${entry['startTime']} - ${entry['endTime']}',
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Colors.grey[600],
@@ -733,7 +733,7 @@ class _DoctorDetailScreenState extends State<DoctorDetailScreen>
                   ),
                   const SizedBox(height: 16),
                   _buildInfoRow(
-                      'Consultation Fee', widget.doctor.consultationFee),
+                      'Consultation Fee', widget.doctor.consultationFeeFormatted),
                   _buildInfoRow('Location', widget.doctor.location),
                   _buildInfoRow('Distance', '${widget.doctor.distance} km'),
                   _buildInfoRow(

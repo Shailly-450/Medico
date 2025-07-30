@@ -15,11 +15,26 @@ class DoctorsScreen extends StatefulWidget {
 
 class _DoctorsScreenState extends State<DoctorsScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      // Load more doctors when user is near the bottom
+      // We'll handle pagination in the build method instead
+    }
   }
 
   @override
@@ -32,6 +47,10 @@ class _DoctorsScreenState extends State<DoctorsScreen> {
         appBar: AppBar(
           title: const Text('Doctors'),
           actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: () => model.loadDoctors(refresh: true),
+            ),
             IconButton(
               icon: const Icon(Icons.filter_list),
               onPressed: () => _showFilterDialog(context, model),
@@ -59,9 +78,16 @@ class _DoctorsScreenState extends State<DoctorsScreen> {
           // Search Bar
           TextField(
             controller: _searchController,
-            onChanged: model.setSearchQuery,
+            onChanged: (query) {
+              model.setSearchQuery(query);
+              if (query.isNotEmpty) {
+                model.searchDoctors(query);
+              } else {
+                model.loadDoctors(refresh: true);
+              }
+            },
             decoration: InputDecoration(
-              hintText: 'Search doctors, specialties, hospitals...',
+              hintText: 'Search doctors, specialties, languages...',
               prefixIcon: const Icon(Icons.search),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
@@ -69,6 +95,7 @@ class _DoctorsScreenState extends State<DoctorsScreen> {
                       onPressed: () {
                         _searchController.clear();
                         model.setSearchQuery('');
+                        model.loadDoctors(refresh: true);
                       },
                     )
                   : null,
@@ -97,8 +124,13 @@ class _DoctorsScreenState extends State<DoctorsScreen> {
                     selected: isSelected,
                     onSelected: (selected) {
                       model.setSpecialty(specialty);
+                      if (specialty != 'All') {
+                        model.loadDoctorsBySpecialty(specialty);
+                      } else {
+                        model.loadDoctors(refresh: true);
+                      }
                     },
-                    selectedColor: AppColors.primary.withOpacity(0.2),
+                    selectedColor: AppColors.primary.withValues(alpha: 0.2),
                     checkmarkColor: AppColors.primary,
                     labelStyle: TextStyle(
                       color: isSelected ? AppColors.primary : Colors.grey[700],
@@ -116,8 +148,50 @@ class _DoctorsScreenState extends State<DoctorsScreen> {
   }
 
   Widget _buildDoctorsList(BuildContext context, DoctorsViewModel model) {
-    if (model.isLoading) {
+    if (model.busy && model.allDoctors.isEmpty) {
       return const Center(child: CircularProgressIndicator());
+    }
+
+    if (model.errorMessage != null && model.allDoctors.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Error loading doctors',
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              model.errorMessage!,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[500],
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => model.loadDoctors(refresh: true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
     }
 
     if (model.filteredDoctors.isEmpty) {
@@ -149,7 +223,10 @@ class _DoctorsScreenState extends State<DoctorsScreen> {
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => model.clearFilters(),
+              onPressed: () {
+                model.clearError();
+                model.loadDoctors(refresh: true);
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
@@ -161,19 +238,35 @@ class _DoctorsScreenState extends State<DoctorsScreen> {
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: model.filteredDoctors.length,
-      itemBuilder: (context, index) {
-        final doctor = model.filteredDoctors[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: DoctorCard(
-            doctor: doctor,
-            onTap: () => _navigateToDoctorDetail(context, doctor),
-          ),
-        );
-      },
+    return RefreshIndicator(
+      onRefresh: () => model.loadDoctors(refresh: true),
+      child: ListView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(16),
+        itemCount: model.filteredDoctors.length + (model.hasMoreDoctors ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index == model.filteredDoctors.length) {
+            // Show loading indicator for pagination
+            return Padding(
+              padding: const EdgeInsets.all(16),
+              child: Center(
+                child: model.isLoading
+                    ? const CircularProgressIndicator()
+                    : const SizedBox.shrink(),
+              ),
+            );
+          }
+
+          final doctor = model.filteredDoctors[index];
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: DoctorCard(
+              doctor: doctor,
+              onTap: () => _navigateToDoctorDetail(context, doctor),
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -206,13 +299,6 @@ class _DoctorsScreenState extends State<DoctorsScreen> {
                 context,
                 'Online Now',
                 DoctorFilter.online,
-                model.selectedFilter,
-                (filter) => model.setFilter(filter),
-              ),
-              _buildFilterOption(
-                context,
-                'Nearby',
-                DoctorFilter.nearby,
                 model.selectedFilter,
                 (filter) => model.setFilter(filter),
               ),
@@ -253,7 +339,8 @@ class _DoctorsScreenState extends State<DoctorsScreen> {
             ),
             TextButton(
               onPressed: () {
-                model.clearFilters();
+                model.clearError();
+                model.loadDoctors(refresh: true);
                 Navigator.of(context).pop();
               },
               child: const Text('Clear All'),
