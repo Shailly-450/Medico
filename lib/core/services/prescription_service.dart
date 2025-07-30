@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import '../../models/prescription.dart';
 import '../config.dart';
 import 'auth_service.dart';
+import 'google_drive_service.dart';
+import 'dart:io';
 
 class PrescriptionService {
   static const String _endpoint = '/prescriptions';
@@ -395,5 +397,57 @@ class PrescriptionService {
   // Method to get mock prescription count (for debugging)
   static int getMockPrescriptionCount() {
     return _mockPrescriptions.length;
+  }
+
+  /// Upload prescription file to Google Drive
+  Future<String?> uploadPrescriptionToDrive(File file, String prescriptionId) async {
+    try {
+      debugPrint('🌐 Uploading prescription to Google Drive...');
+      
+      final fileName = 'prescription_${prescriptionId}_${DateTime.now().millisecondsSinceEpoch}.${file.path.split('.').last}';
+      
+      final driveUrl = await GoogleDriveService.uploadFile(
+        file: file,
+        fileName: fileName,
+        description: 'Prescription file for prescription ID: $prescriptionId',
+      );
+      
+      if (driveUrl != null) {
+        debugPrint('✅ Prescription uploaded to Google Drive: $driveUrl');
+        return driveUrl;
+      } else {
+        debugPrint('❌ Failed to upload prescription to Google Drive');
+        return null;
+      }
+    } catch (e) {
+      debugPrint('❌ Error uploading prescription to Google Drive: $e');
+      return null;
+    }
+  }
+
+  /// Upload prescription attachment to Google Drive
+  Future<String?> uploadPrescriptionAttachment(File file, String prescriptionId, String attachmentType) async {
+    try {
+      debugPrint('🌐 Uploading prescription attachment to Google Drive...');
+      
+      final fileName = '${attachmentType}_${prescriptionId}_${DateTime.now().millisecondsSinceEpoch}.${file.path.split('.').last}';
+      
+      final driveUrl = await GoogleDriveService.uploadFile(
+        file: file,
+        fileName: fileName,
+        description: '$attachmentType attachment for prescription ID: $prescriptionId',
+      );
+      
+      if (driveUrl != null) {
+        debugPrint('✅ Prescription attachment uploaded to Google Drive: $driveUrl');
+        return driveUrl;
+      } else {
+        debugPrint('❌ Failed to upload prescription attachment to Google Drive');
+        return null;
+      }
+    } catch (e) {
+      debugPrint('❌ Error uploading prescription attachment to Google Drive: $e');
+      return null;
+    }
   }
 }

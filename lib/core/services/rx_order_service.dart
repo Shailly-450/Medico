@@ -3,6 +3,8 @@ import '../../models/rx_order.dart';
 import '../../models/medicine.dart';
 import '../../core/config.dart';
 
+import 'dart:io';
+
 class RxOrderService {
   static String get baseUrl => AppConfig.apiBaseUrl;
   static const Duration timeout = Duration(seconds: 10);
@@ -92,6 +94,29 @@ class RxOrderService {
         orElse: () => throw Exception('Pharmacy not found'),
       );
 
+      // Handle prescription file upload to Google Drive
+      String? drivePrescriptionUrl;
+      if (prescriptionImageUrl != null && prescriptionImageUrl.isNotEmpty) {
+        try {
+          final file = File(prescriptionImageUrl);
+          if (await file.exists()) {
+            final fileName = 'prescription_${DateTime.now().millisecondsSinceEpoch}.${file.path.split('.').last}';
+            
+            // Upload to Google Drive
+            drivePrescriptionUrl = await GoogleDriveService.uploadFile(
+              file: file,
+              fileName: fileName,
+              description: 'Prescription uploaded for Rx order',
+            );
+            
+            print('✅ Prescription uploaded to Google Drive: $drivePrescriptionUrl');
+          }
+        } catch (e) {
+          print('⚠️ Failed to upload prescription to Google Drive: $e');
+          // Continue with local file path if Google Drive upload fails
+        }
+      }
+
       // Calculate totals
       double subtotal = 0.0;
       for (final item in items) {
@@ -117,7 +142,7 @@ class RxOrderService {
         orderType: orderType,
         orderDate: DateTime.now(),
         expectedReadyDate: DateTime.now().add(const Duration(days: 1)),
-        prescriptionImageUrl: prescriptionImageUrl,
+        prescriptionImageUrl: drivePrescriptionUrl ?? prescriptionImageUrl, // Use Google Drive URL if available
         doctorName: doctorName,
         doctorLicense: doctorLicense,
         patientNotes: patientNotes,
