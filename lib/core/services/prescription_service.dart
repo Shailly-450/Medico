@@ -4,8 +4,8 @@ import 'package:http/http.dart' as http;
 import '../../models/prescription.dart';
 import '../config.dart';
 import 'auth_service.dart';
-import 'google_drive_service.dart';
 import 'dart:io';
+import 'file_upload_service.dart';
 
 class PrescriptionService {
   static const String _endpoint = '/prescriptions';
@@ -404,19 +404,13 @@ class PrescriptionService {
     try {
       debugPrint('🌐 Uploading prescription to Google Drive...');
       
-      final fileName = 'prescription_${prescriptionId}_${DateTime.now().millisecondsSinceEpoch}.${file.path.split('.').last}';
+      final result = await FileUploadService.uploadPrescription(file, prescriptionId);
       
-      final driveUrl = await GoogleDriveService.uploadFile(
-        file: file,
-        fileName: fileName,
-        description: 'Prescription file for prescription ID: $prescriptionId',
-      );
-      
-      if (driveUrl != null) {
-        debugPrint('✅ Prescription uploaded to Google Drive: $driveUrl');
-        return driveUrl;
+      if (result['success'] == true) {
+        debugPrint('✅ Prescription uploaded to Google Drive: ${result['webContentLink']}');
+        return result['webContentLink'] as String;
       } else {
-        debugPrint('❌ Failed to upload prescription to Google Drive');
+        debugPrint('❌ Failed to upload prescription to Google Drive: ${result['error']}');
         return null;
       }
     } catch (e) {
@@ -432,17 +426,17 @@ class PrescriptionService {
       
       final fileName = '${attachmentType}_${prescriptionId}_${DateTime.now().millisecondsSinceEpoch}.${file.path.split('.').last}';
       
-      final driveUrl = await GoogleDriveService.uploadFile(
+      final result = await FileUploadService.uploadFileToDrive(
         file: file,
         fileName: fileName,
         description: '$attachmentType attachment for prescription ID: $prescriptionId',
       );
       
-      if (driveUrl != null) {
-        debugPrint('✅ Prescription attachment uploaded to Google Drive: $driveUrl');
-        return driveUrl;
+      if (result['success'] == true) {
+        debugPrint('✅ Prescription attachment uploaded to Google Drive: ${result['webContentLink']}');
+        return result['webContentLink'] as String;
       } else {
-        debugPrint('❌ Failed to upload prescription attachment to Google Drive');
+        debugPrint('❌ Failed to upload prescription attachment to Google Drive: ${result['error']}');
         return null;
       }
     } catch (e) {

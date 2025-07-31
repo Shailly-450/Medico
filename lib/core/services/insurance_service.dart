@@ -4,6 +4,7 @@ import '../../models/insurance.dart';
 import '../config.dart';
 import 'dart:io';
 import 'auth_service.dart';
+import 'file_upload_service.dart';
 
 class InsuranceService {
   final String baseUrl = AppConfig.apiBaseUrl;
@@ -129,38 +130,16 @@ class InsuranceService {
 
   // Upload insurance card image
   Future<String> uploadInsuranceCard(File imageFile) async {
-    if (AuthService.accessToken == null) {
-      throw Exception('Not authenticated');
-    }
-
-    final uri = Uri.parse('$baseUrl$insuranceEndpoint/upload');
-
-    var request = http.MultipartRequest('POST', uri)
-      ..headers['Authorization'] = 'Bearer ${AuthService.accessToken}';
-    request.files.add(
-      await http.MultipartFile.fromPath('insuranceCard', imageFile.path),
-    );
-
-    print('Uploading insurance card...');
-
-    final streamedResponse = await request.send().timeout(timeout);
-    final response = await http.Response.fromStream(streamedResponse);
-
-    print('API Response [${response.statusCode}]: ${response.body}');
-
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> responseData = jsonDecode(response.body);
-      if (responseData['success'] == true && responseData['data'] != null) {
-        return responseData['data']['url'] as String;
+    try {
+      final result = await FileUploadService.uploadInsuranceCard(imageFile);
+      
+      if (result['success'] == true) {
+        return result['webContentLink'] as String;
       } else {
-        throw Exception('Invalid response format: ${response.body}');
+        throw Exception('Failed to upload insurance card: ${result['error']}');
       }
-    } else if (response.statusCode == 401) {
-      throw Exception('Authentication required');
-    } else {
-      throw Exception(
-        'Failed to upload insurance card: ${response.statusCode}',
-      );
+    } catch (e) {
+      throw Exception('Failed to upload insurance card: $e');
     }
   }
 

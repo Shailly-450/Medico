@@ -55,18 +55,11 @@ class InsuranceViewModel extends BaseViewModel {
     required String policyHolderName,
     required DateTime validFrom,
     required DateTime validTo,
-    File? insuranceCardFile,
+    String? insuranceCardUrl,
   }) async {
     try {
       setBusy(true);
       clearError();
-
-      String? insuranceCardUrl;
-      if (insuranceCardFile != null) {
-        insuranceCardUrl = await _service.uploadInsuranceCard(
-          insuranceCardFile,
-        );
-      }
 
       final userId = AuthService.currentUserId;
       if (userId == null) {
@@ -118,18 +111,11 @@ class InsuranceViewModel extends BaseViewModel {
     String? policyHolderName,
     DateTime? validFrom,
     DateTime? validTo,
-    File? insuranceCardFile,
+    String? insuranceCardUrl,
   }) async {
     try {
       setBusy(true);
       clearError();
-
-      String? insuranceCardUrl;
-      if (insuranceCardFile != null) {
-        insuranceCardUrl = await _service.uploadInsuranceCard(
-          insuranceCardFile,
-        );
-      }
 
       final insurance = await _service.updateInsurance(
         insuranceId: insuranceId,

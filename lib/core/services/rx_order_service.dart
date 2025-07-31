@@ -1,11 +1,10 @@
-import 'package:http/http.dart' as http;
 import '../../models/rx_order.dart';
 import '../../models/medicine.dart';
 import '../../core/config.dart';
 
 import 'dart:io';
 
-import 'google_drive_service.dart';
+import 'file_upload_service.dart';
 
 class RxOrderService {
   static String get baseUrl => AppConfig.apiBaseUrl;
@@ -16,8 +15,7 @@ class RxOrderService {
   static const String pharmaciesEndpoint = '/api/v1/pharmacies';
   static const String medicinesEndpoint = '/api/v1/medicines';
 
-  // HTTP client
-  final http.Client _client = http.Client();
+
 
   // Mock data storage (simulating database)
   static List<RxOrder> _mockRxOrders = [];
@@ -102,16 +100,17 @@ class RxOrderService {
         try {
           final file = File(prescriptionImageUrl);
           if (await file.exists()) {
-            final fileName = 'prescription_${DateTime.now().millisecondsSinceEpoch}.${file.path.split('.').last}';
-            
-            // Upload to Google Drive
-            drivePrescriptionUrl = await GoogleDriveService.uploadFile(
-              file: file,
-              fileName: fileName,
-              description: 'Prescription uploaded for Rx order',
+            final result = await FileUploadService.uploadPrescription(
+              file,
+              DateTime.now().millisecondsSinceEpoch.toString(),
             );
             
-            print('✅ Prescription uploaded to Google Drive: $drivePrescriptionUrl');
+            if (result['success'] == true) {
+              drivePrescriptionUrl = result['webContentLink'] as String;
+              print('✅ Prescription uploaded to Google Drive: $drivePrescriptionUrl');
+            } else {
+              print('⚠️ Failed to upload prescription to Google Drive: ${result['error']}');
+            }
           }
         } catch (e) {
           print('⚠️ Failed to upload prescription to Google Drive: $e');

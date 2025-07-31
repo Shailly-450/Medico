@@ -6,6 +6,7 @@ import '../../core/views/base_view.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import '../../core/services/file_upload_service.dart';
 
 class CreateInsuranceScreen extends StatefulWidget {
   final Insurance? insurance;
@@ -297,10 +298,19 @@ class _CreateInsuranceScreenState extends State<CreateInsuranceScreen> {
 
   Future<void> _pickImage() async {
     try {
-      final image = await ImagePicker().pickImage(source: ImageSource.gallery);
-      if (image != null) {
+      final file = await FileUploadService.pickImageFromGallery();
+      if (file != null) {
+        // Validate file size
+        if (!FileUploadService.isValidFileSize(file)) {
+          setState(() {
+            _error = 'File size must be less than 10MB';
+          });
+          return;
+        }
+        
         setState(() {
-          _insuranceCardFile = File(image.path);
+          _insuranceCardFile = file;
+          _error = null;
         });
       }
     } catch (e) {
@@ -319,6 +329,23 @@ class _CreateInsuranceScreenState extends State<CreateInsuranceScreen> {
     });
 
     try {
+      String? insuranceCardUrl;
+      
+      // Upload insurance card to Google Drive if selected
+      if (_insuranceCardFile != null) {
+        final uploadResult = await FileUploadService.uploadInsuranceCard(_insuranceCardFile!);
+        
+        if (uploadResult['success'] == true) {
+          insuranceCardUrl = uploadResult['webContentLink'] as String;
+        } else {
+          setState(() {
+            _error = 'Failed to upload insurance card: ${uploadResult['error']}';
+            _isLoading = false;
+          });
+          return;
+        }
+      }
+
       bool success;
 
       if (widget.insurance == null) {
@@ -328,7 +355,7 @@ class _CreateInsuranceScreenState extends State<CreateInsuranceScreen> {
           policyHolderName: _policyHolderController.text,
           validFrom: _validFrom,
           validTo: _validTo,
-          insuranceCardFile: _insuranceCardFile,
+          insuranceCardUrl: insuranceCardUrl, // Use Google Drive URL
         );
         success = insurance != null;
       } else {
@@ -339,12 +366,18 @@ class _CreateInsuranceScreenState extends State<CreateInsuranceScreen> {
           policyHolderName: _policyHolderController.text,
           validFrom: _validFrom,
           validTo: _validTo,
-          insuranceCardFile: _insuranceCardFile,
+          insuranceCardUrl: insuranceCardUrl, // Use Google Drive URL
         );
         success = insurance != null;
       }
 
       if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Insurance saved successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
         Navigator.pop(context, true);
       }
     } catch (e) {

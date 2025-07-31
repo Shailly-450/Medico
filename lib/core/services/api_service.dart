@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../config.dart';
+import 'file_upload_service.dart';
 
 class ApiService {
   // Configuration
@@ -255,17 +257,22 @@ class ApiService {
 
   // Upload/Update profile avatar
   static Future<Map<String, dynamic>> uploadProfileAvatar(String filePath) async {
-    var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/auth/profile/avatar'));
-    request.headers.addAll(_authHeaders);
-    request.files.add(await http.MultipartFile.fromPath('avatar', filePath));
     try {
-      final streamedResponse = await request.send().timeout(timeout);
-      final response = await http.Response.fromStream(streamedResponse);
-      return _parseResponse(response);
+      final file = File(filePath);
+      if (!await file.exists()) {
+        return {
+          'success': false,
+          'message': 'File does not exist',
+        };
+      }
+      
+      // Use the new FileUploadService for Google Drive upload
+      final result = await FileUploadService.uploadProfileAvatar(file);
+      return result;
     } catch (e) {
       return {
         'success': false,
-        'message': 'Failed to upload avatar:  ${e.toString()}',
+        'message': 'Failed to upload avatar: ${e.toString()}',
       };
     }
   }
