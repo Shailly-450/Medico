@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/services/auth_service.dart';
+import '../../viewmodels/doctor_appointment_view_model.dart';
 import '../../models/appointment.dart';
 import '../../models/doctor.dart';
 import '../../core/services/pre_approval_service.dart';
-import '../admin/appointments/admin_appointments_panel.dart';
+import 'doctor_appointments_panel.dart';
 import 'create_doctor_profile_screen.dart';
 import 'package:medico/views/doctor/patients/patient_list_screen.dart';
 
@@ -34,7 +36,8 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
       name: AuthService.currentUserName ?? 'Dr. Unknown',
       specialty: 'General Medicine', // This would come from backend
       hospital: 'Medical Center',
-      imageUrl: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400',
+      imageUrl:
+          'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400',
       rating: 4.8,
       reviews: 128,
       isAvailable: true,
@@ -49,52 +52,24 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
     );
   }
 
-  void _loadAppointments() {
-    // Simulate loading appointments
-    Future.delayed(const Duration(seconds: 1), () {
+  Future<void> _loadAppointments() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // For now, we'll use empty appointments since the view model is not available here
+      // The actual appointments will be loaded in the DoctorAppointmentsPanel
       setState(() {
-        _appointments = _generateDummyAppointments();
+        _appointments = [];
         _isLoading = false;
       });
-    });
-  }
-
-  List<Appointment> _generateDummyAppointments() {
-    return [
-      Appointment(
-        id: '1',
-        doctorName: _currentDoctor.name,
-        doctorImage: _currentDoctor.imageUrl,
-        specialty: _currentDoctor.specialty,
-        isVideoCall: false,
-        date: '2024-07-09',
-        time: '09:30 AM',
-        appointmentType: 'consultation',
-        preApprovalStatus: 'pending',
-      ),
-      Appointment(
-        id: '2',
-        doctorName: _currentDoctor.name,
-        doctorImage: _currentDoctor.imageUrl,
-        specialty: _currentDoctor.specialty,
-        isVideoCall: true,
-        date: '2024-07-10',
-        time: '02:00 PM',
-        appointmentType: 'consultation',
-        preApprovalStatus: 'approved',
-      ),
-      Appointment(
-        id: '3',
-        doctorName: _currentDoctor.name,
-        doctorImage: _currentDoctor.imageUrl,
-        specialty: _currentDoctor.specialty,
-        isVideoCall: false,
-        date: '2024-07-08',
-        time: '11:00 AM',
-        appointmentType: 'consultation',
-        preApprovalStatus: 'approved',
-      ),
-    ];
+    } catch (e) {
+      setState(() {
+        _appointments = [];
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -122,19 +97,22 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildWelcomeCard(),
-                  const SizedBox(height: 24),
-                  _buildQuickStats(),
-                  const SizedBox(height: 24),
-                  _buildTodayAppointments(),
-                  const SizedBox(height: 24),
-                  _buildQuickActions(),
-                ],
+          : RefreshIndicator(
+              onRefresh: _loadAppointments,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildWelcomeCard(),
+                    const SizedBox(height: 24),
+                    _buildQuickStats(),
+                    const SizedBox(height: 24),
+                    _buildTodayAppointments(),
+                    const SizedBox(height: 24),
+                    _buildQuickActions(),
+                  ],
+                ),
               ),
             ),
     );
@@ -209,12 +187,20 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
   }
 
   Widget _buildQuickStats() {
+    final today = DateTime.now().toIso8601String().split('T')[0];
+    final todayAppointments = _appointments
+        .where((a) => a.date == today && a.preApprovalStatus == 'approved')
+        .length;
+    final pendingAppointments =
+        _appointments.where((a) => a.preApprovalStatus == 'pending').length;
+    final totalAppointments = _appointments.length;
+
     return Row(
       children: [
         Expanded(
           child: _buildStatCard(
             title: 'Today\'s Appointments',
-            value: '${_appointments.where((a) => a.date == '2024-07-09').length}',
+            value: '$todayAppointments',
             icon: Icons.calendar_today,
             color: AppColors.primary,
           ),
@@ -223,7 +209,7 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
         Expanded(
           child: _buildStatCard(
             title: 'Pending Reviews',
-            value: '${_appointments.where((a) => a.preApprovalStatus == 'pending').length}',
+            value: '$pendingAppointments',
             icon: Icons.pending_actions,
             color: Colors.orange,
           ),
@@ -231,8 +217,8 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
         const SizedBox(width: 12),
         Expanded(
           child: _buildStatCard(
-            title: 'Total Patients',
-            value: '${_appointments.length}',
+            title: 'Total Appointments',
+            value: '$totalAppointments',
             icon: Icons.people,
             color: Colors.green,
           ),
@@ -283,8 +269,11 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
   }
 
   Widget _buildTodayAppointments() {
-    final todayAppointments = _appointments.where((a) => a.date == '2024-07-09').toList();
-    
+    final today = DateTime.now().toIso8601String().split('T')[0];
+    final todayAppointments = _appointments
+        .where((a) => a.date == today && a.preApprovalStatus == 'approved')
+        .toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -303,7 +292,8 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const AdminAppointmentsPanel(),
+                    builder: (context) =>
+                        const DoctorAppointmentsPanelWrapper(),
                   ),
                 );
               },
@@ -333,7 +323,8 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
             ),
           )
         else
-          ...todayAppointments.map((appointment) => _buildAppointmentCard(appointment)),
+          ...todayAppointments
+              .map((appointment) => _buildAppointmentCard(appointment)),
       ],
     );
   }
@@ -354,7 +345,9 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
               width: 50,
               height: 50,
               decoration: BoxDecoration(
-                color: appointment.isVideoCall ? Colors.blue[100] : Colors.green[100],
+                color: appointment.isVideoCall
+                    ? Colors.blue[100]
+                    : Colors.green[100],
                 borderRadius: BorderRadius.circular(25),
               ),
               child: Icon(
@@ -388,7 +381,8 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: _getStatusColor(appointment.preApprovalStatus).withValues(alpha: 0.15),
+                color: _getStatusColor(appointment.preApprovalStatus)
+                    .withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -429,7 +423,8 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const AdminAppointmentsPanel(),
+                      builder: (context) =>
+                          const DoctorAppointmentsPanelWrapper(),
                     ),
                   );
                 },
@@ -575,4 +570,4 @@ class _DoctorDashboardScreenState extends State<DoctorDashboardScreen> {
         return 'Unknown';
     }
   }
-} 
+}
