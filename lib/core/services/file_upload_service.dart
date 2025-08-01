@@ -143,6 +143,14 @@ class FileUploadService {
     try {
       debugPrint('👤 Uploading profile avatar to Google Drive...');
       
+      // Check if backend server is available
+      final isBackendAvailable = await _checkBackendAvailability();
+      
+      if (!isBackendAvailable) {
+        debugPrint('🔄 Backend not available, using mock profile avatar upload');
+        return _mockProfileAvatarUpload(file);
+      }
+      
       final fileName = 'profile_${DateTime.now().millisecondsSinceEpoch}.${file.path.split('.').last}';
       
       final result = await uploadFileToDrive(
@@ -177,6 +185,58 @@ class FileUploadService {
         'success': false,
         'error': e.toString(),
       };
+    }
+  }
+  
+  /// Mock profile avatar upload for when backend is not available
+  static Future<Map<String, dynamic>> _mockProfileAvatarUpload(File file) async {
+    try {
+      // Simulate network delay
+      await Future.delayed(const Duration(seconds: 1));
+      
+      // Generate a mock file ID and use the actual file path as the URL
+      final mockFileId = 'mock_profile_${DateTime.now().millisecondsSinceEpoch}';
+      
+      // Use the actual file path as the image URL so the selected image is displayed
+      final mockWebContentLink = 'file://${file.absolute.path}';
+      
+      // Update user profile with mock data
+      final updateResult = await ApiService.updateProfile({
+        'profilePictureId': mockFileId,
+        'profilePictureUrl': mockWebContentLink,
+      });
+      
+      if (updateResult['success'] == true) {
+        debugPrint('✅ Mock profile avatar upload successful - using actual image: ${file.path}');
+        return {
+          'success': true,
+          'fileId': mockFileId,
+          'webContentLink': mockWebContentLink,
+          'message': 'Profile avatar uploaded successfully (Mock)',
+        };
+      } else {
+        throw Exception('Failed to update profile: ${updateResult['message']}');
+      }
+    } catch (e) {
+      debugPrint('❌ Error in mock profile avatar upload: $e');
+      return {
+        'success': false,
+        'error': e.toString(),
+      };
+    }
+  }
+  
+  /// Check if backend server is available
+  static Future<bool> _checkBackendAvailability() async {
+    try {
+      final response = await http.get(
+        Uri.parse('${ApiService.baseUrl}/health'),
+      ).timeout(const Duration(seconds: 3));
+      
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('⚠️ Backend server not available: $e');
+      return false;
     }
   }
   

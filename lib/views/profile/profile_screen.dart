@@ -17,6 +17,7 @@ import '../../core/services/auth_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'dart:io';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -464,11 +465,17 @@ class _ProfileScreenState extends State<ProfileScreen>
                 }
               }
             },
-            child: _ModernProfileAvatar(
-              key: ValueKey('${profile?['id']}_${profile?['imageUrl']}_${profileVM.avatarUpdateTimestamp}'),
-              name: name,
-              imageUrl: profile?['imageUrl'],
-              radius: 36,
+            child: Builder(
+              builder: (context) {
+                debugPrint('📊 Profile data in UI: $profile');
+                debugPrint('🖼️ Image URL in UI: ${profile?['imageUrl']}');
+                return _ModernProfileAvatar(
+                  key: ValueKey('${profile?['id']}_${profile?['imageUrl']}_${profileVM.avatarUpdateTimestamp}'),
+                  name: name,
+                  imageUrl: profile?['imageUrl'],
+                  radius: 36,
+                );
+              },
             ),
           ),
           const SizedBox(width: 20),
@@ -967,28 +974,59 @@ class _ModernProfileAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('🖼️ _ModernProfileAvatar build - imageUrl: $imageUrl, name: $name');
+    
     if (imageUrl != null && imageUrl!.isNotEmpty) {
-      return Container(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withOpacity(0.2),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: CircleAvatar(
-          radius: radius,
-          backgroundImage: NetworkImage(imageUrl!),
-          backgroundColor: AppColors.primary.withOpacity(0.1),
-          onBackgroundImageError: (exception, stackTrace) {
-            // Handle image loading errors
-            debugPrint('Failed to load profile image: $exception');
-          },
-        ),
-      );
+      // Check if it's a local file path
+      if (imageUrl!.startsWith('file://')) {
+        final filePath = imageUrl!.substring(7); // Remove 'file://' prefix
+        debugPrint('📁 Using local file: $filePath');
+        return Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withOpacity(0.2),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: CircleAvatar(
+            radius: radius,
+            backgroundImage: FileImage(File(filePath)),
+            backgroundColor: AppColors.primary.withOpacity(0.1),
+            onBackgroundImageError: (exception, stackTrace) {
+              // Handle image loading errors
+              debugPrint('❌ Failed to load profile image: $exception');
+            },
+          ),
+        );
+      } else {
+        // Handle network images
+        debugPrint('🌐 Using network image: $imageUrl');
+        return Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withOpacity(0.2),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: CircleAvatar(
+            radius: radius,
+            backgroundImage: NetworkImage(imageUrl!),
+            backgroundColor: AppColors.primary.withOpacity(0.1),
+            onBackgroundImageError: (exception, stackTrace) {
+              // Handle image loading errors
+              debugPrint('❌ Failed to load profile image: $exception');
+            },
+          ),
+        );
+      }
     }
 
     return Container(
