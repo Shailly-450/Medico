@@ -235,35 +235,50 @@ class ApiService {
     }
     try {
       final response = await _get('/auth/me');
-      return _parseResponse(response);
+      final data = _parseResponse(response);
+      
+      if (data['success'] == true) {
+        debugPrint('✅ Successfully fetched profile from backend');
+        return data;
+      } else {
+        debugPrint('❌ Backend returned error: ${data['message']}');
+        // Only use mock if backend returns an error
+        debugPrint('🔄 Using mock profile data due to backend error');
+        return await getMockProfile();
+      }
     } catch (e) {
-      // If backend is not available, return mock profile data
-      debugPrint('🔄 Backend not available, returning mock profile data');
-      return _getMockProfile();
+      debugPrint('❌ Backend connection failed: $e');
+      // Only use mock if backend is unreachable
+      debugPrint('🔄 Using mock profile data due to backend unavailability');
+      return await getMockProfile();
     }
   }
 
   static Future<Map<String, dynamic>> updateProfile(Map<String, dynamic> profileData) async {
     // Always use mock for local testing
     debugPrint('🔄 Forcing mock profile update');
-    return _mockUpdateProfile(profileData);
+    return await _mockUpdateProfile(profileData);
   }
   
   /// Mock profile data for when backend is not available
-  static Map<String, dynamic> _getMockProfile() {
+  static Future<Map<String, dynamic>> getMockProfile() async {
+    final imageUrl = await _getPersistedImageUrl() ?? 'https://via.placeholder.com/150/007AFF/FFFFFF?text=JD';
+    final profilePictureId = await _getPersistedProfilePictureId() ?? 'mock_profile_123';
+    
     return {
       'success': true,
       'data': {
         'id': 'mock_user_123',
-        'name': 'John Doe',
-        'email': 'john.doe@example.com',
-        'phone': '+1234567890',
-        'address': '123 Main St, City, State 12345',
-        'imageUrl': 'https://via.placeholder.com/150/007AFF/FFFFFF?text=JD',
-        'profilePictureId': 'mock_profile_123',
-        'profilePictureUrl': 'https://via.placeholder.com/150/007AFF/FFFFFF?text=JD',
+        'name': 'Shailly Yadav',
+        'email': 'shaillyy861@gmail.com',
+        'phone': '7007051309',
+        'address': 'Infocity, Gandhinagar, Gujarat, 382010, India',
+        'imageUrl': imageUrl, // This is what the UI expects
+        'profilePicture': imageUrl, // Keep for backward compatibility
+        'profilePictureId': profilePictureId,
+        'profilePictureUrl': imageUrl,
         'dateOfBirth': '1990-01-01',
-        'gender': 'Male',
+        'gender': 'Female',
         'bloodGroup': 'O+',
         'emergencyContact': {
           'name': 'Jane Doe',
@@ -274,22 +289,75 @@ class ApiService {
     };
   }
   
+  /// Get persisted image URL from SharedPreferences
+  static Future<String?> _getPersistedImageUrl() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getString('mock_profile_image_url');
+    } catch (e) {
+      return null;
+    }
+  }
+  
+  /// Get persisted profile picture ID from SharedPreferences
+  static Future<String?> _getPersistedProfilePictureId() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getString('mock_profile_picture_id');
+    } catch (e) {
+      return null;
+    }
+  }
+  
+  /// Save image URL to SharedPreferences
+  static Future<void> _saveImageUrl(String imageUrl) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('mock_profile_image_url', imageUrl);
+    } catch (e) {
+      debugPrint('Failed to save image URL: $e');
+    }
+  }
+  
+  /// Save profile picture ID to SharedPreferences
+  static Future<void> _saveProfilePictureId(String profilePictureId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('mock_profile_picture_id', profilePictureId);
+    } catch (e) {
+      debugPrint('Failed to save profile picture ID: $e');
+    }
+  }
+  
   /// Mock profile update for when backend is not available
-  static Map<String, dynamic> _mockUpdateProfile(Map<String, dynamic> profileData) {
+  static Future<Map<String, dynamic>> _mockUpdateProfile(Map<String, dynamic> profileData) async {
+    // Save image URL and profile picture ID if provided
+    if (profileData['profilePictureUrl'] != null) {
+      await _saveImageUrl(profileData['profilePictureUrl']);
+    }
+    if (profileData['profilePictureId'] != null) {
+      await _saveProfilePictureId(profileData['profilePictureId']);
+    }
+    
+    // Get the updated image URL (either from input or persisted)
+    final imageUrl = profileData['profilePictureUrl'] ?? await _getPersistedImageUrl() ?? 'https://via.placeholder.com/150/007AFF/FFFFFF?text=JD';
+    final profilePictureId = profileData['profilePictureId'] ?? await _getPersistedProfilePictureId() ?? 'mock_profile_123';
+    
     // Simulate successful update
     return {
       'success': true,
       'data': {
         'id': 'mock_user_123',
-        'name': profileData['name'] ?? 'John Doe',
-        'email': profileData['email'] ?? 'john.doe@example.com',
-        'phone': profileData['phone'] ?? '+1234567890',
-        'address': profileData['address'] ?? '123 Main St, City, State 12345',
-        'imageUrl': profileData['profilePictureUrl'] ?? 'https://via.placeholder.com/150/007AFF/FFFFFF?text=JD',
-        'profilePictureId': profileData['profilePictureId'] ?? 'mock_profile_123',
-        'profilePictureUrl': profileData['profilePictureUrl'] ?? 'https://via.placeholder.com/150/007AFF/FFFFFF?text=JD',
+        'name': profileData['name'] ?? 'Shailly Yadav',
+        'email': profileData['email'] ?? 'shaillyy861@gmail.com',
+        'phone': profileData['phone'] ?? '7007051309',
+        'address': profileData['address'] ?? 'Infocity, Gandhinagar, Gujarat, 382010, India',
+        'imageUrl': imageUrl, // This is what the UI expects
+        'profilePicture': imageUrl, // Keep for backward compatibility
+        'profilePictureId': profilePictureId,
+        'profilePictureUrl': imageUrl,
         'dateOfBirth': profileData['dateOfBirth'] ?? '1990-01-01',
-        'gender': profileData['gender'] ?? 'Male',
+        'gender': profileData['gender'] ?? 'Female',
         'bloodGroup': profileData['bloodGroup'] ?? 'O+',
         'emergencyContact': profileData['emergencyContact'] ?? {
           'name': 'Jane Doe',
@@ -841,5 +909,44 @@ class ApiService {
       headers: _authHeaders,
     );
     return _parseResponse(response);
+  }
+
+  // Get auth token
+  static Future<String?> getAuthToken() async {
+    return _accessToken;
+  }
+
+  /// Get authenticated Google Drive URL
+  static Future<Map<String, dynamic>> getAuthenticatedDriveUrl(String fileId) async {
+    try {
+      debugPrint('🔐 Getting authenticated Drive URL for file ID: $fileId');
+      
+      final response = await http.get(
+        Uri.parse('$baseUrl/drive/authenticated-url/$fileId'),
+        headers: _authHeaders,
+      );
+      
+      debugPrint('📡 Authenticated URL Response [${response.statusCode}]: ${response.body}');
+      
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        return {
+          'success': data['success'] == true,
+          'url': data['url'],
+          'message': data['message'],
+        };
+      } else {
+        return {
+          'success': false,
+          'message': 'Failed to get authenticated URL: ${response.statusCode}',
+        };
+      }
+    } catch (e) {
+      debugPrint('❌ Error getting authenticated Drive URL: $e');
+      return {
+        'success': false,
+        'message': 'Error: ${e.toString()}',
+      };
+    }
   }
 } 

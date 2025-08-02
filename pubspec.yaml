@@ -67,6 +67,7 @@ dependencies:
   # Google Drive integration
   googleapis: ^11.0.0
   googleapis_auth: ^1.4.0
+  crypto: ^3.0.3
 
 
 dev_dependencies:

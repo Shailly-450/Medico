@@ -11,6 +11,7 @@ import '../../journey_tracker/journey_tracker_screen.dart';
 import '../../workflow/medical_workflow_screen.dart';
 
 import '../../invoices/invoices_screen.dart';
+import '../../testing/image_loading_test_screen.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({Key? key}) : super(key: key);
@@ -98,6 +99,12 @@ class AppDrawer extends StatelessWidget {
             icon: Icons.receipt,
             title: 'Invoices',
             screen: const InvoicesScreen(),
+          ),
+          _buildDrawerItem(
+            context,
+            icon: Icons.image,
+            title: 'Image Loading Test',
+            screen: const ImageLoadingTestScreen(),
           ),
           const Divider(),
           ListTile(

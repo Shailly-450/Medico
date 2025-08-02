@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/services/api_service.dart';
+import '../core/services/cached_image_service.dart';
 import 'package:flutter/services.dart';
 
 class ProfileViewModel extends ChangeNotifier {
@@ -12,6 +13,8 @@ class ProfileViewModel extends ChangeNotifier {
   
   void refreshAvatar() {
     _avatarUpdateTimestamp = DateTime.now().millisecondsSinceEpoch;
+    // Clear image cache to force refresh
+    CachedImageService.clearCache();
     notifyListeners();
   }
 
@@ -41,6 +44,8 @@ class ProfileViewModel extends ChangeNotifier {
       final response = await ApiService.updateProfile(data);
       if (response['success'] == true) {
         profileData = response['data'];
+        // Clear image cache when profile is updated
+        CachedImageService.clearCache();
         isLoading = false;
         notifyListeners();
         return true;
@@ -85,6 +90,7 @@ class ProfileViewModel extends ChangeNotifier {
         // Clear image cache to force refresh
         PaintingBinding.instance.imageCache.clear();
         PaintingBinding.instance.imageCache.clearLiveImages();
+        CachedImageService.clearCache();
         
         // Update profile data with the new image URL
         if (profileData != null) {

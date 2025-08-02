@@ -160,22 +160,60 @@ class AuthService {
         _currentUserName = user['profile']['name'];
         _currentUserRole = _parseUserRole(user['role']);
         
+        print('✅ Successfully fetched profile from backend: ${user['profile']['profilePicture']}');
+        
         return {
           'success': true,
           'message': 'Profile retrieved successfully',
           'user': user,
         };
       } else {
-        return {
-          'success': false,
-          'message': data['message'] ?? 'Failed to get profile',
-        };
+        print('❌ Backend returned error: ${data['message']}');
+        // Only use mock if backend returns an error
+        print('🔄 Using mock profile data due to backend error');
+        final mockProfile = await ApiService.getMockProfile();
+        
+        if (mockProfile['success'] == true) {
+          final user = mockProfile['data'];
+          _currentUserId = user['id'];
+          _currentUserName = user['name'];
+          _currentUserRole = UserRole.patient; // Default to patient for mock
+          
+          return {
+            'success': true,
+            'message': 'Profile retrieved successfully (Mock)',
+            'user': user,
+          };
+        } else {
+          return {
+            'success': false,
+            'message': 'Failed to get profile',
+          };
+        }
       }
     } catch (e) {
-      return {
-        'success': false,
-        'message': 'Profile retrieval failed: ${e.toString()}',
-      };
+      print('❌ Backend connection failed: $e');
+      // Only use mock if backend is unreachable
+      print('🔄 Using mock profile data due to backend unavailability');
+      final mockProfile = await ApiService.getMockProfile();
+      
+      if (mockProfile['success'] == true) {
+        final user = mockProfile['data'];
+        _currentUserId = user['id'];
+        _currentUserName = user['name'];
+        _currentUserRole = UserRole.patient; // Default to patient for mock
+        
+        return {
+          'success': true,
+          'message': 'Profile retrieved successfully (Mock)',
+          'user': user,
+        };
+      } else {
+        return {
+          'success': false,
+          'message': 'Failed to get profile',
+        };
+      }
     }
   }
 

@@ -11,9 +11,10 @@ import 'help_support_screen.dart';
 import 'privacy_policy_screen.dart';
 import 'consent_management_screen.dart';
 import 'personal_data_screen.dart';
-import 'package:provider/provider.dart';
 import '../../viewmodels/profile_view_model.dart';
 import '../../core/services/auth_service.dart';
+import '../../core/widgets/profile_photo_widget.dart';
+import 'profile_photo_upload_screen.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -97,7 +98,9 @@ class _ProfileScreenState extends State<ProfileScreen>
     }
 
     final profile = profileData?['profile'];
-    final doctorProfile = profileData?['doctorProfile'];
+    
+    // Extract image URL from the correct location in the response
+    final imageUrl = profile?['imageUrl'] ?? profile?['profilePicture'] ?? profileData?['imageUrl'];
     final email = profileData?['email'];
     final role = profileData?['role'];
     // Use these fields in your UI as needed
@@ -432,51 +435,49 @@ class _ProfileScreenState extends State<ProfileScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Avatar
-          InkWell(
-            borderRadius: BorderRadius.circular(100),
-            onTap: () async {
-              final picker = ImagePicker();
-              final picked = await picker.pickImage(
-                  source: ImageSource.gallery, imageQuality: 80);
-              if (picked != null) {
-                final profileVM =
-                    Provider.of<ProfileViewModel>(context, listen: false);
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (ctx) =>
-                      const Center(child: CircularProgressIndicator()),
-                );
-                final result = await profileVM.updateProfileAvatar(picked.path);
-                Navigator.of(context).pop();
-                if (!mounted) return;
-                if (result['success'] == true) {
-                  // Force refresh the avatar display
-                  profileVM.refreshAvatar();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Profile picture updated!')),
+          Builder(
+            builder: (context) {
+              debugPrint('📊 Profile data in UI: $profile');
+              debugPrint('🖼️ Image URL in UI: ${profile?['imageUrl']}');
+              debugPrint('📊 Full profile data: ${profileVM.profileData}');
+              
+              // Extract image URL from the correct location in the response
+              final imageUrl = profile?['imageUrl'] ?? 
+                              profile?['profilePicture'] ?? 
+                              profile?['profilePictureUrl'] ?? 
+                              profileVM.profileData?['imageUrl'] ??
+                              profileVM.profileData?['profile']?['imageUrl'] ??
+                              profileVM.profileData?['profile']?['profilePicture'] ??
+                              profileVM.profileData?['profile']?['profilePictureUrl'];
+              
+              debugPrint('🖼️ Final extracted image URL: $imageUrl');
+              
+              return ProfilePhotoWidget(
+                key: ValueKey('${profile?['id']}_${profile?['imageUrl']}_${profileVM.avatarUpdateTimestamp}'),
+                name: name,
+                imageUrl: imageUrl,
+                size: 72,
+                showEditIcon: true,
+                onTap: () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ProfilePhotoUploadScreen(),
+                    ),
                   );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                        content: Text(result['message'] ??
-                            'Failed to update profile picture')),
-                  );
-                }
-              }
+                  
+                  if (result != null && mounted) {
+                    // Refresh profile data
+                    await profileVM.fetchProfile();
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Profile picture updated!')),
+                      );
+                    }
+                  }
+                },
+              );
             },
-            child: Builder(
-              builder: (context) {
-                debugPrint('📊 Profile data in UI: $profile');
-                debugPrint('🖼️ Image URL in UI: ${profile?['imageUrl']}');
-                return _ModernProfileAvatar(
-                  key: ValueKey('${profile?['id']}_${profile?['imageUrl']}_${profileVM.avatarUpdateTimestamp}'),
-                  name: name,
-                  imageUrl: profile?['imageUrl'],
-                  radius: 36,
-                );
-              },
-            ),
           ),
           const SizedBox(width: 20),
           // Info
@@ -660,10 +661,11 @@ class _ProfileScreenState extends State<ProfileScreen>
                         padding: const EdgeInsets.all(16),
                         child: Row(
                           children: [
-                            _ModernProfileAvatar(
+                            ProfilePhotoWidget(
                               name: member?['name'],
                               imageUrl: member?['imageUrl'],
-                              radius: 24,
+                              size: 48,
+                              showEditIcon: false,
                             ),
                             const SizedBox(width: 16),
                             Expanded(
@@ -953,116 +955,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   }
 }
 
-class _ModernProfileAvatar extends StatelessWidget {
-  final String? name;
-  final String? imageUrl;
-  final double radius;
 
-  const _ModernProfileAvatar({
-    Key? key,
-    this.name,
-    this.imageUrl,
-    this.radius = 40,
-  }) : super(key: key);
-
-  String getInitials() {
-    if (name == null || name!.trim().isEmpty) return '';
-    final parts = name!.trim().split(' ');
-    if (parts.length == 1) return parts[0][0].toUpperCase();
-    return (parts[0][0] + parts.last[0]).toUpperCase();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    debugPrint('🖼️ _ModernProfileAvatar build - imageUrl: $imageUrl, name: $name');
-    
-    if (imageUrl != null && imageUrl!.isNotEmpty) {
-      // Check if it's a local file path
-      if (imageUrl!.startsWith('file://')) {
-        final filePath = imageUrl!.substring(7); // Remove 'file://' prefix
-        debugPrint('📁 Using local file: $filePath');
-        return Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withOpacity(0.2),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: CircleAvatar(
-            radius: radius,
-            backgroundImage: FileImage(File(filePath)),
-            backgroundColor: AppColors.primary.withOpacity(0.1),
-            onBackgroundImageError: (exception, stackTrace) {
-              // Handle image loading errors
-              debugPrint('❌ Failed to load profile image: $exception');
-            },
-          ),
-        );
-      } else {
-        // Handle network images
-        debugPrint('🌐 Using network image: $imageUrl');
-        return Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withOpacity(0.2),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: CircleAvatar(
-            radius: radius,
-            backgroundImage: NetworkImage(imageUrl!),
-            backgroundColor: AppColors.primary.withOpacity(0.1),
-            onBackgroundImageError: (exception, stackTrace) {
-              // Handle image loading errors
-              debugPrint('❌ Failed to load profile image: $exception');
-            },
-          ),
-        );
-      }
-    }
-
-    return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: LinearGradient(
-          colors: [
-            AppColors.primary.withOpacity(0.15),
-            AppColors.accent.withOpacity(0.15),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.2),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: CircleAvatar(
-        radius: radius,
-        backgroundColor: Colors.transparent,
-        child: Text(
-          getInitials(),
-          style: TextStyle(
-            color: AppColors.primary,
-            fontWeight: FontWeight.bold,
-            fontSize: radius * 0.6,
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 // Add the edit profile dialog widget
 class _EditProfileDialog extends StatefulWidget {
