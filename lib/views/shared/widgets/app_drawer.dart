@@ -12,6 +12,7 @@ import '../../workflow/medical_workflow_screen.dart';
 
 import '../../invoices/invoices_screen.dart';
 import '../../testing/image_loading_test_screen.dart';
+import '../../testing/order_api_diagnostic_screen.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({Key? key}) : super(key: key);
@@ -105,6 +106,12 @@ class AppDrawer extends StatelessWidget {
             icon: Icons.image,
             title: 'Image Loading Test',
             screen: const ImageLoadingTestScreen(),
+          ),
+          _buildDrawerItem(
+            context,
+            icon: Icons.bug_report,
+            title: 'Order API Diagnostic',
+            screen: const OrderApiDiagnosticScreen(),
           ),
           const Divider(),
           ListTile(

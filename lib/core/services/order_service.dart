@@ -13,21 +13,38 @@ class OrderService {
   // 1. List Orders
   Future<List<Order>> fetchOrders(
       {String? status, int page = 1, int limit = 10}) async {
-    final response = await dio.get(
-      '/orders',
-      queryParameters: {
-        if (status != null) 'status': status,
-        'page': page,
-        'limit': limit,
-      },
-      options: _authHeader,
-    );
-    if (response.data['success']) {
-      return (response.data['data'] as List)
-          .map((json) => Order.fromJson(json))
-          .toList();
-    } else {
-      throw Exception(response.data['message']);
+    try {
+      print('🔍 Fetching orders with status: $status, page: $page, limit: $limit');
+      print('🔑 Using JWT token: ${jwtToken.isNotEmpty ? "Present" : "Missing"}');
+      
+      final response = await dio.get(
+        '/orders',
+        queryParameters: {
+          if (status != null) 'status': status,
+          'page': page,
+          'limit': limit,
+        },
+        options: _authHeader,
+      );
+      
+      print('📥 Orders API response status: ${response.statusCode}');
+      print('📦 Orders API response data: ${response.data}');
+      
+      if (response.data['success']) {
+        return (response.data['data'] as List)
+            .map((json) => Order.fromJson(json))
+            .toList();
+      } else {
+        throw Exception(response.data['message']);
+      }
+    } on DioError catch (e) {
+      print('❌ DioError fetching orders: ${e.response?.data}');
+      print('❌ DioError status: ${e.response?.statusCode}');
+      print('❌ DioError message: ${e.message}');
+      rethrow;
+    } catch (e) {
+      print('❌ Error fetching orders: $e');
+      rethrow;
     }
   }
 
@@ -44,19 +61,30 @@ class OrderService {
   // 3. Create Order
   Future<Order> createOrder(Map<String, dynamic> orderData) async {
     try {
+      print('➕ Creating order with data: $orderData');
+      print('🔑 Using JWT token: ${jwtToken.isNotEmpty ? "Present" : "Missing"}');
+      
       final response = await dio.post(
         '/orders',
         data: orderData,
         options: _authHeader,
       );
+      
+      print('📥 Create order API response status: ${response.statusCode}');
+      print('📦 Create order API response data: ${response.data}');
+      
       if (response.data['success']) {
         return Order.fromJson(response.data['data']);
       } else {
         throw Exception(response.data['message']);
       }
     } on DioError catch (e) {
+      print('❌ DioError creating order: ${e.response?.data}');
+      print('❌ DioError status: ${e.response?.statusCode}');
+      print('❌ DioError message: ${e.message}');
       rethrow;
     } catch (e) {
+      print('❌ Error creating order: $e');
       rethrow;
     }
   }
